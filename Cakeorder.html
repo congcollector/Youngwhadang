@@ -495,7 +495,9 @@ async function dbGetOrders() {
       headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
     });
     const d = await r.json();
-    return Array.isArray(d) ? d : (d.orders || []);
+    // JSONBin wraps data in {record: ...} when X-Bin-Meta is not false
+    const data = d.record !== undefined ? d.record : d;
+    return Array.isArray(data) ? data : (data.orders || []);
   } catch(e) { console.error('주문 로드 실패', e); return []; }
 }
 async function dbSaveOrders(orders) {
@@ -524,7 +526,9 @@ async function dbGetPhotos() {
     const r = await fetchWithTimeout(`${JB_BASE}/${BIN_PHOTOS}/latest`, {
       headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
     });
-    return await r.json();
+    const d = await r.json();
+    const data = d.record !== undefined ? d.record : d;
+    return data;
   } catch(e) { console.error('사진 로드 실패', e); return {}; }
 }
 async function dbSavePhotos(data) {
