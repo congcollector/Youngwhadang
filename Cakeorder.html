@@ -662,14 +662,13 @@ function renderGuest() {
     <div class="section-header">케이크 사이즈</div>
     <div class="size-scroll">
       ${SIZES.map(s => {
-        const photos = cakePhotos[s.id] || [];
+        const photos = (cakePhotos && cakePhotos[s.id]) ? cakePhotos[s.id] : [];
         return `
         <div class="size-tile ${fd.size===s.id?'sel':''}" onclick="selSize('${s.id}')">
           ${photos.length > 0 ? `
             <div class="size-photo-wrap" onclick="event.stopPropagation();openPhotoViewer('${s.id}')">
-              <img src="${photos[0]}" class="size-photo" alt="${s.name}">
+              <img src="${photos[0]}" class="size-photo" alt="${s.name}" onerror="this.parentElement.innerHTML='<div class=\\'size-emoji\\'>${s.emoji}</div>'">
               ${photos.length > 1 ? `<div class="size-photo-count">+${photos.length-1}</div>` : ''}
-              <div class="size-photo-overlay">사진 보기 🔍</div>
             </div>
           ` : `<div class="size-emoji">${s.emoji}</div>`}
           <div class="size-name">${s.name}</div>
@@ -1205,9 +1204,16 @@ setTimeout(()=>t.className=‘toast’,2400);
 }
 
 // ── INIT ──
-async function init() {
-render(); // 먼저 화면 띄우기
-loadCakePhotos().then(() => render()); // 사진은 백그라운드로
+function init() {
+render(); // 동기로 즉시 화면 띄우기
+if (IS_ADMIN) {
+// 어드민은 따로 로드
+} else {
+// 손님은 사진만 백그라운드 로드
+loadCakePhotos().then(() => {
+try { render(); } catch(e) {}
+}).catch(() => {});
+}
 }
 init();
 </script>
