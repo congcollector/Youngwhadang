@@ -1205,15 +1205,14 @@ setTimeout(()=>t.className=‘toast’,2400);
 
 // ── INIT ──
 function init() {
-render(); // 동기로 즉시 화면 띄우기
-if (IS_ADMIN) {
-// 어드민은 따로 로드
-} else {
-// 손님은 사진만 백그라운드 로드
+try {
+render();
+} catch(e) {
+document.getElementById(‘wrap’).innerHTML = ` <div style="padding:20px;color:red;font-size:13px;word-break:break-all;"> <b>오류 발생:</b><br>${e.message}<br><br> <b>스택:</b><br>${e.stack} </div>`;
+}
 loadCakePhotos().then(() => {
 try { render(); } catch(e) {}
 }).catch(() => {});
-}
 }
 init();
 </script>
