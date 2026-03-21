@@ -475,8 +475,8 @@ display: flex; align-items: center; justify-content: center;
 <script>
 // ── JSONBin 설정 ──
 const JB_KEY      = '$2a$10$1TI.0JkZpAal5R9OLl715.reE4O0Aq.YTv7idwuvamnsjlokv39LO';
-const BIN_ORDERS  = '69be6286c3097a1dd546050d';
-const BIN_PHOTOS  = '69be629fc3097a1dd5460552';
+const BIN_ORDERS  = '69be6ab4c3097a1dd5461d2d';
+const BIN_PHOTOS  = '69be6ac9aa77b81da9053769';
 const JB_BASE     = 'https://api.jsonbin.io/v3/b';
 const JB_H        = { 'Content-Type': 'application/json', 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' };
 
@@ -491,7 +491,9 @@ function fetchWithTimeout(url, opts, ms=8000) {
 // 주문 CRUD
 async function dbGetOrders() {
   try {
-    const r = await fetchWithTimeout(`${JB_BASE}/${BIN_ORDERS}/latest`, { headers: JB_H });
+    const r = await fetchWithTimeout(`${JB_BASE}/${BIN_ORDERS}/latest`, {
+      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
+    });
     const d = await r.json();
     return Array.isArray(d) ? d : (d.orders || []);
   } catch(e) { console.error('주문 로드 실패', e); return []; }
@@ -519,7 +521,9 @@ async function dbDeleteOrder(id) {
 // 사진 CRUD
 async function dbGetPhotos() {
   try {
-    const r = await fetchWithTimeout(`${JB_BASE}/${BIN_PHOTOS}/latest`, { headers: JB_H });
+    const r = await fetchWithTimeout(`${JB_BASE}/${BIN_PHOTOS}/latest`, {
+      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
+    });
     return await r.json();
   } catch(e) { console.error('사진 로드 실패', e); return {}; }
 }
