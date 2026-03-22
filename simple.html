@@ -2,14 +2,21 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>심플 테스트</title>
+<title>테스트2</title>
 </head>
 <body>
 <h1>타이틀</h1>
 <div id="wrap">초기값</div>
 <script>
-var x = '안녕하세요';
-document.getElementById('wrap').innerHTML = x;
+var SIZES = [
+  { id:'s1', e:'🎂', name:'1호', cm:'지름 15cm', price:55000 },
+  { id:'s2', e:'🎂', name:'2호', cm:'지름 18cm', price:70000 }
+];
+var h = '';
+for (var i=0; i<SIZES.length; i++) {
+  h += '<div>' + SIZES[i].name + '</div>';
+}
+document.getElementById('wrap').innerHTML = h;
 </script>
 </body>
 </html>
