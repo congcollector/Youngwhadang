@@ -151,16 +151,53 @@ async function addOrder(o) {
 async function updateOrder(id,p) { await api('/cake_orders?id=eq.'+id,'PATCH',p); }
 async function delOrder(id) { await api('/cake_orders?id=eq.'+id,'DELETE'); }
 
+// 설정 기본값
+const DEFAULT_SETTINGS = {
+  shop_name: '영화당',
+  shop_phone: '010-5496-0736',
+  bank_account: '농협 3511-2979-4311-3',
+  bank_holder: '김은영',
+  pickup_notice: '픽업 약 3시간 전 제작 시작 · 예약 시간에 맞춰 방문해주세요',
+  storage_tips: ['📌 당일 섭취 권장','🌸 앙금꽃 → 냉장 보관 (최대 1주일)','🍡 떡 → 냉동 후 자연해동'],
+  transport_tips: ['⏰ 픽업 약 3시간 전 제작 시작','🧑\u200d🤝\u200d🧑 동행자와 함께 조수석에서 손으로 받쳐 이동','🚚 배달 가능 (5,000원)'],
+  sizes: [
+    {id:'s1', e:'🎂', name:'1호',      cm:'지름 15cm',  price:55000},
+    {id:'s2', e:'🎂', name:'2호',      cm:'지름 18cm',  price:70000},
+    {id:'sn', e:'🔢', name:'숫자케이크', cm:'세로 7cm',   price:90000},
+    {id:'s2t',e:'✨', name:'2단케이크', cm:'2호 + 미니', price:130000}
+  ],
+  choco_price: 3000,
+  delivery_price: 5000,
+  lets: ['어머님의 60년 세월을 존경하고 사랑합니다','지금처럼 건강하고 오래 곁에 있어주세요','아버님의 세 번째 스무 살을 축하드립니다','팔팔한 80세 팔순을 축하드립니다','늘 건강하고 행복하게 함께해요 사랑합니다']
+};
+
+let CFG = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+async function loadSettings() {
+  try {
+    const r = await api('/cake_photos2?id=eq.settings');
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.length > 0) {
+      const saved = JSON.parse(d[0].data);
+      CFG = Object.assign({}, DEFAULT_SETTINGS, saved);
+      // sizes 병합
+      if (saved.sizes) CFG.sizes = saved.sizes;
+      if (saved.lets) CFG.lets = saved.lets;
+      if (saved.storage_tips) CFG.storage_tips = saved.storage_tips;
+      if (saved.transport_tips) CFG.transport_tips = saved.transport_tips;
+    }
+  } catch(e) {}
+}
+
+async function saveSettings(data) {
+  await api('/cake_photos2?id=eq.settings','DELETE');
+  await api('/cake_photos2','POST',{id:'settings', data: JSON.stringify(data)});
+}
+
 const IS_ADMIN = location.hash === '#admin-younghwadang';
-const SIZES = [
-  {id:'s1', e:'🎂', name:'1호',      cm:'지름 15cm',  price:55000},
-  {id:'s2', e:'🎂', name:'2호',      cm:'지름 18cm',  price:70000},
-  {id:'sn', e:'🔢', name:'숫자케이크', cm:'세로 7cm',   price:90000},
-  {id:'s2t',e:'✨', name:'2단케이크', cm:'2호 + 미니', price:130000}
-];
 const PAYS = ['계좌이체','굿뜨래페이','카드'];
 const ST   = {pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
-const LETS = ['어머님의 60년 세월을 존경하고 사랑합니다','지금처럼 건강하고 오래 곁에 있어주세요','아버님의 세 번째 스무 살을 축하드립니다','팔팔한 80세 팔순을 축하드립니다','늘 건강하고 행복하게 함께해요 사랑합니다'];
 
 let fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,delivery:false,addr:'',done:false};
 let acc = {s:false,t:false};
@@ -184,7 +221,7 @@ function showSheet(h) {
 function closeSheet() { document.getElementById('ov').className = 'ov'; }
 
 function selLet(idx) {
-  const lt = LETS[parseInt(idx)];
+  const lt = CFG.lets[parseInt(idx)];
   fd.lettering = (fd.lettering === lt ? '' : lt);
   renderGuest();
 }
@@ -195,12 +232,12 @@ function resetForm() {
 
 function renderGuest() {
   if (fd.done) { renderSuccess(); return; }
-  const sel   = SIZES.find(s => s.id === fd.size);
-  const total = (sel ? sel.price : 0) + (fd.choco ? 3000 : 0) + (fd.delivery ? 5000 : 0);
+  const sel   = CFG.sizes.find(s => s.id === fd.size);
+  const total = (sel ? sel.price : 0) + (fd.choco ? CFG.choco_price : 0) + (fd.delivery ? CFG.delivery_price : 0);
   let h = '';
 
   h += '<div class="sec"><div class="sec-hdr">주문 안내<\/div>';
-  h += '<div class="notice">주문서 제출 후 <strong>010-5496-0736<\/strong>으로 확인 연락드려요.<br>입금 계좌: <strong>농협 3511-2979-4311-3 (김은영)<\/strong><\/div><\/div>';
+  h += '<div class="notice">주문서 제출 후 <strong>'+CFG.shop_phone+'<\/strong>으로 확인 연락드려요.<br>입금 계좌: <strong>'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">기본 정보<\/div><div class="card">';
   h += '<div class="row"><div class="row-lbl">성함 <span class="req">*<\/span><\/div><input class="inp" placeholder="주문자 성함" value="'+fd.name+'" oninput="fd.name=this.value"><\/div>';
@@ -210,10 +247,10 @@ function renderGuest() {
   h += '<div class="sec"><div class="sec-hdr">픽업 일정<\/div><div class="card">';
   h += '<div class="row"><div class="row-lbl">날짜 <span class="req">*<\/span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
   h += '<div class="row"><div class="row-lbl">시간 <span class="req">*<\/span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-  h += '<\/div><div class="sec-foot">픽업 약 3시간 전 제작 시작 · 예약 시간에 맞춰 방문해주세요<\/div><\/div>';
+  h += '<\/div><div class="sec-foot">'+CFG.pickup_notice+'<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">케이크 사이즈<\/div><div class="sz-scroll">';
-  SIZES.forEach(s => {
+  CFG.sizes.forEach(s => {
     h += '<div class="sz'+(fd.size===s.id?' on':'')+'" onclick="fd.size=\''+s.id+'\';renderGuest()">';
     h += '<div class="sz-e">'+s.e+'<\/div>';
     h += '<div class="sz-n">'+s.name+'<\/div>';
@@ -223,9 +260,9 @@ function renderGuest() {
   h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">추가 옵션<\/div><div class="card">';
-  h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🍫 초콜릿 장식<\/div><div class="tog-s">화이트초콜릿 장식 +3,000원<\/div><\/div>';
+  h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🍫 초콜릿 장식<\/div><div class="tog-s">화이트초콜릿 장식 '+CFG.choco_price.toLocaleString()+'원<\/div><\/div>';
   h += '<div class="sw'+(fd.choco?' on':'')+'" onclick="fd.choco=!fd.choco;renderGuest()"><div class="sw-k"><\/div><\/div><\/div>';
-  h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🚗 배달 요청<\/div><div class="tog-s">부여 전 지역 +5,000원<\/div><\/div>';
+  h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🚗 배달 요청<\/div><div class="tog-s">부여 전 지역 '+CFG.delivery_price.toLocaleString()+'원<\/div><\/div>';
   h += '<div class="sw'+(fd.delivery?' on':'')+'" onclick="fd.delivery=!fd.delivery;renderGuest()"><div class="sw-k"><\/div><\/div><\/div>';
   if (fd.delivery) {
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
@@ -239,12 +276,12 @@ function renderGuest() {
   h += '<div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🧊<\/div>';
   h += '<div class="tog-l" style="flex:1;margin-left:10px;">보관 방법<\/div>';
   h += '<div class="arr'+(acc.s?' open':'')+'">&#8250;<\/div><\/div>';
-  if (acc.s) { h += '<div class="acc-bd"><div class="acc-it">📌 당일 섭취 권장<\/div><div class="acc-it">🌸 앙금꽃 → 냉장 보관 (최대 1주일)<\/div><div class="acc-it">🍡 떡 → 냉동 후 자연해동<\/div><\/div>'; }
+  if (acc.s) { h += '<div class="acc-bd">'+CFG.storage_tips.map(function(t){return '<div class="acc-it">'+t+'<\/div>';}).join('')+'<\/div>'; }
   h += '<div class="acc-row" onclick="acc.t=!acc.t;renderGuest()" style="border-top:0.5px solid var(--sep);">';
   h += '<div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🚗<\/div>';
   h += '<div class="tog-l" style="flex:1;margin-left:10px;">픽업 주의사항<\/div>';
   h += '<div class="arr'+(acc.t?' open':'')+'">&#8250;<\/div><\/div>';
-  if (acc.t) { h += '<div class="acc-bd"><div class="acc-it">⏰ 픽업 약 3시간 전 제작 시작<\/div><div class="acc-it">🧑‍🤝‍🧑 동행자와 함께 조수석에서 손으로 받쳐 이동<\/div><div class="acc-it">🚚 배달 가능 (5,000원)<\/div><\/div>'; }
+  if (acc.t) { h += '<div class="acc-bd">'+CFG.transport_tips.map(function(t){return '<div class="acc-it">'+t+'<\/div>';}).join('')+'<\/div>'; }
   h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">디자인<\/div><div class="card"><div style="padding:14px 16px;">';
@@ -253,7 +290,7 @@ function renderGuest() {
 
   h += '<div class="sec"><div class="sec-hdr">레터링<\/div><div class="card"><div style="padding:14px 16px;">';
   h += '<div class="lc">';
-  LETS.forEach((lt, i) => {
+  CFG.lets.forEach((lt, i) => {
     h += '<button class="lc-btn'+(fd.lettering===lt?' on':'')+'" data-idx="'+i+'" onclick="selLet(this.dataset.idx)">'+lt+'<\/button>';
   });
   h += '<\/div>';
@@ -269,8 +306,8 @@ function renderGuest() {
   if (sel) {
     h += '<div class="sec"><div class="sec-hdr">결제 금액<\/div><div class="card">';
     h += '<div class="pr"><span class="pk">'+sel.name+'<\/span><span class="pv">'+sel.price.toLocaleString()+'원<\/span><\/div>';
-    if (fd.choco)    h += '<div class="pr"><span class="pk">초콜릿 장식<\/span><span class="pv">+3,000원<\/span><\/div>';
-    if (fd.delivery) h += '<div class="pr"><span class="pk">배달<\/span><span class="pv">+5,000원<\/span><\/div>';
+    if (fd.choco)    h += '<div class="pr"><span class="pk">초콜릿 장식<\/span><span class="pv">'+CFG.choco_price.toLocaleString()+'원<\/span><\/div>';
+    if (fd.delivery) h += '<div class="pr"><span class="pk">배달<\/span><span class="pv">'+CFG.delivery_price.toLocaleString()+'원<\/span><\/div>';
     h += '<div class="pr"><span class="pkb">총 결제 금액<\/span><span class="pvb">'+total.toLocaleString()+'원<\/span><\/div>';
     h += '<\/div><\/div>';
   }
@@ -297,8 +334,8 @@ async function doSubmit() {
   if (!fd.time)         { toast('픽업 시간을 선택해주세요'); return; }
   if (!fd.size)         { toast('케이크 사이즈를 선택해주세요'); return; }
   if (!fd.pay)          { toast('결제 방법을 선택해주세요'); return; }
-  const sel   = SIZES.find(s => s.id === fd.size);
-  const total = sel.price + (fd.choco?3000:0) + (fd.delivery?5000:0);
+  const sel   = CFG.sizes.find(s => s.id === fd.size);
+  const total = sel.price + (fd.choco?CFG.choco_price:0) + (fd.delivery?CFG.delivery_price:0);
   W('<div class="loading">주문서 전송 중...<\/div>');
   try {
     await addOrder({
@@ -333,6 +370,7 @@ async function renderAdmin() {
     const cnt = f==='all' ? orders.length : orders.filter(o=>o.status===f).length;
     h += '<button class="fc'+(aFilter===f?' on':'')+'" onclick="aFilter=\''+f+'\';renderAdmin()">'+lbls[f]+' '+cnt+'<\/button>';
   });
+  h += '<button class="fc" onclick="showSettings()" style="background:rgba(139,74,74,0.1);color:var(--accent);">⚙️ 설정<\/button>';
   h += '<\/div><\/div>';
 
   if (!filt.length) {
@@ -406,11 +444,99 @@ async function doSav() {
 }
 async function doDel()   { if (!confirm('삭제할까요?')) return; await delOrder(curId); closeSheet(); toast('삭제됐어요'); renderAdmin(); }
 
+function showSettings() {
+  let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
+  h += '<div class="sh-tw"><div class="sh-t">⚙️ 주문서 설정<\/div><div class="sh-s">수정 후 저장 버튼을 눌러주세요<\/div><\/div>';
+  h += '<div style="padding:16px 16px 0;">';
+
+  // 가게 정보
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">가게 정보<\/div>';
+  h += '<div class="dl" style="margin-bottom:14px;">';
+  h += '<div class="dr"><div class="dk">가게명<\/div><div class="dv"><input id="cfg_shop_name" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+CFG.shop_name+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">연락처<\/div><div class="dv"><input id="cfg_phone" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+CFG.shop_phone+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">입금계좌<\/div><div class="dv"><input id="cfg_account" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+CFG.bank_account+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">계좌주<\/div><div class="dv"><input id="cfg_holder" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+CFG.bank_holder+'"><\/div><\/div>';
+  h += '<\/div>';
+
+  // 케이크 종류
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">케이크 종류 & 가격<\/div>';
+  h += '<div class="dl" style="margin-bottom:14px;">';
+  CFG.sizes.forEach(function(s,i) {
+    h += '<div class="dr" style="flex-wrap:wrap;gap:6px;">';
+    h += '<div class="dk">'+s.e+'<\/div>';
+    h += '<input id="cfg_sz_name_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:80px;" value="'+s.name+'">';
+    h += '<input id="cfg_sz_cm_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:90px;" value="'+s.cm+'">';
+    h += '<input id="cfg_sz_price_'+i+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:80px;" value="'+s.price+'">';
+    h += '<\/div>';
+  });
+  h += '<\/div>';
+
+  // 추가옵션 가격
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">추가 옵션 가격<\/div>';
+  h += '<div class="dl" style="margin-bottom:14px;">';
+  h += '<div class="dr"><div class="dk">초콜릿장식<\/div><div class="dv"><input id="cfg_choco" type="number" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;text-align:right;" value="'+CFG.choco_price+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">배달비<\/div><div class="dv"><input id="cfg_delivery" type="number" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;text-align:right;" value="'+CFG.delivery_price+'"><\/div><\/div>';
+  h += '<\/div>';
+
+  // 안내 문구
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">안내 문구<\/div>';
+  h += '<div class="dl" style="margin-bottom:14px;">';
+  h += '<div class="dr"><div class="dk">픽업안내<\/div><div class="dv"><textarea id="cfg_pickup" style="border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;width:100%;resize:none;height:50px;line-height:1.5;">'+CFG.pickup_notice+'<\/textarea><\/div><\/div>';
+  CFG.storage_tips.forEach(function(t,i) {
+    h += '<div class="dr"><div class="dk">보관'+(i+1)+'<\/div><div class="dv"><input id="cfg_storage_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
+  });
+  CFG.transport_tips.forEach(function(t,i) {
+    h += '<div class="dr"><div class="dk">픽업주의'+(i+1)+'<\/div><div class="dv"><input id="cfg_transport_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
+  });
+  h += '<\/div>';
+
+  // 레터링 예시
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">레터링 예시<\/div>';
+  h += '<div class="dl" style="margin-bottom:14px;">';
+  CFG.lets.forEach(function(t,i) {
+    h += '<div class="dr"><div class="dk">예시'+(i+1)+'<\/div><div class="dv"><input id="cfg_let_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
+  });
+  h += '<\/div>';
+
+  h += '<\/div>';
+  h += '<div class="sh-act"><button class="sh-cls" onclick="closeSheet()">닫기<\/button><button class="sh-sav" onclick="saveSettingsFromForm()">저장<\/button><\/div>';
+  showSheet(h);
+}
+
+async function saveSettingsFromForm() {
+  const newCFG = {
+    shop_name: document.getElementById('cfg_shop_name').value,
+    shop_phone: document.getElementById('cfg_phone').value,
+    bank_account: document.getElementById('cfg_account').value,
+    bank_holder: document.getElementById('cfg_holder').value,
+    pickup_notice: document.getElementById('cfg_pickup').value,
+    choco_price: parseInt(document.getElementById('cfg_choco').value)||3000,
+    delivery_price: parseInt(document.getElementById('cfg_delivery').value)||5000,
+    sizes: CFG.sizes.map(function(s,i) {
+      return {
+        id: s.id, e: s.e,
+        name: document.getElementById('cfg_sz_name_'+i).value,
+        cm: document.getElementById('cfg_sz_cm_'+i).value,
+        price: parseInt(document.getElementById('cfg_sz_price_'+i).value)||s.price
+      };
+    }),
+    storage_tips: CFG.storage_tips.map(function(_,i) { return document.getElementById('cfg_storage_'+i).value; }),
+    transport_tips: CFG.transport_tips.map(function(_,i) { return document.getElementById('cfg_transport_'+i).value; }),
+    lets: CFG.lets.map(function(_,i) { return document.getElementById('cfg_let_'+i).value; })
+  };
+  await saveSettings(newCFG);
+  CFG = newCFG;
+  toast('설정이 저장됐어요 ✅');
+  closeSheet();
+  renderAdmin();
+}
+
 function render() {
   if (IS_ADMIN) renderAdmin(); else renderGuest();
 }
 
-render();
+// 설정 로드 후 렌더
+loadSettings().then(function() { render(); }).catch(function() { render(); });
 </script>
 
 </body>
