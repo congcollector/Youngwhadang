@@ -559,7 +559,16 @@ let pvPhotos = [], pvIdx = 0, pvSizeName = '';
 
 const W = h => { document.getElementById('wrap').innerHTML = h; };
 
-function render() { IS_ADMIN ? renderAdmin() : renderGuest(); }
+function render() {
+  if (IS_ADMIN) {
+    renderAdmin().catch(e => {
+      document.getElementById('wrap').innerHTML =
+        `<div style="padding:20px;color:red;font-size:13px;word-break:break-all;"><b>Admin 오류:</b><br>${e.message}</div>`;
+    });
+  } else {
+    renderGuest();
+  }
+}
 
 // ── 아코디언 ──
 function toggleAccordion(key) {
@@ -1184,14 +1193,20 @@ setTimeout(()=>t.className=‘toast’,2400);
 
 // ── INIT ──
 function init() {
-try {
-render();
-} catch(e) {
-document.getElementById(‘wrap’).innerHTML = ` <div style="padding:20px;color:red;font-size:13px;word-break:break-all;"> <b>오류 발생:</b><br>${e.message}<br><br> <b>스택:</b><br>${e.stack} </div>`;
+if (IS_ADMIN) {
+renderAdmin().catch(e => {
+document.getElementById(‘wrap’).innerHTML =
+’<div style="padding:20px;color:red;font-size:13px;">오류: ’ + e.message + ‘</div>’;
+});
+} else {
+try { renderGuest(); } catch(e) {
+document.getElementById(‘wrap’).innerHTML =
+’<div style="padding:20px;color:red;font-size:13px;">오류: ’ + e.message + ‘</div>’;
 }
 loadCakePhotos().then(() => {
-try { render(); } catch(e) {}
+try { renderGuest(); } catch(e) {}
 }).catch(() => {});
+}
 }
 
 // module scope → 전역 노출
