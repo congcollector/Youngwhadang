@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>영화당 · 떡케이크 주문</title>
+<style>
+:root { --bg:#f7f3f0; --card:#fff; --accent:#8b4a4a; --text:#1c1c1e; --text2:#6b6b70; --text3:#aeaeb2; --sep:rgba(60,60,67,0.12); --green:#34c759; --red:#ff3b30; --r:14px; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);font-family:-apple-system,'Helvetica Neue',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;}
+.hdr{background:rgba(247,243,240,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:0.5px solid var(--sep);padding:52px 20px 14px;position:sticky;top:0;z-index:50;}
+.hdr-in{display:flex;align-items:flex-end;justify-content:space-between;}
+.hdr-eye{font-size:11px;font-weight:600;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px;}
+.hdr-ttl{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.pill{font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;}
+.pill-g{background:rgba(139,74,74,0.1);color:var(--accent);}
+.pill-a{background:var(--accent);color:#fff;}
+.wrap{max-width:480px;margin:0 auto;padding:20px 0 100px;}
+.loading{text-align:center;padding:80px 20px;color:var(--text2);font-size:15px;}
+.sec{margin-bottom:28px;}
+.sec-hdr{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.6px;padding:0 20px;margin-bottom:8px;}
+.sec-foot{font-size:12px;color:var(--text2);padding:7px 20px 0;line-height:1.6;}
+.card{background:var(--card);border-radius:var(--r);margin:0 16px;overflow:hidden;}
+.row{display:flex;align-items:center;padding:0 16px;min-height:46px;border-bottom:0.5px solid var(--sep);}
+.row:last-child{border-bottom:none;}
+.row-lbl{font-size:15px;min-width:72px;}
+.req{color:var(--red);font-size:12px;}
+.inp{flex:1;border:none;outline:none;background:transparent;font-size:15px;font-family:inherit;color:var(--text);text-align:right;padding:12px 0;}
+.inp::placeholder{color:var(--text3);}
+.notice{background:var(--card);border-radius:var(--r);padding:14px 16px;margin:0 16px;font-size:13px;color:var(--text2);line-height:1.8;}
+.notice strong{color:var(--accent);font-weight:600;}
+.sz-scroll{display:flex;gap:10px;overflow-x:auto;padding:0 16px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.sz-scroll::-webkit-scrollbar{display:none;}
+.sz{flex-shrink:0;width:128px;background:var(--card);border-radius:var(--r);padding:14px 10px;text-align:center;border:2px solid transparent;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:all 0.15s;}
+.sz.on{border-color:var(--accent);background:rgba(139,74,74,0.05);}
+.sz-e{font-size:28px;margin-bottom:6px;}
+.sz-n{font-size:13px;font-weight:600;margin-bottom:2px;}
+.sz-c{font-size:11px;color:var(--text2);margin-bottom:6px;}
+.sz-p{font-size:14px;font-weight:700;color:var(--accent);}
+.tog{display:flex;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--sep);min-height:48px;}
+.tog:last-child{border-bottom:none;}
+.tog-bd{flex:1;}
+.tog-l{font-size:15px;}
+.tog-s{font-size:12px;color:var(--text2);margin-top:1px;}
+.sw{width:51px;height:31px;border-radius:16px;background:rgba(120,120,128,0.2);position:relative;flex-shrink:0;transition:background 0.2s;cursor:pointer;}
+.sw.on{background:var(--green);}
+.sw-k{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1);}
+.sw.on .sw-k{transform:translateX(20px);}
+.pay-wrap{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;}
+.pc{padding:7px 16px;border-radius:20px;font-size:14px;font-weight:500;font-family:inherit;border:none;cursor:pointer;background:rgba(120,120,128,0.1);color:var(--text);transition:all 0.15s;}
+.pc.on{background:var(--accent);color:#fff;}
+.pr{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:0.5px solid var(--sep);}
+.pr:last-child{border-bottom:none;}
+.pk{font-size:15px;} .pv{font-size:15px;color:var(--text2);}
+.pkb{font-size:15px;font-weight:600;} .pvb{font-size:17px;font-weight:700;color:var(--accent);}
+.btn{display:block;width:calc(100% - 32px);margin:0 16px;padding:15px;border-radius:var(--r);border:none;background:var(--accent);color:#fff;font-size:17px;font-weight:600;font-family:inherit;cursor:pointer;}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+.ov.show{display:flex;}
+.sh{background:var(--bg);border-radius:20px 20px 0 0;padding:0 0 40px;width:100%;animation:up 0.28s cubic-bezier(0.32,0.72,0,1);max-height:90vh;overflow-y:auto;}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sh-hw{padding:10px 0 6px;text-align:center;}
+.sh-h{display:inline-block;width:36px;height:5px;border-radius:3px;background:rgba(60,60,67,0.2);}
+.sh-tw{padding:4px 20px 16px;border-bottom:0.5px solid var(--sep);}
+.sh-t{font-size:17px;font-weight:600;}
+.sh-s{font-size:13px;color:var(--text2);margin-top:2px;}
+.sh-act{display:flex;gap:10px;padding:16px 16px 0;}
+.sh-del{flex:1;padding:13px;border-radius:var(--r);background:rgba(255,59,48,0.1);border:none;color:#cc2a22;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
+.sh-cls{flex:1;padding:13px;border-radius:var(--r);background:rgba(120,120,128,0.12);border:none;color:var(--text2);font-size:14px;font-family:inherit;cursor:pointer;}
+.sh-sav{flex:1;padding:13px;border-radius:var(--r);background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;}
+.dl{background:var(--card);border-radius:var(--r);overflow:hidden;}
+.dr{display:flex;padding:11px 16px;border-bottom:0.5px solid var(--sep);gap:12px;}
+.dr:last-child{border-bottom:none;}
+.dk{font-size:13px;color:var(--text2);min-width:68px;}
+.dv{font-size:14px;flex:1;line-height:1.5;}
+.stb{padding:8px 16px;border-radius:20px;border:none;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;}
+.stb-p{background:rgba(255,149,0,0.12);color:#c07000;}
+.stb-c{background:rgba(52,199,89,0.12);color:#1a8a3a;}
+.stb-d{background:rgba(0,122,255,0.12);color:#0060cc;}
+.stb-x{background:rgba(255,59,48,0.12);color:#cc2a22;}
+.stb.act{font-weight:700;box-shadow:0 0 0 1.5px currentColor inset;}
+.stb:not(.act){opacity:0.45;}
+.memo-ta{width:100%;background:var(--card);border:none;border-radius:var(--r);padding:12px 14px;font-size:14px;font-family:inherit;color:var(--text);resize:none;height:80px;outline:none;line-height:1.5;}
+.stats{display:flex;gap:10px;margin:0 16px 16px;}
+.stat{flex:1;background:var(--card);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.stat-n{font-size:22px;font-weight:700;color:var(--accent);}
+.stat-l{font-size:10px;color:var(--text2);margin-top:2px;font-weight:500;}
+.flt{display:flex;gap:8px;overflow-x:auto;padding:0 16px;margin-bottom:14px;scrollbar-width:none;}
+.flt::-webkit-scrollbar{display:none;}
+.fc{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;background:var(--card);color:var(--text2);white-space:nowrap;cursor:pointer;border:none;font-family:inherit;flex-shrink:0;}
+.fc.on{background:var(--accent);color:#fff;}
+.oc{background:var(--card);border-radius:var(--r);margin:0 16px 10px;overflow:hidden;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.oc-top{display:flex;align-items:center;justify-content:space-between;padding:13px 16px 10px;border-bottom:0.5px solid var(--sep);}
+.oc-nm{font-size:16px;font-weight:600;}
+.oc-bd{padding:10px 16px 13px;font-size:13px;color:var(--text2);line-height:1.8;}
+.oc-ft{display:flex;justify-content:space-between;padding:10px 16px;border-top:0.5px solid var(--sep);}
+.oc-ph{font-size:13px;color:var(--text2);}
+.oc-tt{font-size:16px;font-weight:700;color:var(--accent);}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;}
+.b-pending{background:rgba(255,149,0,0.12);color:#c07000;}
+.b-confirmed{background:rgba(52,199,89,0.12);color:#1a8a3a;}
+.b-done{background:rgba(0,122,255,0.12);color:#0060cc;}
+.b-cancel{background:rgba(255,59,48,0.12);color:#cc2a22;}
+.acc-row{display:flex;align-items:center;padding:13px 16px;cursor:pointer;gap:10px;min-height:50px;}
+.arr{font-size:18px;color:var(--text3);transition:transform 0.22s;flex-shrink:0;}
+.arr.open{transform:rotate(90deg);}
+.acc-bd{padding:4px 16px 14px 56px;border-top:0.5px solid var(--sep);background:rgba(0,0,0,0.015);}
+.acc-it{font-size:13px;color:var(--text2);line-height:1.8;padding:2px 0;}
+.succ{text-align:center;padding:60px 24px 32px;}
+.succ-ic{font-size:64px;margin-bottom:18px;}
+.succ-t{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;}
+.succ-s{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:28px;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(40,40,40,0.92);color:#fff;padding:11px 22px;border-radius:20px;font-size:14px;font-weight:500;z-index:400;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.lc{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.lc-btn{padding:5px 11px;border-radius:20px;border:1px solid rgba(139,74,74,0.25);background:rgba(139,74,74,0.07);color:var(--accent);font-size:11px;font-family:inherit;cursor:pointer;line-height:1.5;}
+.lc-btn.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.empty{text-align:center;padding:60px 20px;color:var(--text2);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <div>
+      <div class="hdr-eye">영화당 · Younghwadang</div>
+      <div class="hdr-ttl">🌸 떡케이크 주문</div>
+    </div>
+    <div class="pill" id="modePill"></div>
+  </div>
+</div>
+
+<div class="wrap" id="wrap"></div>
+<div class="ov" id="ov"><div class="sh" id="sh"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPA = 'https://pithlzhuqezeesprcbze.supabase.co/rest/v1';
+var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
+var H = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+
+function api(path,method,body){
+  return fetch(SUPA+path,{method:method||'GET',headers:H,body:body?JSON.stringify(body):undefined});
+}
+function getOrders(){return api('/cake_orders?order=created_at.desc').then(function(r){return r.ok?r.json():[];});}
+function addOrder(o){return api('/cake_orders','POST',o).then(function(r){if(!r.ok)throw new Error('fail');});}
+function updateOrder(id,p){return api('/cake_orders?id=eq.'+id,'PATCH',p);}
+function delOrder(id){return api('/cake_orders?id=eq.'+id,'DELETE');}
+
+var IS_ADMIN = location.hash==='#admin-younghwadang';
+var SIZES=[
+  {id:'s1',e:'🎂',name:'1호',cm:'지름 15cm',price:55000},
+  {id:'s2',e:'🎂',name:'2호',cm:'지름 18cm',price:70000},
+  {id:'sn',e:'🔢',name:'숫자케이크',cm:'세로 7cm',price:90000},
+  {id:'s2t',e:'✨',name:'2단케이크',cm:'2호 + 미니',price:130000}
+];
+var PAYS=['계좌이체','굿뜨래페이','카드'];
+var ST={pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
+var fd={name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,delivery:false,addr:'',done:false};
+var acc={s:false,t:false};
+var curId=null;
+var aFilter='all';
+var LETS=['어머님의 60년 세월을 존경하고 사랑합니다','지금처럼 건강하고 오래 곁에 있어주세요','아버님의 세 번째 스무 살을 축하드립니다','팔팔한 80세 팔순을 축하드립니다','늘 건강하고 행복하게 함께해요 사랑합니다'];
+
+var pill=document.getElementById('modePill');
+pill.textContent=IS_ADMIN?'사장님 🔑':'주문하기';
+pill.className='pill '+(IS_ADMIN?'pill-a':'pill-g');
+
+function W(h){document.getElementById('wrap').innerHTML=h;}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2400);}
+function showSheet(h){document.getElementById('sh').innerHTML=h;document.getElementById('ov').className='ov show';}
+function closeSheet(){document.getElementById('ov').className='ov';}
+
+function selLet(idx){
+  var lt=LETS[parseInt(idx)];
+  fd.lettering=(fd.lettering===lt?'':lt);
+  renderGuest();
+}
+function renderGuest(){
+  if(fd.done){renderSuccess();return;}
+  var sel=null;
+  for(var i=0;i<SIZES.length;i++){if(SIZES[i].id===fd.size){sel=SIZES[i];break;}}
+  var total=(sel?sel.price:0)+(fd.choco?3000:0)+(fd.delivery?5000:0);
+  var h='';
+
+  h+='<div class="sec"><div class="sec-hdr">주문 안내</div>';
+  h+='<div class="notice">주문서 제출 후 <strong>010-5496-0736</strong>으로 확인 연락드려요.<br>입금 계좌: <strong>농협 3511-2979-4311-3 (김은영)</strong></div></div>';
+
+  h+='<div class="sec"><div class="sec-hdr">기본 정보</div><div class="card">';
+  h+='<div class="row"><div class="row-lbl">성함 <span class="req">*</span></div><input class="inp" placeholder="주문자 성함" value="'+fd.name+'" oninput="fd.name=this.value"></div>';
+  h+='<div class="row"><div class="row-lbl">전화번호 <span class="req">*</span></div><input class="inp" type="tel" placeholder="010-0000-0000" value="'+fd.phone+'" oninput="fd.phone=this.value"></div>';
+  h+='</div></div>';
+
+  h+='<div class="sec"><div class="sec-hdr">픽업 일정</div><div class="card">';
+  h+='<div class="row"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"></div>';
+  h+='<div class="row"><div class="row-lbl">시간 <span class="req">*</span></div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"></div>';
+  h+='</div><div class="sec-foot">픽업 약 3시간 전 제작 시작 · 예약 시간에 맞춰 방문해주세요</div></div>';
+
+  h+='<div class="sec"><div class="sec-hdr">케이크 사이즈</div><div class="sz-scroll">';
+  for(var i=0;i<SIZES.length;i++){
+    var s=SIZES[i];
+    h+='<div class="sz'+(fd.size===s.id?' on':'')+'" onclick="fd.size=\''+s.id+'\';renderGuest()">';
+    h+='<div class="sz-e">'+s.e+'</div>';
+    h+='<div class="sz-n">'+s.name+'</div>';
+    h+='<div class="sz-c">'+s.cm+'</div>';
+    h+='<div class="sz-p">'+s.price.toLocaleString()+'원</div></div>';
+  }
+  h+='</div></div>';
+
+  h+='<div class="sec"><div class="sec-hdr">추가 옵션</div><div class="card">';
+  h+='<div class="tog"><div class="tog-bd"><div class="tog-l">🍫 초콜릿 장식</div><div class="tog-s">화이트초콜릿 장식 +3,000원</div></div>';
+  h+='<div class="sw'+(fd.choco?' on':'')+'" onclick="fd.choco=!fd.choco;renderGuest()"><div class="sw-k"></div></div></div>';
+  h+='<div class="tog"><div class="tog-bd"><div class="tog-l">🚗 배달 요청</div><div class="tog-s">부여 전 지역 +5,000원</div></div>';
+  h+='<div class="sw'+(fd.delivery?' on':'')+'" onclick="fd.delivery=!fd.delivery;renderGuest()"><div class="sw-k"></div></div></div>';
+  if(fd.delivery){
+    h+='<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
+    h+='<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소" value="'+fd.addr+'" oninput="fd.addr=this.value">';
+    h+='</div>';
+  }
+  h+='</div></div>';
+
+  h+='<div class="sec"><div class="sec-hdr">안내사항</div><div class="card">';
+  h+='<div class="acc-row" onclick="acc.s=!acc.s;renderGuest()">';
+  h+='<div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🧊</div>';
+  h+='<div class="tog-l" style="flex:1;margin-left:10px;">보관 방법</div>';
+  h+='<div class="arr'+(acc.s?' open':'')+'">&rsaquo;</div></div>';
+  if(acc.s){h+='<div class="acc-bd"><div class="acc-it">📌 당일 섭취 권장</div><div class="acc-it">🌸 앙금꽃 → 냉장 보관 (최대 1주일)</div><div class="acc-it">🍡 떡 → 냉동 후 자연해동</div></div>';}
+  h+='<div class="acc-row" onclick="acc.t=!acc.t;renderGuest()" style="border-top:0.5px solid var(--sep);">';
+  h+='<div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🚗</div>';
+  h+='<div class="tog-l" style="flex:1;margin-left:10px;">픽업 주의사항</div>';
+  h+='<div class="arr'+(acc.t?' open':'')+'">&rsaquo;</div></div>';
+  if(acc.t){h+='<div class="acc-bd"><div class="acc-it">⏰ 픽업 약 3시간 전 제작 시작</div><div class="acc-it">🧑‍🤝‍🧑 동행자와 함께 조수석에서 손으로 받쳐 이동</div><div class="acc-it">🚚 배달 가능 (5,000원)</div></div>';}
+  h+='</div></div>';
+
+  h+='<div class="sec"><div class="sec-hdr">디자인</div><div class="card"><div style="padding:14px 16px;">';
+  h+='<textarea style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);resize:none;height:72px;outline:none;line-height:1.5;" placeholder="색감, 스타일을 적어주세요" oninput="fd.design=this.value">'+fd.design+'</textarea>';
+
+h+=’</div></div></div>’;
+
+h+=’<div class="sec"><div class="sec-hdr">레터링</div><div class="card"><div style="padding:14px 16px;">’;
+h+=’<div class="lc">’;
+for(var i=0;i<LETS.length;i++){
+var lt=LETS[i];
+var isOn=fd.lettering===lt;
+h+=’<button class="lc-btn'+(isOn?' on':'')+'" data-idx="'+i+'" onclick="selLet(this.dataset.idx)">’+lt+’</button>’;
+}
+h+=’</div>’;
+h+=’<textarea style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);resize:none;height:64px;outline:none;line-height:1.5;" placeholder="직접 입력하거나 위 예시를 선택하세요" oninput="fd.lettering=this.value">’+fd.lettering+’</textarea>’;
+h+=’</div></div></div>’;
+
+h+=’<div class="sec"><div class="sec-hdr">결제 방법</div><div class="card"><div class="pay-wrap">’;
+for(var i=0;i<PAYS.length;i++){
+h+=’<button class="pc'+(fd.pay===PAYS[i]?' on':'')+'" onclick="fd.pay=\''+PAYS[i]+'\';renderGuest()">’+PAYS[i]+’</button>’;
+}
+h+=’</div></div></div>’;
+
+if(sel){
+h+=’<div class="sec"><div class="sec-hdr">결제 금액</div><div class="card">’;
+h+=’<div class="pr"><span class="pk">’+sel.name+’</span><span class="pv">’+sel.price.toLocaleString()+‘원</span></div>’;
+if(fd.choco){h+=’<div class="pr"><span class="pk">초콜릿 장식</span><span class="pv">+3,000원</span></div>’;}
+if(fd.delivery){h+=’<div class="pr"><span class="pk">배달</span><span class="pv">+5,000원</span></div>’;}
+h+=’<div class="pr"><span class="pkb">총 결제 금액</span><span class="pvb">’+total.toLocaleString()+‘원</span></div>’;
+h+=’</div></div>’;
+}
+
+h+=’<div class="sec"><button class="btn" onclick="doSubmit()">주문서 제출하기</button></div>’;
+W(h);
+}
+
+function renderSuccess(){
+var h=’’;
+h+=’<div class="succ">’;
+h+=’<div class="succ-ic">🌸</div>’;
+h+=’<div class="succ-t">주문서가 전달됐어요</div>’;
+h+=’<div class="succ-s">확인 후 <strong>010-5496-0736</strong>으로 연락드릴게요 💛</div>’;
+h+=’<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong>농협 3511-2979-4311-3 (김은영)</strong><br><span style="font-size:12px;color:var(--text2);">입금 확인 후 예약 확정돼요</span></div>’;
+h+=’<button class="btn" onclick="resetForm()">새 주문서 작성</button>’;
+h+=’</div>’;
+W(h);
+}
+function resetForm(){
+fd={name:’’,phone:’’,date:’’,time:’’,size:’’,design:’’,lettering:’’,pay:’’,choco:false,delivery:false,addr:’’,done:false};
+renderGuest();
+}
+
+function doSubmit(){
+if(!fd.name.trim()){toast(‘성함을 입력해주세요’);return;}
+if(!fd.phone.trim()){toast(‘전화번호를 입력해주세요’);return;}
+if(!fd.date){toast(‘픽업 날짜를 선택해주세요’);return;}
+if(!fd.time){toast(‘픽업 시간을 선택해주세요’);return;}
+if(!fd.size){toast(‘케이크 사이즈를 선택해주세요’);return;}
+if(!fd.pay){toast(‘결제 방법을 선택해주세요’);return;}
+var sel=null;
+for(var i=0;i<SIZES.length;i++){if(SIZES[i].id===fd.size){sel=SIZES[i];break;}}
+var total=sel.price+(fd.choco?3000:0)+(fd.delivery?5000:0);
+W(’<div class="loading">주문서 전송 중…</div>’);
+addOrder({
+id:‘o_’+Date.now(),name:fd.name,phone:fd.phone,
+pickup_date:fd.date,pickup_time:fd.time,
+cake_size:sel.name,cake_price:sel.price,
+design:fd.design||’’,lettering:fd.lettering||’’,
+payment:fd.pay,choco_deco:fd.choco,
+delivery:fd.delivery,delivery_addr:fd.addr||’’,
+total_price:total,status:‘pending’,memo:’’,
+created_at:Date.now()
+}).then(function(){fd.done=true;renderGuest();})
+.catch(function(){toast(‘전송 실패, 다시 시도해주세요’);renderGuest();});
+}
+
+function renderAdmin(){
+W(’<div class="loading">주문 목록 불러오는 중…</div>’);
+getOrders().then(function(orders){
+if(!Array.isArray(orders))orders=[];
+var filt=aFilter===‘all’?orders:orders.filter(function(o){return o.status===aFilter;});
+var rev=orders.filter(function(o){return o.status!==‘cancel’;}).reduce(function(s,o){return s+(o.total_price||0);},0);
+var lbls={all:‘전체’,pending:‘확인중’,confirmed:‘예약확정’,done:‘픽업완료’,cancel:‘취소’};
+var h=’<div class="sec" style="padding-top:8px;">’;
+h+=’<div class="stats">’;
+h+=’<div class="stat"><div class="stat-n">’+orders.length+’</div><div class="stat-l">전체</div></div>’;
+h+=’<div class="stat"><div class="stat-n" style="color:#c07000;">’+orders.filter(function(o){return o.status===‘pending’;}).length+’</div><div class="stat-l">확인중</div></div>’;
+h+=’<div class="stat"><div class="stat-n" style="color:#1a8a3a;">’+orders.filter(function(o){return o.status===‘confirmed’;}).length+’</div><div class="stat-l">확정</div></div>’;
+h+=’<div class="stat"><div class="stat-n" style="font-size:14px;padding-top:4px;">’+Math.round(rev/10000)+‘만원</div><div class="stat-l">매출</div></div>’;
+h+=’</div><div class="flt">’;
+[‘all’,‘pending’,‘confirmed’,‘done’,‘cancel’].forEach(function(f){
+var cnt=f===‘all’?orders.length:orders.filter(function(o){return o.status===f;}).length;
+h+=’<button class="fc'+(aFilter===f?' on':'')+'" onclick="aFilter=\''+f+'\';renderAdmin()">’+lbls[f]+’ ‘+cnt+’</button>’;
+});
+h+=’</div></div>’;
+if(!filt.length){
+h+=’<div class="empty"><div style="font-size:44px;">🌸</div><div style="margin-top:12px;">해당 주문이 없어요</div></div>’;
+}else{
+filt.forEach(function(o){
+var d=new Date(o.created_at);
+var ds=(d.getMonth()+1)+’/’+d.getDate()+’ ‘+String(d.getHours()).padStart(2,‘0’)+’:’+String(d.getMinutes()).padStart(2,‘0’);
+h+=’<div class="oc" onclick="openOrder(\''+o.id+'\')">’;
+h+=’<div class="oc-top"><div class="oc-nm">’+o.name+’</div>’;
+h+=’<div style="display:flex;align-items:center;gap:7px;"><div class="badge b-'+o.status+'">’+ST[o.status]+’</div><div style="font-size:12px;color:var(--text2);">’+ds+’</div></div></div>’;
+h+=’<div class="oc-bd">📅 ‘+o.pickup_date+’ ‘+o.pickup_time+’<br>🎂 ‘+o.cake_size+(o.choco_deco?’ · 초콜릿’:’’)+(o.delivery?’ · 배달’:’’)+’<br>💳 ‘+o.payment+’</div>’;
+h+=’<div class="oc-ft"><div class="oc-ph">’+o.phone+’</div><div class="oc-tt">’+(o.total_price||0).toLocaleString()+‘원</div></div></div>’;
+});
+}
+W(h);
+}).catch(function(){W(’<div class="empty"><div style="font-size:44px;">⚠️</div><div style="margin-top:12px;">불러오기 실패</div></div>’);});
+}
+
+function openOrder(id){
+getOrders().then(function(orders){
+var o=null;
+for(var i=0;i<orders.length;i++){if(orders[i].id===id){o=orders[i];break;}}
+if(!o)return;
+curId=id;
+var h=’<div class="sh-hw"><div class="sh-h"></div></div>’;
+h+=’<div class="sh-tw"><div class="sh-t">’+o.name+‘님 주문</div><div class="sh-s">’+o.pickup_date+’ ‘+o.pickup_time+’ 픽업</div></div>’;
+h+=’<div style="margin:16px 16px 0;"><div class="dl">’;
+h+=’<div class="dr"><div class="dk">이름</div><div class="dv">’+o.name+’</div></div>’;
+h+=’<div class="dr"><div class="dk">전화번호</div><div class="dv">’+o.phone+’</div></div>’;
+h+=’<div class="dr"><div class="dk">픽업</div><div class="dv">’+o.pickup_date+’ ‘+o.pickup_time+’</div></div>’;
+h+=’<div class="dr"><div class="dk">케이크</div><div class="dv">’+o.cake_size+(o.choco_deco?’ + 초콜릿’:’’)+(o.delivery?’ + 배달’:’’)+’</div></div>’;
+h+=’<div class="dr"><div class="dk">디자인</div><div class="dv">’+(o.design||’—’)+’</div></div>’;
+h+=’<div class="dr"><div class="dk">레터링</div><div class="dv">’+(o.lettering||’—’)+’</div></div>’;
+h+=’<div class="dr"><div class="dk">결제</div><div class="dv">’+o.payment+’</div></div>’;
+h+=’<div class="dr"><div class="dk">금액</div><div class="dv" style="font-weight:700;color:var(--accent);">’+(o.total_price||0).toLocaleString()+‘원</div></div>’;
+h+=’</div></div>’;
+h+=’<div style="margin:12px 16px 0;"><div style="font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">상태 변경</div>’;
+h+=’<div style="display:flex;gap:8px;flex-wrap:wrap;">’;
+h+=’<button class="stb stb-p'+(o.status==='pending'?' act':'')+'" onclick="chgSt(\'pending\')">확인중</button>’;
+h+=’<button class="stb stb-c'+(o.status==='confirmed'?' act':'')+'" onclick="chgSt(\'confirmed\')">예약확정</button>’;
+h+=’<button class="stb stb-d'+(o.status==='done'?' act':'')+'" onclick="chgSt(\'done\')">픽업완료</button>’;
+h+=’<button class="stb stb-x'+(o.status==='cancel'?' act':'')+'" onclick="chgSt(\'cancel\')">취소</button>’;
+h+=’</div></div>’;
+h+=’<div style="margin:12px 16px 0;"><div style="font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">메모</div>’;
+h+=’<textarea class="memo-ta" id="memoTa">’+(o.memo||’’)+’</textarea></div>’;
+h+=’<div class="sh-act"><button class="sh-del" onclick="doDel()">삭제</button><button class="sh-cls" onclick="closeSheet()">닫기</button><button class="sh-sav" onclick="doSav()">저장</button></div>’;
+showSheet(h);
+});
+}
+
+function chgSt(s){updateOrder(curId,{status:s}).then(function(){toast(‘상태 변경됐어요’);openOrder(curId);renderAdmin();});}
+function doSav(){var m=document.getElementById(‘memoTa’).value;updateOrder(curId,{memo:m}).then(function(){toast(‘저장됐어요’);closeSheet();renderAdmin();});}
+function doDel(){if(!confirm(‘삭제할까요?’))return;delOrder(curId).then(function(){closeSheet();toast(‘삭제됐어요’);renderAdmin();});}
+
+if(IS_ADMIN){renderAdmin();}else{renderGuest();}
+</script>
+
+</body>
+</html>
