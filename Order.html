@@ -472,59 +472,48 @@ display: flex; align-items: center; justify-content: center;
 </div>
 <div class="toast" id="toast"></div>
 
-<script type="module">
-// ── Firebase 설정 ──
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+<script>
+// ── Supabase 설정 ──
+const SUPA_URL = 'https://pithlzhuqezeesprcbze.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
+const SH = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBF0bmOFWsBMURnyOcBQK9LUju8V6gxxxs",
-  authDomain: "youngwhadang.firebaseapp.com",
-  projectId: "youngwhadang",
-  storageBucket: "youngwhadang.firebasestorage.app",
-  messagingSenderId: "951138259773",
-  appId: "1:951138259773:web:2961f0493ea597c3142b54"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+function sGet(path) { return fetch(SUPA_URL+'/rest/v1/'+path, { headers: SH }); }
+function sPost(path,body) { return fetch(SUPA_URL+'/rest/v1/'+path, { method:'POST', headers:SH, body:JSON.stringify(body) }); }
+function sPatch(path,body) { return fetch(SUPA_URL+'/rest/v1/'+path, { method:'PATCH', headers:{...SH,'Prefer':'return=representation'}, body:JSON.stringify(body) }); }
+function sDel(path) { return fetch(SUPA_URL+'/rest/v1/'+path, { method:'DELETE', headers:SH }); }
 
 // 주문 CRUD
 async function dbGetOrders() {
   try {
-    const q = query(collection(db, 'orders'), orderBy('created_at', 'desc'));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const r = await sGet('cake_orders?order=created_at.desc');
+    const d = await r.json();
+    return Array.isArray(d) ? d : [];
   } catch(e) { console.error('주문 로드 실패', e); return []; }
 }
 async function dbAddOrder(order) {
-  try {
-    const { id, ...data } = order;
-    await setDoc(doc(db, 'orders', id), data);
-  } catch(e) { console.error('주문 저장 실패', e); throw e; }
+  const r = await sPost('cake_orders', order);
+  if (!r.ok) { const e = await r.text(); throw new Error(e); }
 }
 async function dbUpdateOrder(id, patch) {
-  try {
-    await updateDoc(doc(db, 'orders', id), patch);
-  } catch(e) { console.error('주문 업데이트 실패', e); }
+  await sPatch('cake_orders?id=eq.'+id, patch);
 }
 async function dbDeleteOrder(id) {
-  try {
-    await deleteDoc(doc(db, 'orders', id));
-  } catch(e) { console.error('주문 삭제 실패', e); }
+  await sDel('cake_orders?id=eq.'+id);
 }
 
 // 사진 CRUD
 async function dbGetPhotos() {
   try {
-    const snap = await getDoc(doc(db, 'settings', 'cakePhotos'));
-    return snap.exists() ? snap.data() : {};
-  } catch(e) { console.error('사진 로드 실패', e); return {}; }
+    const r = await sGet('cake_photos2?id=eq.main');
+    const d = await r.json();
+    if (Array.isArray(d) && d.length > 0) return JSON.parse(d[0].data || '{}');
+    return {};
+  } catch(e) { return {}; }
 }
 async function dbSavePhotos(data) {
-  try {
-    await setDoc(doc(db, 'settings', 'cakePhotos'), data);
-  } catch(e) { console.error('사진 저장 실패', e); }
+  await sDel('cake_photos2?id=eq.main');
+  await sPost('cake_photos2', { id:'main', data: JSON.stringify(data) });
 }
 
 const ADMIN_HASH = '#admin-younghwadang';
