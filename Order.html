@@ -472,66 +472,59 @@ display: flex; align-items: center; justify-content: center;
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
-// ── JSONBin 설정 ──
-const JB_KEY      = '$2a$10$1TI.0JkZpAal5R9OLl715.reE4O0Aq.YTv7idwuvamnsjlokv39LO';
-const BIN_ORDERS  = '69be6ab4c3097a1dd5461d2d';
-const BIN_PHOTOS  = '69be6ac9aa77b81da9053769';
-const JB_BASE     = 'https://api.jsonbin.io/v3/b';
-const JB_H        = { 'Content-Type': 'application/json', 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' };
+<script type="module">
+// ── Firebase 설정 ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-// timeout 있는 fetch
-function fetchWithTimeout(url, opts) {
-  return fetch(url, opts);
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyBF0bmOFWsBMURnyOcBQK9LUju8V6gxxxs",
+  authDomain: "youngwhadang.firebaseapp.com",
+  projectId: "youngwhadang",
+  storageBucket: "youngwhadang.firebasestorage.app",
+  messagingSenderId: "951138259773",
+  appId: "1:951138259773:web:2961f0493ea597c3142b54"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
 // 주문 CRUD
 async function dbGetOrders() {
   try {
-    const r = await fetchWithTimeout(`${JB_BASE}/${BIN_ORDERS}/latest`, {
-      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
-    });
-    const d = await r.json();
-    // JSONBin wraps data in {record: ...} when X-Bin-Meta is not false
-    const data = d.record !== undefined ? d.record : d;
-    return Array.isArray(data) ? data : (data.orders || []);
+    const q = query(collection(db, 'orders'), orderBy('created_at', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch(e) { console.error('주문 로드 실패', e); return []; }
 }
-async function dbSaveOrders(orders) {
-  await fetchWithTimeout(`${JB_BASE}/${BIN_ORDERS}`, {
-    method: 'PUT', headers: JB_H, body: JSON.stringify(orders)
-  });
-}
 async function dbAddOrder(order) {
-  const orders = await dbGetOrders();
-  orders.unshift(order);
-  await dbSaveOrders(orders);
+  try {
+    const { id, ...data } = order;
+    await setDoc(doc(db, 'orders', id), data);
+  } catch(e) { console.error('주문 저장 실패', e); throw e; }
 }
 async function dbUpdateOrder(id, patch) {
-  const orders = await dbGetOrders();
-  const idx = orders.findIndex(o => o.id === id);
-  if (idx !== -1) { Object.assign(orders[idx], patch); await dbSaveOrders(orders); }
+  try {
+    await updateDoc(doc(db, 'orders', id), patch);
+  } catch(e) { console.error('주문 업데이트 실패', e); }
 }
 async function dbDeleteOrder(id) {
-  const orders = await dbGetOrders();
-  await dbSaveOrders(orders.filter(o => o.id !== id));
+  try {
+    await deleteDoc(doc(db, 'orders', id));
+  } catch(e) { console.error('주문 삭제 실패', e); }
 }
 
 // 사진 CRUD
 async function dbGetPhotos() {
   try {
-    const r = await fetchWithTimeout(`${JB_BASE}/${BIN_PHOTOS}/latest`, {
-      headers: { 'X-Master-Key': JB_KEY, 'X-Bin-Meta': 'false' }
-    });
-    const d = await r.json();
-    const data = d.record !== undefined ? d.record : d;
-    return data;
+    const snap = await getDoc(doc(db, 'settings', 'cakePhotos'));
+    return snap.exists() ? snap.data() : {};
   } catch(e) { console.error('사진 로드 실패', e); return {}; }
 }
 async function dbSavePhotos(data) {
-  await fetchWithTimeout(`${JB_BASE}/${BIN_PHOTOS}`, {
-    method: 'PUT', headers: JB_H, body: JSON.stringify(data)
-  });
+  try {
+    await setDoc(doc(db, 'settings', 'cakePhotos'), data);
+  } catch(e) { console.error('사진 저장 실패', e); }
 }
 
 const ADMIN_HASH = '#admin-younghwadang';
@@ -1211,6 +1204,37 @@ loadCakePhotos().then(() => {
 try { render(); } catch(e) {}
 }).catch(() => {});
 }
+
+// module scope → 전역 노출
+window.render = render;
+window.selSize = selSize;
+window.toggle = toggle;
+window.selPay = selPay;
+window.selLettering = selLettering;
+window.removePhoto = removePhoto;
+window.handlePhotos = handlePhotos;
+window.submitOrder = submitOrder;
+window.setFilter = setFilter;
+window.openOrder = openOrder;
+window.changeStatus = changeStatus;
+window.saveMemo = saveMemo;
+window.deleteOrder = deleteOrder;
+window.closeSheet = closeSheet;
+window.closeOverlayOuter = closeOverlayOuter;
+window.toast = toast;
+window.toggleAccordion = toggleAccordion;
+window.openPhotoViewer = openPhotoViewer;
+window.closePhotoViewer = closePhotoViewer;
+window.pvNav = pvNav;
+window.openChocoInfo = openChocoInfo;
+window.adminPhotoTab = adminPhotoTab;
+window.setAdminTab = setAdminTab;
+window.addAdminPhotos = addAdminPhotos;
+window.deleteAdminPhoto = deleteAdminPhoto;
+window.quickEdit = quickEdit;
+window.quickDelete = quickDelete;
+window.renderAdminPhotoManager = renderAdminPhotoManager;
+
 init();
 </script>
 
