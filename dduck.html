@@ -359,12 +359,13 @@ async function openOrder(id) {
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
   h += '<div class="sh-tw"><div class="sh-t">'+o.name+'님 주문<\/div><div class="sh-s">'+o.pickup_date+' '+o.pickup_time+' 픽업<\/div><\/div>';
   h += '<div style="margin:16px 16px 0;"><div class="dl">';
-  h += '<div class="dr"><div class="dk">이름<\/div><div class="dv">'+o.name+'<\/div><\/div>';
-  h += '<div class="dr"><div class="dk">전화번호<\/div><div class="dv">'+o.phone+'<\/div><\/div>';
-  h += '<div class="dr"><div class="dk">픽업<\/div><div class="dv">'+o.pickup_date+' '+o.pickup_time+'<\/div><\/div>';
+  h += '<div class="dr"><div class="dk">이름<\/div><div class="dv"><input id="e_name" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+o.name+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">전화번호<\/div><div class="dv"><input id="e_phone" type="tel" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+o.phone+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">날짜<\/div><div class="dv"><input id="e_date" type="date" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+o.pickup_date+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">시간<\/div><div class="dv"><input id="e_time" type="time" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+o.pickup_time+'"><\/div><\/div>';
   h += '<div class="dr"><div class="dk">케이크<\/div><div class="dv">'+o.cake_size+(o.choco_deco?' + 초콜릿':'')+(o.delivery?' + 배달':'')+'<\/div><\/div>';
-  h += '<div class="dr"><div class="dk">디자인<\/div><div class="dv">'+(o.design||'—')+'<\/div><\/div>';
-  h += '<div class="dr"><div class="dk">레터링<\/div><div class="dv">'+(o.lettering||'—')+'<\/div><\/div>';
+  h += '<div class="dr"><div class="dk">디자인<\/div><div class="dv"><textarea id="e_design" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;resize:none;height:60px;line-height:1.5;">'+(o.design||'')+'<\/textarea><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">레터링<\/div><div class="dv"><textarea id="e_lettering" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;resize:none;height:60px;line-height:1.5;">'+(o.lettering||'')+'<\/textarea><\/div><\/div>';
   h += '<div class="dr"><div class="dk">결제<\/div><div class="dv">'+o.payment+'<\/div><\/div>';
   h += '<div class="dr"><div class="dk">금액<\/div><div class="dv" style="font-weight:700;color:var(--accent);">'+(o.total_price||0).toLocaleString()+'원<\/div><\/div>';
   h += '<\/div><\/div>';
@@ -382,7 +383,27 @@ async function openOrder(id) {
 }
 
 async function chgSt(s) { await updateOrder(curId,{status:s}); toast('상태 변경됐어요'); openOrder(curId); renderAdmin(); }
-async function doSav()   { const m=document.getElementById('memoTa').value; await updateOrder(curId,{memo:m}); toast('저장됐어요'); closeSheet(); renderAdmin(); }
+async function doSav() {
+  const patch = {
+    memo: document.getElementById('memoTa').value
+  };
+  const name = document.getElementById('e_name');
+  const phone = document.getElementById('e_phone');
+  const date = document.getElementById('e_date');
+  const time = document.getElementById('e_time');
+  const design = document.getElementById('e_design');
+  const lettering = document.getElementById('e_lettering');
+  if (name) patch.name = name.value;
+  if (phone) patch.phone = phone.value;
+  if (date) patch.pickup_date = date.value;
+  if (time) patch.pickup_time = time.value;
+  if (design) patch.design = design.value;
+  if (lettering) patch.lettering = lettering.value;
+  await updateOrder(curId, patch);
+  toast('저장됐어요');
+  closeSheet();
+  renderAdmin();
+}
 async function doDel()   { if (!confirm('삭제할까요?')) return; await delOrder(curId); closeSheet(); toast('삭제됐어요'); renderAdmin(); }
 
 function render() {
