@@ -250,9 +250,14 @@ function renderGuest() {
   h += '<\/div><div class="sec-foot">'+CFG.pickup_notice+'<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">케이크 사이즈<\/div><div class="sz-scroll">';
-  CFG.sizes.forEach(s => {
+  CFG.sizes.forEach(function(s) {
+    const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
     h += '<div class="sz'+(fd.size===s.id?' on':'')+'" onclick="fd.size=\''+s.id+'\';renderGuest()">';
-    h += '<div class="sz-e">'+s.e+'<\/div>';
+    if (photos.length > 0) {
+      h += '<div style="width:100%;height:80px;border-radius:8px;overflow:hidden;margin-bottom:6px;"><img src="'+photos[0]+'" style="width:100%;height:100%;object-fit:cover;"><\/div>';
+    } else {
+      h += '<div class="sz-e">'+s.e+'<\/div>';
+    }
     h += '<div class="sz-n">'+s.name+'<\/div>';
     h += '<div class="sz-c">'+s.cm+'<\/div>';
     h += '<div class="sz-p">'+s.price.toLocaleString()+'원<\/div><\/div>';
@@ -260,7 +265,11 @@ function renderGuest() {
   h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">추가 옵션<\/div><div class="card">';
-  h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🍫 초콜릿 장식<\/div><div class="tog-s">화이트초콜릿 장식 '+CFG.choco_price.toLocaleString()+'원<\/div><\/div>';
+  h += '<div class="tog"><div class="tog-bd">';
+  if (CFG.choco_photo) {
+    h += '<img src="'+CFG.choco_photo+'" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:8px;cursor:pointer;" onclick="showChocoModal()">';
+  }
+  h += '<div class="tog-l">🍫 초콜릿 장식<\/div><div class="tog-s">화이트초콜릿 장식 +'+CFG.choco_price.toLocaleString()+'원'+(CFG.choco_photo?' 📸 사진 탭해서 크게 보기':'')+' <\/div><\/div>';
   h += '<div class="sw'+(fd.choco?' on':'')+'" onclick="fd.choco=!fd.choco;renderGuest()"><div class="sw-k"><\/div><\/div><\/div>';
   h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🚗 배달 요청<\/div><div class="tog-s">부여 전 지역 '+CFG.delivery_price.toLocaleString()+'원<\/div><\/div>';
   h += '<div class="sw'+(fd.delivery?' on':'')+'" onclick="fd.delivery=!fd.delivery;renderGuest()"><div class="sw-k"><\/div><\/div><\/div>';
@@ -444,6 +453,89 @@ async function doSav() {
 }
 async function doDel()   { if (!confirm('삭제할까요?')) return; await delOrder(curId); closeSheet(); toast('삭제됐어요'); renderAdmin(); }
 
+// ── 사진 헬퍼 함수 ──
+function resizeImage(file, maxW, maxH, cb) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      if (h > maxH) { w = w * maxH / h; h = maxH; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addSzPhoto(e, idx) {
+  const file = e.target.files[0];
+  if (!file) return;
+  resizeImage(file, 400, 400, function(data) {
+    if (!CFG.size_photos) CFG.size_photos = {};
+    const sizeId = CFG.sizes[idx].id;
+    if (!CFG.size_photos[sizeId]) CFG.size_photos[sizeId] = [];
+    if (CFG.size_photos[sizeId].length >= 3) { toast('최대 3장까지 가능해요'); return; }
+    CFG.size_photos[sizeId].push(data);
+    saveSettings(Object.assign({}, CFG)).then(function() {
+      toast('사진 추가됐어요 ✅');
+      showSettings();
+    });
+  });
+}
+
+function removeSzPhoto(idx, photoIdx) {
+  const sizeId = CFG.sizes[idx].id;
+  if (CFG.size_photos && CFG.size_photos[sizeId]) {
+    CFG.size_photos[sizeId].splice(photoIdx, 1);
+    saveSettings(Object.assign({}, CFG)).then(function() {
+      toast('삭제됐어요');
+      showSettings();
+    });
+  }
+}
+
+function addChocoPhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  resizeImage(file, 600, 400, function(data) {
+    CFG.choco_photo = data;
+    saveSettings(Object.assign({}, CFG)).then(function() {
+      toast('사진 추가됐어요 ✅');
+      showSettings();
+    });
+  });
+}
+
+function removeChocoPhoto() {
+  CFG.choco_photo = '';
+  saveSettings(Object.assign({}, CFG)).then(function() {
+    toast('삭제됐어요');
+    showSettings();
+  });
+}
+
+function showChocoModal() {
+  let modal = document.getElementById('choco_modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'choco_modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:300;display:flex;align-items:center;justify-content:center;';
+    modal.onclick = function() { modal.style.display='none'; };
+    const img = document.createElement('img');
+    img.src = CFG.choco_photo;
+    img.style.cssText = 'max-width:92vw;max-height:80vh;border-radius:12px;object-fit:contain;';
+    modal.appendChild(img);
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+}
+
 function showSettings() {
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
   h += '<div class="sh-tw"><div class="sh-t">⚙️ 주문서 설정<\/div><div class="sh-s">수정 후 저장 버튼을 눌러주세요<\/div><\/div>';
@@ -462,12 +554,22 @@ function showSettings() {
   h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">케이크 종류 & 가격<\/div>';
   h += '<div class="dl" style="margin-bottom:14px;">';
   CFG.sizes.forEach(function(s,i) {
-    h += '<div class="dr" style="flex-wrap:wrap;gap:6px;">';
-    h += '<div class="dk">'+s.e+'<\/div>';
-    h += '<input id="cfg_sz_name_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:80px;" value="'+s.name+'">';
-    h += '<input id="cfg_sz_cm_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:90px;" value="'+s.cm+'">';
-    h += '<input id="cfg_sz_price_'+i+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:80px;" value="'+s.price+'">';
+    const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
+    h += '<div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);">';
+    h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
+    h += '<span style="font-size:18px;">'+s.e+'<\/span>';
+    h += '<input id="cfg_sz_name_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:75px;" value="'+s.name+'">';
+    h += '<input id="cfg_sz_cm_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:88px;" value="'+s.cm+'">';
+    h += '<input id="cfg_sz_price_'+i+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:78px;" value="'+s.price+'">';
     h += '<\/div>';
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;" id="sz_photos_'+i+'">';
+    photos.forEach(function(p,j) {
+      h += '<div style="position:relative;"><img src="'+p+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);"><button onclick="removeSzPhoto('+i+','+j+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
+    });
+    if (photos.length < 3) {
+      h += '<label style="width:64px;height:64px;border-radius:8px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:var(--bg);"><span style="font-size:18px;color:var(--text2);">+<\/span><span style="font-size:9px;color:var(--text2);">사진추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addSzPhoto(event,'+i+')"><\/label>';
+    }
+    h += '<\/div><\/div>';
   });
   h += '<\/div>';
 
@@ -476,6 +578,13 @@ function showSettings() {
   h += '<div class="dl" style="margin-bottom:14px;">';
   h += '<div class="dr"><div class="dk">초콜릿장식<\/div><div class="dv"><input id="cfg_choco" type="number" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;text-align:right;" value="'+CFG.choco_price+'"><\/div><\/div>';
   h += '<div class="dr"><div class="dk">배달비<\/div><div class="dv"><input id="cfg_delivery" type="number" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;text-align:right;" value="'+CFG.delivery_price+'"><\/div><\/div>';
+  h += '<div class="dr" style="flex-direction:column;align-items:flex-start;gap:8px;"><div class="dk" style="padding-top:4px;">초콜릿사진<\/div>';
+  if (CFG.choco_photo) {
+    h += '<div style="position:relative;display:inline-block;"><img src="'+CFG.choco_photo+'" style="width:120px;height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);"><button onclick="removeChocoPhoto()" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
+  } else {
+    h += '<label style="width:120px;height:90px;border-radius:8px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:var(--bg);"><span style="font-size:22px;color:var(--text2);">🍫<\/span><span style="font-size:10px;color:var(--text2);">사진 추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addChocoPhoto(event)"><\/label>';
+  }
+  h += '<\/div>';
   h += '<\/div>';
 
   // 안내 문구
@@ -512,6 +621,8 @@ async function saveSettingsFromForm() {
     pickup_notice: document.getElementById('cfg_pickup').value,
     choco_price: parseInt(document.getElementById('cfg_choco').value)||3000,
     delivery_price: parseInt(document.getElementById('cfg_delivery').value)||5000,
+    choco_photo: CFG.choco_photo || '',
+    size_photos: CFG.size_photos || {},
     sizes: CFG.sizes.map(function(s,i) {
       return {
         id: s.id, e: s.e,
