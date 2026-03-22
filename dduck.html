@@ -203,6 +203,7 @@ let fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:''
 let acc = {s:false,t:false};
 let curId = null;
 let aFilter = 'all';
+let aDateFilter = 'all'; // all, today, week, month
 
 const pill = document.getElementById('modePill');
 pill.textContent = IS_ADMIN ? '사장님 🔑' : '주문하기';
@@ -409,23 +410,58 @@ async function doSubmit() {
 async function renderAdmin() {
   W('<div class="loading">주문 목록 불러오는 중...<\/div>');
   const orders = await getOrders();
-  const filt   = aFilter === 'all' ? orders : orders.filter(o => o.status === aFilter);
-  const rev    = orders.filter(o => o.status !== 'cancel').reduce((s,o) => s+(o.total_price||0), 0);
-  const lbls   = {all:'전체',pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
+
+  // 날짜 필터 적용
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  const weekAgo = new Date(now - 7*24*60*60*1000);
+  const monthAgo = new Date(now - 30*24*60*60*1000);
+
+  let dateFiltered = orders;
+  if (aDateFilter === 'today') {
+    dateFiltered = orders.filter(function(o) { return o.pickup_date === todayStr; });
+  } else if (aDateFilter === 'week') {
+    dateFiltered = orders.filter(function(o) { return new Date(o.pickup_date) >= weekAgo; });
+  } else if (aDateFilter === 'month') {
+    dateFiltered = orders.filter(function(o) { return new Date(o.pickup_date) >= monthAgo; });
+  }
+
+  const filt = aFilter === 'all' ? dateFiltered : dateFiltered.filter(function(o) { return o.status === aFilter; });
+  const rev  = dateFiltered.filter(function(o) { return o.status !== 'cancel'; }).reduce(function(s,o) { return s+(o.total_price||0); }, 0);
+  const lbls = {all:'전체',pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
+  const dlbls = {all:'전체 기간',today:'오늘 픽업',week:'이번 주',month:'이번 달'};
 
   let h = '<div class="sec" style="padding-top:8px;">';
-  h += '<div class="stats">';
-  h += '<div class="stat"><div class="stat-n">'+orders.length+'<\/div><div class="stat-l">전체<\/div><\/div>';
-  h += '<div class="stat"><div class="stat-n" style="color:#c07000;">'+orders.filter(o=>o.status==='pending').length+'<\/div><div class="stat-l">확인중<\/div><\/div>';
-  h += '<div class="stat"><div class="stat-n" style="color:#1a8a3a;">'+orders.filter(o=>o.status==='confirmed').length+'<\/div><div class="stat-l">확정<\/div><\/div>';
+
+  // 상단: 통계 + 설정 버튼
+  h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:0 16px;margin-bottom:12px;">';
+  h += '<div class="stats" style="flex:1;margin:0;">';
+  h += '<div class="stat"><div class="stat-n">'+dateFiltered.length+'<\/div><div class="stat-l">전체<\/div><\/div>';
+  h += '<div class="stat"><div class="stat-n" style="color:#c07000;">'+dateFiltered.filter(function(o){return o.status==='pending';}).length+'<\/div><div class="stat-l">확인중<\/div><\/div>';
+  h += '<div class="stat"><div class="stat-n" style="color:#1a8a3a;">'+dateFiltered.filter(function(o){return o.status==='confirmed';}).length+'<\/div><div class="stat-l">확정<\/div><\/div>';
   h += '<div class="stat"><div class="stat-n" style="font-size:14px;padding-top:4px;">'+Math.round(rev/10000)+'만원<\/div><div class="stat-l">매출<\/div><\/div>';
-  h += '<\/div><div class="flt">';
-  ['all','pending','confirmed','done','cancel'].forEach(f => {
-    const cnt = f==='all' ? orders.length : orders.filter(o=>o.status===f).length;
+  h += '<\/div>';
+  h += '<button onclick="showSettings()" style="flex-shrink:0;margin-left:10px;padding:8px 14px;border-radius:12px;background:rgba(139,74,74,0.1);border:none;color:#8b4a4a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;">⚙️ 설정<\/button>';
+  h += '<\/div>';
+
+  // 날짜 기간 필터
+  h += '<div class="flt" style="margin-bottom:8px;">';
+  ['all','today','week','month'].forEach(function(d) {
+    h += '<button class="fc'+(aDateFilter===d?' on':'')+'" onclick="aDateFilter=\''+d+'\';renderAdmin()">'+dlbls[d]+'<\/button>';
+  });
+  h += '<\/div>';
+
+  // 구분선
+  h += '<div style="height:1px;background:rgba(60,60,67,0.12);margin:0 16px 12px;"><\/div>';
+
+  // 상태 필터
+  h += '<div class="flt">';
+  ['all','pending','confirmed','done','cancel'].forEach(function(f) {
+    const cnt = f==='all' ? dateFiltered.length : dateFiltered.filter(function(o){return o.status===f;}).length;
     h += '<button class="fc'+(aFilter===f?' on':'')+'" onclick="aFilter=\''+f+'\';renderAdmin()">'+lbls[f]+' '+cnt+'<\/button>';
   });
-  h += '<button class="fc" onclick="showSettings()" style="background:rgba(139,74,74,0.1);color:var(--accent);">⚙️ 설정<\/button>';
-  h += '<\/div><\/div>';
+  h += '<\/div>';
+  h += '<\/div>';
 
   if (!filt.length) {
     h += '<div class="empty"><div style="font-size:44px;">🌸<\/div><div style="margin-top:12px;">해당 주문이 없어요<\/div><\/div>';
