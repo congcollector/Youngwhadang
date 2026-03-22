@@ -130,11 +130,25 @@ html,body{background:var(--bg);font-family:-apple-system,'Helvetica Neue',sans-s
   </div>
 </div>
 
-<div class="wrap" id="wrap"></div>
+<div class="wrap" id="wrap"><div class="loading">⏳ 불러오는 중...</div></div>
 <div class="ov" id="ov"><div class="sh" id="sh"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
+// 오류 감지
+window.onerror = function(msg, src, line, col, err) {
+  document.getElementById('wrap').innerHTML = 
+    '<div style="padding:20px;color:red;font-size:14px;word-break:break-all;">' +
+    '<b>오류 발생!</b><br>' + msg + '<br>줄: ' + line + '<br>' + (err ? err.stack : '') +
+    '</div>';
+  return true;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  document.getElementById('wrap').innerHTML = 
+    '<div style="padding:20px;color:orange;font-size:14px;word-break:break-all;">' +
+    '<b>Promise 오류!</b><br>' + e.reason +
+    '</div>';
+});
 var SUPA = 'https://pithlzhuqezeesprcbze.supabase.co/rest/v1';
 var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
 var H = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
