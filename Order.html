@@ -160,7 +160,7 @@ var fd={name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',c
 var acc={s:false,t:false};
 var curId=null;
 var aFilter='all';
-var LETS=['어머님의 60년 세월을 존경하고 사랑합니다','지금처럼 건강하고 오래 곁에 있어주세요','아버님의 세 번째 스무 살을 축하드립니다','팔팔한 80세 팔순을 축하드립니다','늘 건강하고 행복하게 함께해요 사랑합니다'];
+var LETS=[];
 
 var pill=document.getElementById('modePill');
 pill.textContent=IS_ADMIN?'사장님 🔑':'주문하기';
@@ -235,7 +235,7 @@ h+=’</div></div></div>’;
 h+=’<div class="sec"><div class="sec-hdr">레터링</div><div class="card"><div style="padding:14px 16px;">’;
 h+=’<div class="lc">’;
 for(var i=0;i<LETS.length;i++){
-var lt=LETS[i];
+var lt=LETS[];
 var lts=lt.replace(/\/g,’\\’).replace(/’/g,”\’”);
 h+=’<button class="lc-btn'+(fd.lettering===lt?' on':'')+'" onclick="fd.lettering=(fd.lettering===\''+lts+'\'?\'\':\''+lts+'\');renderGuest()">’+lt+’</button>’;
 }
