@@ -160,7 +160,7 @@ var fd={name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',c
 var acc={s:false,t:false};
 var curId=null;
 var aFilter='all';
-var LETS=[];
+var LETS=['어머님의 60년 세월을 존경하고 사랑합니다','지금처럼 건강하고 오래 곁에 있어주세요','아버님의 세 번째 스무 살을 축하드립니다','팔팔한 80세 팔순을 축하드립니다','늘 건강하고 행복하게 함께해요 사랑합니다'];
 
 var pill=document.getElementById('modePill');
 pill.textContent=IS_ADMIN?'사장님 🔑':'주문하기';
@@ -171,6 +171,11 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 function showSheet(h){document.getElementById('sh').innerHTML=h;document.getElementById('ov').className='ov show';}
 function closeSheet(){document.getElementById('ov').className='ov';}
 
+function selLet(idx){
+  var lt=LETS[parseInt(idx)];
+  fd.lettering=(fd.lettering===lt?'':lt);
+  renderGuest();
+}
 function renderGuest(){
   if(fd.done){renderSuccess();return;}
   var sel=null;
@@ -235,9 +240,9 @@ h+=’</div></div></div>’;
 h+=’<div class="sec"><div class="sec-hdr">레터링</div><div class="card"><div style="padding:14px 16px;">’;
 h+=’<div class="lc">’;
 for(var i=0;i<LETS.length;i++){
-var lt=LETS[];
-var lts=lt.replace(/\/g,’\\’).replace(/’/g,”\’”);
-h+=’<button class="lc-btn'+(fd.lettering===lt?' on':'')+'" onclick="fd.lettering=(fd.lettering===\''+lts+'\'?\'\':\''+lts+'\');renderGuest()">’+lt+’</button>’;
+var lt=LETS[i];
+var isOn=fd.lettering===lt;
+h+=’<button class="lc-btn'+(isOn?' on':'')+'" data-idx="'+i+'" onclick="selLet(this.dataset.idx)">’+lt+’</button>’;
 }
 h+=’</div>’;
 h+=’<textarea style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);resize:none;height:64px;outline:none;line-height:1.5;" placeholder="직접 입력하거나 위 예시를 선택하세요" oninput="fd.lettering=this.value">’+fd.lettering+’</textarea>’;
@@ -263,7 +268,19 @@ W(h);
 }
 
 function renderSuccess(){
-W(’<div class="succ"><div class="succ-ic">🌸</div><div class="succ-t">주문서가 전달됐어요</div><div class="succ-s">확인 후 <strong>010-5496-0736</strong>으로 연락드릴게요 💛</div><div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong>농협 3511-2979-4311-3 (김은영)</strong><br><span style="font-size:12px;color:var(--text2);">입금 확인 후 예약 확정돼요</span></div><button class="btn" onclick="fd={name:\'\',phone:\'\',date:\'\',time:\'\',size:\'\',design:\'\',lettering:\'\',pay:\'\',choco:false,delivery:false,addr:\'\',done:false};renderGuest()">새 주문서 작성</button></div>’);
+var h=’’;
+h+=’<div class="succ">’;
+h+=’<div class="succ-ic">🌸</div>’;
+h+=’<div class="succ-t">주문서가 전달됐어요</div>’;
+h+=’<div class="succ-s">확인 후 <strong>010-5496-0736</strong>으로 연락드릴게요 💛</div>’;
+h+=’<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong>농협 3511-2979-4311-3 (김은영)</strong><br><span style="font-size:12px;color:var(--text2);">입금 확인 후 예약 확정돼요</span></div>’;
+h+=’<button class="btn" onclick="resetForm()">새 주문서 작성</button>’;
+h+=’</div>’;
+W(h);
+}
+function resetForm(){
+fd={name:’’,phone:’’,date:’’,time:’’,size:’’,design:’’,lettering:’’,pay:’’,choco:false,delivery:false,addr:’’,done:false};
+renderGuest();
 }
 
 function doSubmit(){
