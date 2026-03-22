@@ -3,445 +3,195 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>영화당 · 떡케이크 주문</title>
 <style>
 :root {
-  --bg: #f2f2f7;
-  --bg2: #ffffff;
-  --grouped: #f2f2f7;
-  --label: #1c1c1e;
-  --label2: rgba(60,60,67,0.6);
-  --label3: rgba(60,60,67,0.3);
-  --sep: rgba(60,60,67,0.12);
+  --bg: #f7f3f0;
+  --card: #ffffff;
   --accent: #8b4a4a;
   --accent2: #a05858;
-  --fill: rgba(120,60,60,0.08);
-  --fill2: rgba(120,60,60,0.05);
+  --text: #1c1c1e;
+  --text2: #6b6b70;
+  --text3: #aeaeb2;
+  --sep: rgba(60,60,67,0.12);
   --green: #34c759;
   --orange: #ff9500;
   --blue: #007aff;
   --red: #ff3b30;
-  --r: 12px;
-  --r-lg: 16px;
+  --r: 14px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { min-height: 100%; background: var(--bg); }
-body {
-  font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
-  color: var(--label);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+html, body { background: var(--bg); font-family: -apple-system, 'Helvetica Neue', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
 
-/* ── HEADER ── */
-.hdr {
-background: rgba(242,242,247,0.92);
-backdrop-filter: saturate(180%) blur(20px);
--webkit-backdrop-filter: saturate(180%) blur(20px);
-border-bottom: 0.5px solid var(–sep);
-padding: 52px 20px 12px;
-position: sticky; top: 0; z-index: 50;
-}
+.hdr { background: rgba(247,243,240,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(–sep); padding: 52px 20px 14px; position: sticky; top: 0; z-index: 50; }
 .hdr-inner { display: flex; align-items: flex-end; justify-content: space-between; }
-.hdr-left {}
-.hdr-eyebrow { font-size: 12px; font-weight: 500; color: var(–accent); letter-spacing: 0.3px; margin-bottom: 1px; }
-.hdr-title { font-size: 28px; font-weight: 700; color: var(–label); letter-spacing: -0.5px; line-height: 1.1; }
-.mode-pill {
-font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
-flex-shrink: 0; margin-left: 12px; margin-bottom: 2px;
-}
-.pill-admin { background: var(–accent); color: white; }
-.pill-guest  { background: var(–fill); color: var(–accent); }
+.hdr-eye { font-size: 11px; font-weight: 600; color: var(–accent); letter-spacing: 0.5px; margin-bottom: 2px; }
+.hdr-title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+.pill { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
+.pill-g { background: rgba(139,74,74,0.1); color: var(–accent); }
+.pill-a { background: var(–accent); color: white; }
 
-/* ── WRAP ── */
-.wrap { max-width: 480px; margin: 0 auto; padding: 20px 0 80px; }
+.wrap { max-width: 480px; margin: 0 auto; padding: 20px 0 100px; }
+.loading { text-align: center; padding: 80px 20px; color: var(–text2); font-size: 15px; }
 
-/* ── SECTION ── */
-.section { margin-bottom: 28px; }
-.section-header {
-font-size: 13px; font-weight: 600; color: var(–label2);
-text-transform: uppercase; letter-spacing: 0.5px;
-padding: 0 20px; margin-bottom: 6px;
-}
-.section-footer {
-font-size: 12px; color: var(–label2);
-padding: 6px 20px 0;
-line-height: 1.5;
-}
+.sec { margin-bottom: 28px; }
+.sec-hdr { font-size: 12px; font-weight: 600; color: var(–text2); text-transform: uppercase; letter-spacing: 0.6px; padding: 0 20px; margin-bottom: 8px; }
+.sec-foot { font-size: 12px; color: var(–text2); padding: 7px 20px 0; line-height: 1.6; }
 
-/* ── GROUPED LIST (Apple style) ── */
-.list {
-background: var(–bg2);
-border-radius: var(–r-lg);
-overflow: hidden;
-margin: 0 16px;
-}
-.list-row {
-display: flex; align-items: center;
-padding: 12px 16px;
-border-bottom: 0.5px solid var(–sep);
-min-height: 44px;
-position: relative;
-}
-.list-row:last-child { border-bottom: none; }
-.list-row-icon {
-width: 30px; height: 30px; border-radius: 8px;
-display: flex; align-items: center; justify-content: center;
-font-size: 15px; flex-shrink: 0; margin-right: 12px;
-}
-.list-row-content { flex: 1; min-width: 0; }
-.list-row-label { font-size: 15px; color: var(–label); font-weight: 400; }
-.list-row-sublabel { font-size: 12px; color: var(–label2); margin-top: 1px; }
-.list-row-value { font-size: 15px; color: var(–label2); flex-shrink: 0; margin-left: 8px; }
-.list-row-chevron { color: var(–label3); font-size: 13px; margin-left: 4px; }
+.card { background: var(–card); border-radius: var(–r); margin: 0 16px; overflow: hidden; }
+.row { display: flex; align-items: center; padding: 0 16px; min-height: 46px; border-bottom: 0.5px solid var(–sep); }
+.row:last-child { border-bottom: none; }
+.row-lbl { font-size: 15px; color: var(–text); min-width: 72px; }
+.row-req { color: var(–red); font-size: 12px; }
+.row-inp { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; font-family: inherit; color: var(–text); text-align: right; padding: 12px 0; }
+.row-inp::placeholder { color: var(–text3); }
+textarea.row-inp { text-align: left; height: 72px; resize: none; line-height: 1.5; padding: 12px 0; }
 
-/* ── INPUTS (Apple inset) ── */
-.inp-row {
-display: flex; align-items: center;
-padding: 0 16px;
-border-bottom: 0.5px solid var(–sep);
-min-height: 44px;
-background: var(–bg2);
-}
-.inp-row:last-child { border-bottom: none; }
-.inp-label { font-size: 15px; color: var(–label); white-space: nowrap; margin-right: 10px; min-width: 72px; }
-.inp-label-req { color: var(–red); font-size: 13px; }
-.inp-field {
-flex: 1; border: none; outline: none; background: transparent;
-font-size: 15px; font-family: inherit; color: var(–label);
-padding: 12px 0; text-align: right;
-}
-.inp-field::placeholder { color: var(–label3); }
-textarea.inp-field {
-text-align: left; padding: 12px 0; resize: none; height: 72px; line-height: 1.5;
-}
-
-/* ── SIZE PICKER ── */
-.size-scroll {
-display: flex; gap: 10px; overflow-x: auto;
-padding: 0 16px 4px; scrollbar-width: none;
-scroll-snap-type: x mandatory;
--webkit-overflow-scrolling: touch;
-}
-.size-scroll::-webkit-scrollbar { display: none; }
-.size-tile {
-flex-shrink: 0; width: 130px;
-background: var(–bg2); border-radius: var(–r-lg);
-padding: 14px 10px; text-align: center;
-border: 2px solid transparent;
-transition: border-color 0.18s, background 0.18s;
-cursor: pointer;
-box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-scroll-snap-align: start;
-}
-.size-tile:active { opacity: 0.85; }
-.size-tile.sel {
-border-color: var(–accent);
-background: rgba(139,74,74,0.06);
-}
-.size-emoji { font-size: 26px; margin-bottom: 6px; }
-.size-name { font-size: 13px; font-weight: 600; color: var(–label); margin-bottom: 2px; }
-.size-cm { font-size: 11px; color: var(–label2); margin-bottom: 6px; }
-.size-price { font-size: 14px; font-weight: 700; color: var(–accent); }
-
-/* ── CHOCO INFO SHEET ── */
-.info-sheet-img {
-width: 100%; border-radius: var(–r-lg);
-object-fit: cover; margin-bottom: 14px;
-max-height: 200px;
-}
-.info-sheet-body { font-size: 14px; color: var(–label2); line-height: 1.7; }
-.info-sheet-body strong { color: var(–label); }
-.toggle-row {
-display: flex; align-items: center;
-padding: 12px 16px; min-height: 44px;
-border-bottom: 0.5px solid var(–sep);
-cursor: pointer;
-}
-.toggle-row:last-child { border-bottom: none; }
-.toggle-content { flex: 1; }
-.toggle-label { font-size: 15px; color: var(–label); }
-.toggle-sub { font-size: 12px; color: var(–label2); margin-top: 1px; }
-.toggle-switch {
-width: 51px; height: 31px; border-radius: 16px;
-background: rgba(120,120,128,0.16);
-position: relative; transition: background 0.22s; flex-shrink: 0;
-}
-.toggle-switch.on { background: var(–green); }
-.toggle-knob {
-position: absolute; top: 2px; left: 2px;
-width: 27px; height: 27px; border-radius: 50%;
-background: white;
-box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
-}
-.toggle-switch.on .toggle-knob { transform: translateX(20px); }
-
-/* ── PAY CHIPS ── */
-.pay-wrap { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 16px; }
-.pay-chip {
-padding: 6px 14px; border-radius: 20px;
-font-size: 14px; font-weight: 500; font-family: inherit;
-border: none; cursor: pointer; transition: all 0.15s;
-background: rgba(120,120,128,0.12); color: var(–label);
-}
-.pay-chip.sel { background: var(–accent); color: white; }
-
-/* ── PRICE SUMMARY ── */
-.price-card {
-background: var(–bg2); border-radius: var(–r-lg);
-margin: 0 16px; overflow: hidden;
-box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.price-row {
-display: flex; align-items: center; justify-content: space-between;
-padding: 11px 16px; border-bottom: 0.5px solid var(–sep);
-}
-.price-row:last-child { border-bottom: none; }
-.price-key { font-size: 15px; color: var(–label); }
-.price-val { font-size: 15px; color: var(–label2); }
-.price-total-key { font-size: 15px; font-weight: 600; color: var(–label); }
-.price-total-val { font-size: 17px; font-weight: 700; color: var(–accent); }
-
-/* ── BUTTON ── */
-.primary-btn {
-display: block; width: calc(100% - 32px); margin: 0 16px;
-padding: 15px; border-radius: var(–r-lg); border: none;
-background: var(–accent); color: white;
-font-size: 17px; font-weight: 600; font-family: inherit;
-cursor: pointer; transition: opacity 0.15s;
-letter-spacing: -0.2px;
-}
-.primary-btn:active { opacity: 0.8; }
-
-/* ── ACCOUNT NOTICE ── */
-.notice {
-background: var(–bg2); border-radius: var(–r-lg);
-padding: 14px 16px; margin: 0 16px;
-font-size: 13px; color: var(–label2); line-height: 1.7;
-}
+.notice { background: var(–card); border-radius: var(–r); padding: 14px 16px; margin: 0 16px; font-size: 13px; color: var(–text2); line-height: 1.8; }
 .notice strong { color: var(–accent); font-weight: 600; }
 
-/* ── ADMIN ORDERS ── */
-.order-card {
-background: var(–bg2); border-radius: var(–r-lg);
-margin: 0 16px 10px; padding: 0;
-overflow: hidden; cursor: pointer;
-box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-transition: opacity 0.15s;
-}
-.order-card:active { opacity: 0.8; }
-.order-top {
-display: flex; align-items: center; justify-content: space-between;
-padding: 13px 16px 10px;
-border-bottom: 0.5px solid var(–sep);
-}
-.order-name { font-size: 16px; font-weight: 600; color: var(–label); }
-.order-body { padding: 10px 16px 13px; }
-.order-meta-line { font-size: 13px; color: var(–label2); line-height: 1.8; }
-.order-footer {
-display: flex; align-items: center; justify-content: space-between;
-padding: 10px 16px; border-top: 0.5px solid var(–sep);
-background: rgba(0,0,0,0.01);
-}
-.order-phone { font-size: 13px; color: var(–label2); }
-.order-total { font-size: 16px; font-weight: 700; color: var(–accent); }
+/* SIZE */
+.size-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.size-scroll::-webkit-scrollbar { display: none; }
+.sz { flex-shrink: 0; width: 128px; background: var(–card); border-radius: var(–r); padding: 14px 10px; text-align: center; border: 2px solid transparent; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.15s; }
+.sz.on { border-color: var(–accent); background: rgba(139,74,74,0.05); }
+.sz-emoji { font-size: 28px; margin-bottom: 6px; }
+.sz-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.sz-cm { font-size: 11px; color: var(–text2); margin-bottom: 6px; }
+.sz-price { font-size: 14px; font-weight: 700; color: var(–accent); }
 
-.badge {
-font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
-}
-.b-pending   { background: rgba(255,149,0,0.12);   color: #c07000; }
-.b-confirmed { background: rgba(52,199,89,0.12);    color: #1a8a3a; }
-.b-done      { background: rgba(0,122,255,0.12);    color: #0060cc; }
-.b-cancel    { background: rgba(255,59,48,0.12);    color: #cc2a22; }
+/* TOGGLE */
+.tog-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(–sep); min-height: 48px; }
+.tog-row:last-child { border-bottom: none; }
+.tog-body { flex: 1; }
+.tog-lbl { font-size: 15px; }
+.tog-sub { font-size: 12px; color: var(–text2); margin-top: 1px; }
+.sw { width: 51px; height: 31px; border-radius: 16px; background: rgba(120,120,128,0.2); position: relative; flex-shrink: 0; transition: background 0.2s; cursor: pointer; }
+.sw.on { background: var(–green); }
+.sw-k { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: white; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+.sw.on .sw-k { transform: translateX(20px); }
 
-/* ── STATS ROW ── */
-.stats { display: flex; gap: 10px; margin: 0 16px 20px; }
-.stat-tile {
-flex: 1; background: var(–bg2); border-radius: var(–r-lg);
-padding: 12px 8px; text-align: center;
-box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.stat-num { font-size: 22px; font-weight: 700; color: var(–accent); letter-spacing: -0.5px; }
-.stat-lbl { font-size: 10px; color: var(–label2); margin-top: 2px; font-weight: 500; }
+/* PAY */
+.pay-wrap { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 16px; }
+.pay-chip { padding: 7px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; font-family: inherit; border: none; cursor: pointer; background: rgba(120,120,128,0.1); color: var(–text); transition: all 0.15s; }
+.pay-chip.on { background: var(–accent); color: white; }
 
-/* ── FILTER ── */
-.filter-row {
-display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
-padding: 0 16px; margin-bottom: 14px;
-}
-.filter-row::-webkit-scrollbar { display: none; }
-.f-chip {
-padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
-background: var(–bg2); color: var(–label2); white-space: nowrap;
-cursor: pointer; flex-shrink: 0; border: none; font-family: inherit;
-box-shadow: 0 1px 3px rgba(0,0,0,0.06); transition: all 0.15s;
-}
-.f-chip.on { background: var(–accent); color: white; }
+/* PRICE */
+.price-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 16px; border-bottom: 0.5px solid var(–sep); }
+.price-row:last-child { border-bottom: none; }
+.p-key { font-size: 15px; }
+.p-val { font-size: 15px; color: var(–text2); }
+.p-key-b { font-size: 15px; font-weight: 600; }
+.p-val-b { font-size: 17px; font-weight: 700; color: var(–accent); }
 
-/* ── SHEET ── */
-.overlay {
-position: fixed; inset: 0;
-background: rgba(0,0,0,0.4);
-z-index: 200; display: none; align-items: flex-end;
-backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-}
+/* BTN */
+.btn-main { display: block; width: calc(100% - 32px); margin: 0 16px; padding: 15px; border-radius: var(–r); border: none; background: var(–accent); color: white; font-size: 17px; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.15s; letter-spacing: -0.2px; }
+.btn-main:active { opacity: 0.8; }
+
+/* OVERLAY */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: flex-end; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .overlay.show { display: flex; }
-.sheet {
-background: var(–bg); border-radius: 20px 20px 0 0;
-padding: 0 0 40px; width: 100%;
-animation: up 0.28s cubic-bezier(0.32,0.72,0,1);
-max-height: 90vh; overflow-y: auto;
-}
+.sheet { background: var(–bg); border-radius: 20px 20px 0 0; padding: 0 0 40px; width: 100%; animation: up 0.28s cubic-bezier(0.32,0.72,0,1); max-height: 90vh; overflow-y: auto; }
 @keyframes up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.sheet-handle-wrap { padding: 10px 0 6px; text-align: center; }
-.sheet-handle { display: inline-block; width: 36px; height: 5px; border-radius: 3px; background: rgba(60,60,67,0.18); }
-.sheet-title-wrap { padding: 4px 20px 16px; border-bottom: 0.5px solid var(–sep); }
-.sheet-title { font-size: 17px; font-weight: 600; color: var(–label); }
-.sheet-subtitle { font-size: 13px; color: var(–label2); margin-top: 2px; }
+.sh-handle-wrap { padding: 10px 0 6px; text-align: center; }
+.sh-handle { display: inline-block; width: 36px; height: 5px; border-radius: 3px; background: rgba(60,60,67,0.2); }
+.sh-title-wrap { padding: 4px 20px 16px; border-bottom: 0.5px solid var(–sep); }
+.sh-title { font-size: 17px; font-weight: 600; }
+.sh-sub { font-size: 13px; color: var(–text2); margin-top: 2px; }
+.sh-actions { display: flex; gap: 10px; padding: 16px 16px 0; }
+.sh-del   { flex:1; padding:13px; border-radius:var(–r); background:rgba(255,59,48,0.1); border:none; color:#cc2a22; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; }
+.sh-close { flex:1; padding:13px; border-radius:var(–r); background:rgba(120,120,128,0.12); border:none; color:var(–text2); font-size:14px; font-family:inherit; cursor:pointer; }
+.sh-save  { flex:1; padding:13px; border-radius:var(–r); background:var(–accent); border:none; color:white; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; }
 
-.detail-section { margin: 16px 16px 0; }
-.detail-list { background: var(–bg2); border-radius: var(–r-lg); overflow: hidden; }
-.detail-row {
-display: flex; padding: 11px 16px; border-bottom: 0.5px solid var(–sep); align-items: flex-start; gap: 12px;
-}
-.detail-row:last-child { border-bottom: none; }
-.detail-key { font-size: 13px; color: var(–label2); min-width: 68px; padding-top: 1px; }
-.detail-val { font-size: 14px; color: var(–label); flex: 1; line-height: 1.5; }
+/* DETAIL */
+.det-sec { margin: 16px 16px 0; }
+.det-list { background: var(–card); border-radius: var(–r); overflow: hidden; }
+.det-row { display: flex; padding: 11px 16px; border-bottom: 0.5px solid var(–sep); gap: 12px; align-items: flex-start; }
+.det-row:last-child { border-bottom: none; }
+.det-k { font-size: 13px; color: var(–text2); min-width: 68px; padding-top: 1px; }
+.det-v { font-size: 14px; color: var(–text); flex: 1; line-height: 1.5; }
 
-.status-section { margin: 12px 16px 0; }
-.status-lbl { font-size: 13px; color: var(–label2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
-.status-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.st-btn {
-padding: 8px 16px; border-radius: 20px; border: none;
-font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s;
-}
-.st-btn-pending   { background: rgba(255,149,0,0.12); color: #c07000; }
-.st-btn-confirmed { background: rgba(52,199,89,0.12);  color: #1a8a3a; }
-.st-btn-done      { background: rgba(0,122,255,0.12);  color: #0060cc; }
-.st-btn-cancel    { background: rgba(255,59,48,0.12);  color: #cc2a22; }
-.st-btn.active-st { opacity: 1; font-weight: 700; box-shadow: 0 0 0 1.5px currentColor inset; }
-.st-btn:not(.active-st) { opacity: 0.45; }
+/* STATUS */
+.st-sec { margin: 12px 16px 0; }
+.st-lbl { font-size: 12px; color: var(–text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+.st-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.stb { padding: 8px 16px; border-radius: 20px; border: none; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all 0.15s; }
+.stb-p { background: rgba(255,149,0,0.12); color: #c07000; }
+.stb-c { background: rgba(52,199,89,0.12); color: #1a8a3a; }
+.stb-d { background: rgba(0,122,255,0.12); color: #0060cc; }
+.stb-x { background: rgba(255,59,48,0.12); color: #cc2a22; }
+.stb.act { font-weight: 700; box-shadow: 0 0 0 1.5px currentColor inset; }
+.stb:not(.act) { opacity: 0.45; }
 
-.memo-section { margin: 12px 16px 0; }
-.memo-ta {
-width: 100%; background: var(–bg2); border: none; border-radius: var(–r-lg);
-padding: 12px 14px; font-size: 14px; font-family: inherit; color: var(–label);
-resize: none; height: 80px; outline: none; line-height: 1.5;
-}
+.memo-sec { margin: 12px 16px 0; }
+.memo-ta { width: 100%; background: var(–card); border: none; border-radius: var(–r); padding: 12px 14px; font-size: 14px; font-family: inherit; color: var(–text); resize: none; height: 80px; outline: none; line-height: 1.5; }
 
-.sheet-actions { display: flex; gap: 10px; padding: 16px 16px 0; }
-.sh-del  { flex:1; padding:13px; border-radius:var(–r-lg); background:rgba(255,59,48,0.1); border:none; color:#cc2a22; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; }
-.sh-close{ flex:1; padding:13px; border-radius:var(–r-lg); background:rgba(120,120,128,0.12); border:none; color:var(–label2); font-size:14px; font-family:inherit; cursor:pointer; }
-.sh-save { flex:1; padding:13px; border-radius:var(–r-lg); background:var(–accent); border:none; color:white; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; }
+/* STATS */
+.stats { display: flex; gap: 10px; margin: 0 16px 16px; }
+.stat { flex: 1; background: var(–card); border-radius: var(–r); padding: 12px 8px; text-align: center; }
+.stat-n { font-size: 22px; font-weight: 700; color: var(–accent); letter-spacing: -0.5px; }
+.stat-l { font-size: 10px; color: var(–text2); margin-top: 2px; font-weight: 500; }
 
-/* ── SUCCESS ── */
+/* FILTER */
+.filter { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px; margin-bottom: 14px; scrollbar-width: none; }
+.filter::-webkit-scrollbar { display: none; }
+.fc { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; background: var(–card); color: var(–text2); white-space: nowrap; cursor: pointer; border: none; font-family: inherit; flex-shrink: 0; transition: all 0.15s; }
+.fc.on { background: var(–accent); color: white; }
+
+/* ORDER CARD */
+.oc { background: var(–card); border-radius: var(–r); margin: 0 16px 10px; overflow: hidden; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.oc:active { opacity: 0.8; }
+.oc-top { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px 10px; border-bottom: 0.5px solid var(–sep); }
+.oc-name { font-size: 16px; font-weight: 600; }
+.oc-body { padding: 10px 16px 13px; font-size: 13px; color: var(–text2); line-height: 1.8; }
+.oc-foot { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 0.5px solid var(–sep); }
+.oc-phone { font-size: 13px; color: var(–text2); }
+.oc-total { font-size: 16px; font-weight: 700; color: var(–accent); }
+
+.badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+.b-pending   { background: rgba(255,149,0,0.12); color: #c07000; }
+.b-confirmed { background: rgba(52,199,89,0.12); color: #1a8a3a; }
+.b-done      { background: rgba(0,122,255,0.12); color: #0060cc; }
+.b-cancel    { background: rgba(255,59,48,0.12); color: #cc2a22; }
+
+/* ACCORDION */
+.acc-row { display: flex; align-items: center; padding: 13px 16px; cursor: pointer; gap: 10px; min-height: 50px; }
+.acc-arrow { font-size: 18px; color: var(–text3); transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1); flex-shrink: 0; }
+.acc-arrow.open { transform: rotate(90deg); }
+.acc-body { padding: 4px 16px 14px 56px; border-top: 0.5px solid var(–sep); background: rgba(0,0,0,0.015); }
+.acc-item { font-size: 13px; color: var(–text2); line-height: 1.8; padding: 2px 0; }
+
+/* SUCCESS */
 .success-wrap { text-align: center; padding: 60px 24px 32px; }
 .success-icon { font-size: 64px; margin-bottom: 18px; }
-.success-title { font-size: 24px; font-weight: 700; color: var(–label); margin-bottom: 8px; letter-spacing: -0.5px; }
-.success-sub { font-size: 15px; color: var(–label2); line-height: 1.7; margin-bottom: 28px; }
+.success-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+.success-sub { font-size: 15px; color: var(–text2); line-height: 1.7; margin-bottom: 28px; }
 
-/* ── TOAST ── */
-.toast {
-position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-background: rgba(40,40,40,0.92); color: white;
-padding: 11px 22px; border-radius: 20px; font-size: 14px; font-weight: 500;
-z-index: 400; opacity: 0; transition: opacity 0.2s;
-pointer-events: none; white-space: nowrap;
-backdrop-filter: blur(12px);
-}
-.t-show { opacity: 1; }
-.loading { text-align: center; padding: 80px 20px; color: var(–label2); font-size: 15px; }
-.empty { text-align: center; padding: 60px 20px; color: var(–label2); }
+/* TOAST */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: rgba(40,40,40,0.92); color: white; padding: 11px 22px; border-radius: 20px; font-size: 14px; font-weight: 500; z-index: 400; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; }
+
+/* LETTERING CHIPS */
+.let-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.let-chip { padding: 5px 11px; border-radius: 20px; border: 1px solid rgba(139,74,74,0.25); background: rgba(139,74,74,0.07); color: var(–accent); font-size: 11px; font-family: inherit; cursor: pointer; text-align: left; line-height: 1.5; transition: all 0.15s; }
+.let-chip.on { background: var(–accent); color: white; border-color: var(–accent); }
+
+/* ADDRESS INPUT */
+.addr-wrap { padding: 12px 16px; border-top: 0.5px solid var(–sep); }
+.addr-inp { width: 100%; border: 1.5px solid var(–sep); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; color: var(–text); background: var(–bg); outline: none; transition: border-color 0.2s; }
+.addr-inp:focus { border-color: var(–accent); }
+
+/* PHOTO */
+.photo-row { border-top: 0.5px solid var(–sep); padding: 12px 16px; }
+.photo-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.photo-thumb { position: relative; }
+.photo-thumb img { width: 76px; height: 76px; border-radius: 12px; object-fit: cover; border: 1.5px solid var(–sep); display: block; }
+.photo-del { position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; border-radius: 50%; background: rgba(60,60,67,0.75); color: white; border: none; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.photo-add-label { width: 76px; height: 76px; border-radius: 12px; border: 1.5px dashed var(–sep); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(–bg); }
+
+.empty { text-align: center; padding: 60px 20px; color: var(–text2); }
 .empty-icon { font-size: 44px; margin-bottom: 12px; }
-
-/* ── SIZE PHOTO ── */
-.size-photo-wrap {
-position: relative; width: 100%; height: 90px;
-border-radius: 10px; overflow: hidden; margin-bottom: 8px; cursor: pointer;
-}
-.size-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
-.size-photo-count {
-position: absolute; bottom: 5px; right: 5px;
-background: rgba(0,0,0,0.55); color: white;
-font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
-}
-.size-photo-overlay {
-position: absolute; inset: 0;
-background: rgba(0,0,0,0); color: transparent;
-display: flex; align-items: center; justify-content: center;
-font-size: 12px; font-weight: 600;
-transition: all 0.18s;
-}
-.size-photo-wrap:active .size-photo-overlay {
-background: rgba(0,0,0,0.3); color: white;
-}
-
-/* ── PHOTO VIEWER ── */
-.photo-viewer {
-position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-z-index: 300; display: none; flex-direction: column;
-align-items: center; justify-content: center;
-}
-.photo-viewer.show { display: flex; }
-.photo-viewer-img { max-width: 94vw; max-height: 80vh; border-radius: 12px; object-fit: contain; }
-.photo-viewer-dots { display: flex; gap: 6px; margin-top: 16px; }
-.pv-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: background 0.2s; }
-.pv-dot.on { background: white; }
-.photo-viewer-close {
-position: absolute; top: 16px; right: 16px;
-width: 36px; height: 36px; border-radius: 50%;
-background: rgba(255,255,255,0.15); color: white;
-border: none; font-size: 18px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-}
-.photo-viewer-nav {
-position: absolute; top: 50%; transform: translateY(-50%);
-width: 40px; height: 40px; border-radius: 50%;
-background: rgba(255,255,255,0.15); color: white;
-border: none; font-size: 20px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-}
-.photo-viewer-nav.prev { left: 10px; }
-.photo-viewer-nav.next { right: 10px; }
-.photo-viewer-label {
-position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-color: white; font-size: 14px; font-weight: 600;
-}
-
-/* ── ACCORDION ── */
-.accordion-row {
-display: flex; align-items: center; padding: 13px 16px;
-min-height: 50px; cursor: pointer; gap: 8px;
-}
-.accordion-arrow {
-font-size: 18px; color: var(–label3);
-transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
-flex-shrink: 0;
-}
-.accordion-arrow.open { transform: rotate(90deg); }
-.accordion-body {
-padding: 4px 16px 14px 56px;
-border-top: 0.5px solid var(–sep);
-background: rgba(0,0,0,0.015);
-}
-.accordion-item {
-font-size: 13px; color: var(–label2); line-height: 1.7;
-padding: 3px 0;
-}
-
-/* ── ADMIN PHOTO MANAGE ── */
-.photo-manage-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.photo-thumb-wrap { position: relative; width: 72px; height: 72px; }
-.photo-thumb { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; border: 1px solid var(–sep); }
-.photo-del-btn {
-position: absolute; top: -6px; right: -6px;
-width: 20px; height: 20px; border-radius: 50%;
-background: rgba(60,60,67,0.75); color: white;
-border: none; font-size: 11px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-}
 </style>
 
 </head>
@@ -449,414 +199,269 @@ display: flex; align-items: center; justify-content: center;
 
 <div class="hdr">
   <div class="hdr-inner">
-    <div class="hdr-left">
-      <div class="hdr-eyebrow">영화당 · Younghwadang</div>
+    <div>
+      <div class="hdr-eye">영화당 · Younghwadang</div>
       <div class="hdr-title">🌸 떡케이크 주문</div>
     </div>
-    <div class="mode-pill" id="modePill"></div>
+    <div class="pill" id="modePill"></div>
   </div>
 </div>
 
-<div class="photo-viewer" id="photoViewer">
-  <button class="photo-viewer-close" onclick="closePhotoViewer()">✕</button>
-  <div class="photo-viewer-label" id="pvLabel"></div>
-  <button class="photo-viewer-nav prev" id="pvPrev" onclick="pvNav(-1)">‹</button>
-  <img class="photo-viewer-img" id="pvImg">
-  <button class="photo-viewer-nav next" id="pvNext" onclick="pvNav(1)">›</button>
-  <div class="photo-viewer-dots" id="pvDots"></div>
-</div>
+<div class="wrap" id="wrap"></div>
 
-<div class="wrap" id="wrap"><div class="loading">불러오는 중...</div></div>
-<div class="overlay" id="overlay" onclick="closeOverlayOuter(event)">
+<div class="overlay" id="overlay">
   <div class="sheet" id="sheet"></div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Supabase 설정 ──
-const SUPA_URL = 'https://pithlzhuqezeesprcbze.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
-const SH = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+// ── 설정 ──
+const SUPA = 'https://pithlzhuqezeesprcbze.supabase.co/rest/v1';
+const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
+const H    = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-function sGet(path) { return fetch(SUPA_URL+'/rest/v1/'+path, { headers: SH }); }
-function sPost(path,body) { return fetch(SUPA_URL+'/rest/v1/'+path, { method:'POST', headers:SH, body:JSON.stringify(body) }); }
-function sPatch(path,body) { return fetch(SUPA_URL+'/rest/v1/'+path, { method:'PATCH', headers:{...SH,'Prefer':'return=representation'}, body:JSON.stringify(body) }); }
-function sDel(path) { return fetch(SUPA_URL+'/rest/v1/'+path, { method:'DELETE', headers:SH }); }
-
-// 주문 CRUD
-async function dbGetOrders() {
-  try {
-    const r = await sGet('cake_orders?order=created_at.desc');
-    const d = await r.json();
-    return Array.isArray(d) ? d : [];
-  } catch(e) { console.error('주문 로드 실패', e); return []; }
-}
-async function dbAddOrder(order) {
-  const r = await sPost('cake_orders', order);
-  if (!r.ok) { const e = await r.text(); throw new Error(e); }
-}
-async function dbUpdateOrder(id, patch) {
-  await sPatch('cake_orders?id=eq.'+id, patch);
-}
-async function dbDeleteOrder(id) {
-  await sDel('cake_orders?id=eq.'+id);
+function api(path, method, body) {
+  return fetch(SUPA + path, { method: method || 'GET', headers: H, body: body ? JSON.stringify(body) : undefined });
 }
 
-// 사진 CRUD
-async function dbGetPhotos() {
-  try {
-    const r = await sGet('cake_photos2?id=eq.main');
-    const d = await r.json();
-    if (Array.isArray(d) && d.length > 0) return JSON.parse(d[0].data || '{}');
-    return {};
-  } catch(e) { return {}; }
+// ── DB ──
+async function getOrders() {
+  const r = await api('/cake_orders?order=created_at.desc');
+  return r.ok ? r.json() : [];
 }
-async function dbSavePhotos(data) {
-  await sDel('cake_photos2?id=eq.main');
-  await sPost('cake_photos2', { id:'main', data: JSON.stringify(data) });
+async function addOrder(o) {
+  const r = await api('/cake_orders', 'POST', o);
+  if (!r.ok) throw new Error(await r.text());
 }
-
-const ADMIN_HASH = '#admin-younghwadang';
-const IS_ADMIN = location.hash === ADMIN_HASH;
-const pill = document.getElementById('modePill');
-pill.textContent = IS_ADMIN ? '사장님 🔑' : '주문하기';
-pill.className = 'mode-pill ' + (IS_ADMIN ? 'pill-admin' : 'pill-guest');
-
-// 숫자 케이크 기본 내장 사진 (JSONBin에서 로드)
-const NUM_IMGS_B64 = [];
-
-// 케이크 사진 — Supabase에서 로드 (사장님이 관리)
-// 구조: { s1: [url,...], s2: [...], sn: [...], s2t: [...] }
-let cakePhotos = { s1:[], s2:[], sn: NUM_IMGS_B64, s2t:[] };
-
-async function loadCakePhotos() {
-  try {
-    const data = await dbGetPhotos();
-    if (data && typeof data === 'object') {
-      Object.keys(data).forEach(id => {
-        cakePhotos[id] = id === 'sn'
-          ? [...NUM_IMGS_B64, ...(data[id] || [])]
-          : (data[id] || []);
-      });
-    }
-  } catch(e) { /* 로드 실패시 기본값 유지 */ }
+async function updateOrder(id, patch) {
+  await api('/cake_orders?id=eq.' + id, 'PATCH', patch);
+}
+async function delOrder(id) {
+  await api('/cake_orders?id=eq.' + id, 'DELETE');
+}
+async function getPhotos() {
+  const r = await api('/cake_photos2?id=eq.main');
+  if (!r.ok) return {};
+  const d = await r.json();
+  if (!d.length) return {};
+  try { return JSON.parse(d[0].data); } catch(e) { return {}; }
+}
+async function savePhotos(data) {
+  await api('/cake_photos2?id=eq.main', 'DELETE');
+  await api('/cake_photos2', 'POST', { id: 'main', data: JSON.stringify(data) });
 }
 
+// ── 상태 ──
+const IS_ADMIN = location.hash === '#admin-younghwadang';
 const SIZES = [
-  { id:'s1',  emoji:'🎂', name:'1호',      cm:'지름 15cm',   price:55000 },
-  { id:'s2',  emoji:'🎂', name:'2호',      cm:'지름 18cm',   price:70000 },
-  { id:'sn',  emoji:'🔢', name:'숫자케이크', cm:'세로 7cm',    price:90000 },
-  { id:'s2t', emoji:'✨', name:'2단케이크', cm:'2호 + 미니', price:130000 },
+  { id:'s1',  e:'🎂', name:'1호',      cm:'지름 15cm',  price:55000 },
+  { id:'s2',  e:'🎂', name:'2호',      cm:'지름 18cm',  price:70000 },
+  { id:'sn',  e:'🔢', name:'숫자케이크', cm:'세로 7cm',   price:90000 },
+  { id:'s2t', e:'✨', name:'2단케이크', cm:'2호 + 미니', price:130000 },
 ];
-const PAYS = ['계좌이체','굿뜨래페이','카드'];
+const PAYS = ['계좌이체', '굿뜨래페이', '카드'];
 const ST = { pending:'확인중', confirmed:'예약확정', done:'픽업완료', cancel:'취소' };
 
-let fd = { name:'', phone:'', date:'', time:'', size:'', design:'', lettering:'', pay:'', choco:false, delivery:false, deliveryAddr:'', photos:[], _done:false };
+let fd = { name:'', phone:'', date:'', time:'', size:'', design:'', lettering:'', pay:'', choco:false, delivery:false, addr:'', photos:[], done:false };
+let acc = { storage:false, transport:false };
+let photos = {}; // 케이크 사진
+let curId = null;
 let adminFilter = 'all';
-let curOrderId = null;
-let openAccordions = { storage: false, transport: false };
-let pvPhotos = [], pvIdx = 0, pvSizeName = '';
+let adminTab = 'orders';
 
-const W = h => { document.getElementById('wrap').innerHTML = h; };
+// 모드 표시
+const pill = document.getElementById('modePill');
+pill.textContent = IS_ADMIN ? '사장님 🔑' : '주문하기';
+pill.className = 'pill ' + (IS_ADMIN ? 'pill-a' : 'pill-g');
 
-function render() {
-  if (IS_ADMIN) {
-    renderAdmin().catch(e => {
-      document.getElementById('wrap').innerHTML =
-        `<div style="padding:20px;color:red;font-size:13px;word-break:break-all;"><b>Admin 오류:</b><br>${e.message}</div>`;
-    });
-  } else {
-    renderGuest();
-  }
+function W(h) { document.getElementById('wrap').innerHTML = h; }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
 }
-
-// ── 아코디언 ──
-function toggleAccordion(key) {
-  openAccordions[key] = !openAccordions[key];
-  renderGuest();
-  window.scrollTo(0, window.scrollY);
+function showSheet(h) {
+  document.getElementById('sheet').innerHTML = h;
+  document.getElementById('overlay').className = 'overlay show';
 }
+function closeSheet() { document.getElementById('overlay').className = 'overlay'; }
 
-// ── 사진 뷰어 ──
-function openPhotoViewer(sizeId) {
-  const s = SIZES.find(x=>x.id===sizeId);
-  pvPhotos = cakePhotos[sizeId] || [];
-  if (!pvPhotos.length) return;
-  pvIdx = 0; pvSizeName = s?.name || '';
-  updatePV();
-  document.getElementById('photoViewer').className = 'photo-viewer show';
-}
-function closePhotoViewer() { document.getElementById('photoViewer').className = 'photo-viewer'; }
-function pvNav(dir) { pvIdx = (pvIdx + dir + pvPhotos.length) % pvPhotos.length; updatePV(); }
-function updatePV() {
-  document.getElementById('pvImg').src = pvPhotos[pvIdx];
-  document.getElementById('pvLabel').textContent = pvSizeName + (pvPhotos.length>1 ? ` ${pvIdx+1}/${pvPhotos.length}` : '');
-  document.getElementById('pvPrev').style.display = pvPhotos.length>1?'flex':'none';
-  document.getElementById('pvNext').style.display = pvPhotos.length>1?'flex':'none';
-  document.getElementById('pvDots').innerHTML = pvPhotos.map((_,i)=>`<div class="pv-dot ${i===pvIdx?'on':''}"></div>`).join('');
-}
-
-// ══════════════════════
-// GUEST
-// ══════════════════════
+// ── 손님 화면 ──
 function renderGuest() {
-  if (fd._done) { renderSuccess(); return; }
+  if (fd.done) { renderSuccess(); return; }
   const sel = SIZES.find(s => s.id === fd.size);
   const total = (sel?.price||0) + (fd.choco?3000:0) + (fd.delivery?5000:0);
 
   W(`
-  <!-- 주문 안내 -->
-  <div class="section">
-    <div class="section-header">주문 안내</div>
+  <div class="sec">
+    <div class="sec-hdr">주문 안내</div>
     <div class="notice">
       주문서 제출 후 <strong>010-5496-0736</strong>으로 확인 연락드려요.<br>
       입금 계좌: <strong>농협 3511-2979-4311-3 (김은영)</strong>
     </div>
   </div>
 
-  <!-- 기본 정보 -->
-  <div class="section">
-    <div class="section-header">기본 정보</div>
-    <div class="list">
-      <div class="inp-row">
-        <div class="inp-label">성함 <span class="inp-label-req">*</span></div>
-        <input class="inp-field" placeholder="주문자 성함" value="${fd.name}" oninput="fd.name=this.value">
+  <div class="sec">
+    <div class="sec-hdr">기본 정보</div>
+    <div class="card">
+      <div class="row">
+        <div class="row-lbl">성함 <span class="row-req">*</span></div>
+        <input class="row-inp" placeholder="주문자 성함" value="${fd.name}" oninput="fd.name=this.value">
       </div>
-      <div class="inp-row">
-        <div class="inp-label">전화번호 <span class="inp-label-req">*</span></div>
-        <input class="inp-field" placeholder="010-0000-0000" value="${fd.phone}" oninput="fd.phone=this.value" type="tel">
+      <div class="row">
+        <div class="row-lbl">전화번호 <span class="row-req">*</span></div>
+        <input class="row-inp" placeholder="010-0000-0000" type="tel" value="${fd.phone}" oninput="fd.phone=this.value">
       </div>
     </div>
   </div>
 
-  <!-- 픽업 일정 -->
-  <div class="section">
-    <div class="section-header">픽업 일정</div>
-    <div class="list">
-      <div class="inp-row">
-        <div class="inp-label">날짜 <span class="inp-label-req">*</span></div>
-        <input class="inp-field" type="date" value="${fd.date}" oninput="fd.date=this.value">
+  <div class="sec">
+    <div class="sec-hdr">픽업 일정</div>
+    <div class="card">
+      <div class="row">
+        <div class="row-lbl">날짜 <span class="row-req">*</span></div>
+        <input class="row-inp" type="date" value="${fd.date}" oninput="fd.date=this.value">
       </div>
-      <div class="inp-row">
-        <div class="inp-label">시간 <span class="inp-label-req">*</span></div>
-        <input class="inp-field" type="time" value="${fd.time}" oninput="fd.time=this.value">
+      <div class="row">
+        <div class="row-lbl">시간 <span class="row-req">*</span></div>
+        <input class="row-inp" type="time" value="${fd.time}" oninput="fd.time=this.value">
       </div>
     </div>
-    <div class="section-footer">픽업 약 3시간 전에 제작이 시작돼요. 예약 시간에 맞춰 방문해주세요.</div>
+    <div class="sec-foot">픽업 약 3시간 전 제작 시작 · 예약 시간에 맞춰 방문해주세요</div>
   </div>
 
-  <!-- 케이크 사이즈 -->
-  <div class="section">
-    <div class="section-header">케이크 사이즈</div>
+  <div class="sec">
+    <div class="sec-hdr">케이크 사이즈</div>
     <div class="size-scroll">
       ${SIZES.map(s => {
-        const photos = (cakePhotos && cakePhotos[s.id]) ? cakePhotos[s.id] : [];
-        return `
-        <div class="size-tile ${fd.size===s.id?'sel':''}" onclick="selSize('${s.id}')">
-          ${photos.length > 0 ? `
-            <div class="size-photo-wrap" onclick="event.stopPropagation();openPhotoViewer('${s.id}')">
-              <img src="${photos[0]}" class="size-photo" alt="${s.name}" onerror="this.parentElement.innerHTML='<div class=\\'size-emoji\\'>${s.emoji}</div>'">
-              ${photos.length > 1 ? `<div class="size-photo-count">+${photos.length-1}</div>` : ''}
-            </div>
-          ` : `<div class="size-emoji">${s.emoji}</div>`}
-          <div class="size-name">${s.name}</div>
-          <div class="size-cm">${s.cm}</div>
-          <div class="size-price">${s.price.toLocaleString()}원</div>
+        const p = photos[s.id] || [];
+        return `<div class="sz ${fd.size===s.id?'on':''}" onclick="fd.size='${s.id}';renderGuest()">
+          ${p.length ? `<img src="${p[0]}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:6px;" onerror="this.style.display='none'">` : `<div class="sz-emoji">${s.e}</div>`}
+          <div class="sz-name">${s.name}</div>
+          <div class="sz-cm">${s.cm}</div>
+          <div class="sz-price">${s.price.toLocaleString()}원</div>
         </div>`;
       }).join('')}
     </div>
-    <div style="height:14px;"></div>
-    <!-- 추가 옵션 -->
-    <div class="list">
-      <div class="toggle-row">
-        <div class="toggle-content" onclick="openChocoInfo()">
-          <div style="display:flex;align-items:center;gap:5px;">
-            <div class="toggle-label">🍫 초콜릿 장식</div>
-            <div style="font-size:11px;color:var(--accent);background:var(--fill);padding:1px 7px;border-radius:8px;">설명 보기 ›</div>
-          </div>
-          <div class="toggle-sub">아기천사 등 · +3,000원 · 탭해서 자세히 보기</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hdr">추가 옵션</div>
+    <div class="card">
+      <div class="tog-row">
+        <div class="tog-body">
+          <div class="tog-lbl">🍫 초콜릿 장식 <span style="font-size:11px;color:var(--accent);background:rgba(139,74,74,0.1);padding:1px 7px;border-radius:8px;margin-left:4px;">+3,000원</span></div>
+          <div class="tog-sub">아기천사 등 화이트초콜릿 장식</div>
         </div>
-        <div class="toggle-switch ${fd.choco?'on':''}" onclick="toggle('choco')"><div class="toggle-knob"></div></div>
+        <div class="sw ${fd.choco?'on':''}" onclick="fd.choco=!fd.choco;renderGuest()"><div class="sw-k"></div></div>
       </div>
-      <div class="toggle-row" onclick="toggle('delivery')">
-        <div class="toggle-content">
-          <div class="toggle-label">🚗 배달 요청</div>
-          <div class="toggle-sub">부여 전 지역 · +5,000원</div>
+      <div class="tog-row">
+        <div class="tog-body">
+          <div class="tog-lbl">🚗 배달 요청 <span style="font-size:11px;color:var(--accent);background:rgba(139,74,74,0.1);padding:1px 7px;border-radius:8px;margin-left:4px;">+5,000원</span></div>
+          <div class="tog-sub">부여 전 지역</div>
         </div>
-        <div class="toggle-switch ${fd.delivery?'on':''}"><div class="toggle-knob"></div></div>
+        <div class="sw ${fd.delivery?'on':''}" onclick="fd.delivery=!fd.delivery;renderGuest()"><div class="sw-k"></div></div>
       </div>
       ${fd.delivery ? `
-      <div style="padding:12px 16px;border-top:0.5px solid var(--sep);background:rgba(52,199,89,0.03);">
-        <div style="font-size:12px;font-weight:600;color:var(--label2);margin-bottom:8px;">배달 주소</div>
-        <input
-          style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--label);background:var(--bg);outline:none;transition:border-color 0.2s;"
-          placeholder="도로명 주소를 입력해주세요"
-          value="${fd.deliveryAddr||''}"
-          oninput="fd.deliveryAddr=this.value"
-          onfocus="this.style.borderColor='var(--accent)'"
-          onblur="this.style.borderColor='var(--sep)'"
-        >
-        <div style="font-size:11px;color:var(--label2);margin-top:6px;">📍 부여 전 지역 배달 가능 · 배달비 5,000원</div>
+      <div class="addr-wrap">
+        <input class="addr-inp" placeholder="배달 주소를 입력해주세요" value="${fd.addr}" oninput="fd.addr=this.value">
       </div>` : ''}
     </div>
   </div>
 
-  <!-- 보관/주의 아코디언 -->
-  <div class="section">
-    <div class="section-header">안내사항</div>
-    <div class="list">
-      <div class="accordion-row" onclick="toggleAccordion('storage')">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;">
-          <div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🧊</div>
-          <div class="toggle-label">떡케이크 보관 방법</div>
-        </div>
-        <div class="accordion-arrow ${openAccordions.storage?'open':''}">›</div>
+  <div class="sec">
+    <div class="sec-hdr">안내사항</div>
+    <div class="card">
+      <div class="acc-row" onclick="acc.storage=!acc.storage;renderGuest()">
+        <div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🧊</div>
+        <div class="tog-lbl" style="flex:1;">보관 방법</div>
+        <div class="acc-arrow ${acc.storage?'open':''}">›</div>
       </div>
-      ${openAccordions.storage ? `
-      <div class="accordion-body">
-        <div class="accordion-item">📌 당일 섭취를 가장 권장드립니다 (무첨가)</div>
-        <div class="accordion-item">🌸 앙금 꽃 → 분리 후 냉장 보관 (최대 1주일)</div>
-        <div class="accordion-item">🍡 떡 → 냉동 보관 후 자연해동 또는 전자레인지</div>
-        <div class="accordion-item">💛 해동 후 앙금을 함께 발라드시면 더욱 맛있어요</div>
+      ${acc.storage ? `<div class="acc-body">
+        <div class="acc-item">📌 당일 섭취를 가장 권장드립니다</div>
+        <div class="acc-item">🌸 앙금꽃 → 분리 후 냉장 보관 (최대 1주일)</div>
+        <div class="acc-item">🍡 떡 → 냉동 보관 후 자연해동 또는 전자레인지</div>
       </div>` : ''}
-
-      <div class="accordion-row" onclick="toggleAccordion('transport')" style="border-top:0.5px solid var(--sep);">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;">
-          <div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🚗</div>
-          <div class="toggle-label">픽업 및 이동 시 주의사항</div>
-        </div>
-        <div class="accordion-arrow ${openAccordions.transport?'open':''}">›</div>
+      <div class="acc-row" onclick="acc.transport=!acc.transport;renderGuest()" style="border-top:0.5px solid var(--sep);">
+        <div style="width:30px;height:30px;border-radius:8px;background:rgba(139,74,74,0.1);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🚗</div>
+        <div class="tog-lbl" style="flex:1;">픽업 주의사항</div>
+        <div class="acc-arrow ${acc.transport?'open':''}">›</div>
       </div>
-      ${openAccordions.transport ? `
-      <div class="accordion-body">
-        <div class="accordion-item">⏰ 픽업 약 3시간 전 제작 시작 — 예약 시간 맞춰 방문해주세요</div>
-        <div class="accordion-item">🧑‍🤝‍🧑 반드시 동행자와 함께 방문하셔서 조수석에서 손으로 받쳐 이동</div>
-        <div class="accordion-item">🌸 꽃 장식이 풍성해 흔들림에 취약해요 — 천천히 이동해 주세요</div>
-        <div class="accordion-item">🚚 걱정되신다면 배달도 가능해요 (부여 전 지역 5,000원)</div>
+      ${acc.transport ? `<div class="acc-body">
+        <div class="acc-item">⏰ 픽업 약 3시간 전 제작 시작</div>
+        <div class="acc-item">🧑‍🤝‍🧑 동행자와 함께 조수석에서 손으로 받쳐 이동</div>
+        <div class="acc-item">🚚 걱정되신다면 배달도 가능해요 (5,000원)</div>
       </div>` : ''}
     </div>
   </div>
 
-  <!-- 디자인 & 레터링 -->
-  <div class="section">
-    <div class="section-header">디자인 & 레터링</div>
-
-    <!-- 디자인 (텍스트 + 사진 통합) -->
-    <div class="list" style="margin-bottom:10px;">
+  <div class="sec">
+    <div class="sec-hdr">디자인</div>
+    <div class="card">
       <div style="padding:14px 16px 10px;">
-        <div style="font-size:13px;font-weight:600;color:var(--label);margin-bottom:4px;">원하는 디자인</div>
-        <div style="font-size:12px;color:var(--label2);margin-bottom:10px;line-height:1.5;">색감이나 스타일을 적어주세요. 참고 사진을 함께 올려주시면 더욱 가깝게 제작해드려요 🌸</div>
-        <textarea
-          style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--label);background:var(--bg);resize:none;height:72px;outline:none;line-height:1.5;transition:border-color 0.2s;"
-          placeholder="예) 핑크 파스텔톤 봄꽃 느낌, 민트 계열, 차분한 화이트 베이지..."
-          oninput="fd.design=this.value"
-          onfocus="this.style.borderColor='var(--accent)'"
-          onblur="this.style.borderColor='var(--sep)'"
-        >${fd.design}</textarea>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">원하는 디자인</div>
+        <textarea class="row-inp" style="border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;background:var(--bg);width:100%;height:72px;text-align:left;" placeholder="색감, 스타일을 적어주세요" oninput="fd.design=this.value">${fd.design}</textarea>
 
 ```
   </div>
-
-  <!-- 사진 첨부 (디자인과 연결) -->
-  <div style="border-top:0.5px solid var(--sep);padding:12px 16px;">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:600;color:var(--label);">📎 참고 사진</div>
-      <div style="font-size:11px;color:var(--label2);background:var(--bg);padding:2px 8px;border-radius:10px;">이 사진으로 디자인해드려요</div>
-    </div>
-
-    ${fd.photos && fd.photos.length > 0 ? `
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-      ${fd.photos.map((p,i)=>`
-        <div style="position:relative;">
-          <img src="${p}" style="width:76px;height:76px;border-radius:12px;object-fit:cover;border:1.5px solid var(--sep);">
-          <button onclick="removePhoto(${i})" style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+  <div class="photo-row">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;">📎 참고 사진 <span style="font-size:11px;color:var(--text2);font-weight:400;">최대 3장</span></div>
+    <div class="photo-grid">
+      ${(fd.photos||[]).map((p,i) => `
+        <div class="photo-thumb">
+          <img src="${p}">
+          <button class="photo-del" onclick="fd.photos.splice(${i},1);renderGuest()">✕</button>
         </div>`).join('')}
-      ${fd.photos.length < 3 ? `
-      <label style="width:76px;height:76px;border-radius:12px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:var(--bg);">
-        <span style="font-size:20px;">+</span>
-        <span style="font-size:10px;color:var(--label2);">추가</span>
-        <input type="file" accept="image/*" multiple style="display:none;" onchange="handlePhotos(event)">
+      ${(fd.photos||[]).length < 3 ? `
+      <label class="photo-add-label">
+        <span style="font-size:22px;color:var(--text2);">+</span>
+        <span style="font-size:10px;color:var(--text2);">추가</span>
+        <input type="file" accept="image/*" multiple style="display:none;" onchange="addPhotos(event)">
       </label>` : ''}
-    </div>` : `
-    <label style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg);border-radius:12px;cursor:pointer;border:1.5px dashed var(--sep);">
-      <span style="font-size:22px;">🖼️</span>
-      <div>
-        <div style="font-size:13px;font-weight:500;color:var(--accent);">사진 선택하기</div>
-        <div style="font-size:11px;color:var(--label2);margin-top:1px;">최대 3장 · 원하는 디자인 참고 사진</div>
-      </div>
-      <input type="file" accept="image/*" multiple style="display:none;" onchange="handlePhotos(event)">
-    </label>`}
-  </div>
-</div>
-
-<!-- 레터링 -->
-<div class="list">
-  <div style="padding:14px 16px 10px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div style="font-size:13px;font-weight:600;color:var(--label);">레터링 문구</div>
-      <div style="font-size:11px;color:var(--green);font-weight:600;background:rgba(52,199,89,0.1);padding:2px 9px;border-radius:10px;">무료</div>
     </div>
-    <!-- 예시 칩 -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-      ${[
-        '어머님의 60년 세월을 존경하고 사랑합니다',
-        '지금처럼 건강하고 오래 곁에 있어주세요',
-        '아버님의 세 번째 스무 살을 축하드립니다',
-        '팔팔한 80세 팔순을 축하드립니다',
-        '늘 건강하고 행복하게 함께해요 사랑합니다'
-      ].map(ex=>`
-        <button onclick="selLettering('${ex.replace(/'/g,"\\'")}') "
-          style="padding:5px 11px;border-radius:20px;border:1px solid ${fd.lettering===ex?'var(--accent)':'var(--sep)'};
-          background:${fd.lettering===ex?'var(--accent)':'rgba(139,74,74,0.07)'};
-          color:${fd.lettering===ex?'white':'var(--accent)'};
-          border-color:${fd.lettering===ex?'var(--accent)':'rgba(139,74,74,0.25)'};
-          font-size:11px;font-family:inherit;cursor:pointer;text-align:left;line-height:1.5;">
-          ${ex}
-        </button>`).join('')}
-    </div>
-    <textarea
-      style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--label);background:var(--bg);resize:none;height:64px;outline:none;line-height:1.5;transition:border-color 0.2s;"
-      placeholder="직접 입력하거나 위 예시를 탭해서 선택하세요"
-      oninput="fd.lettering=this.value"
-      onfocus="this.style.borderColor='var(--accent)'"
-      onblur="this.style.borderColor='var(--sep)'"
-    >${fd.lettering}</textarea>
   </div>
 </div>
 ```
 
   </div>
 
-  <!-- 결제 방법 -->
-
-  <div class="section">
-    <div class="section-header">결제 방법</div>
-    <div class="list">
-      <div class="pay-wrap">
-        ${PAYS.map(p=>`<button class="pay-chip ${fd.pay===p?'sel':''}" onclick="selPay('${p}')">${p}</button>`).join('')}
+  <div class="sec">
+    <div class="sec-hdr">레터링</div>
+    <div class="card">
+      <div style="padding:14px 16px 10px;">
+        <div class="let-chips">
+          ${['어머님의 60년 세월을 존경하고 사랑합니다','지금처럼 건강하고 오래 곁에 있어주세요','아버님의 세 번째 스무 살을 축하드립니다','팔팔한 80세 팔순을 축하드립니다','늘 건강하고 행복하게 함께해요 사랑합니다'].map(t =>
+          `<button class="let-chip ${fd.lettering===t?'on':''}" onclick="fd.lettering=fd.lettering==='${t.replace(/'/g,"\\'")}' ? '' : '${t.replace(/'/g,"\\'")}';renderGuest()">${t}</button>`).join('')}
+        </div>
+        <textarea class="row-inp" style="border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;background:var(--bg);width:100%;height:64px;text-align:left;" placeholder="직접 입력하거나 위 예시를 선택하세요" oninput="fd.lettering=this.value">${fd.lettering}</textarea>
       </div>
     </div>
   </div>
 
-  <!-- 가격 요약 -->
+  <div class="sec">
+    <div class="sec-hdr">결제 방법</div>
+    <div class="card">
+      <div class="pay-wrap">
+        ${PAYS.map(p => `<button class="pay-chip ${fd.pay===p?'on':''}" onclick="fd.pay='${p}';renderGuest()">${p}</button>`).join('')}
+      </div>
+    </div>
+  </div>
 
 ${sel ? `
 
-  <div class="section">
-    <div class="section-header">결제 금액</div>
-    <div class="price-card">
-      <div class="price-row"><span class="price-key">${sel.name}</span><span class="price-val">${sel.price.toLocaleString()}원</span></div>
-      ${fd.choco?`<div class="price-row"><span class="price-key">초콜릿 장식</span><span class="price-val">+3,000원</span></div>`:''}
-      ${fd.delivery?`<div class="price-row"><span class="price-key">배달</span><span class="price-val">+5,000원</span></div>`:''}
-      <div class="price-row"><span class="price-total-key">총 결제 금액</span><span class="price-total-val">${total.toLocaleString()}원</span></div>
+  <div class="sec">
+    <div class="sec-hdr">결제 금액</div>
+    <div class="card">
+      <div class="price-row"><span class="p-key">${sel.name}</span><span class="p-val">${sel.price.toLocaleString()}원</span></div>
+      ${fd.choco ? `<div class="price-row"><span class="p-key">초콜릿 장식</span><span class="p-val">+3,000원</span></div>` : ''}
+      ${fd.delivery ? `<div class="price-row"><span class="p-key">배달</span><span class="p-val">+5,000원</span></div>` : ''}
+      <div class="price-row"><span class="p-key-b">총 결제 금액</span><span class="p-val-b">${total.toLocaleString()}원</span></div>
     </div>
   </div>` : ''}
 
-  <div class="section">
-    <button class="primary-btn" onclick="submitOrder()">주문서 제출하기</button>
-    <div style="font-size:12px;color:var(--label2);text-align:center;margin-top:10px;padding:0 20px;line-height:1.6;">
-      제출 후 확인 연락드립니다 · 문의 010-5496-0736
-    </div>
+  <div class="sec">
+    <button class="btn-main" onclick="submit()">주문서 제출하기</button>
   </div>
   `);
 }
@@ -865,131 +470,87 @@ function renderSuccess() {
 W(`<div class="success-wrap">
 <div class="success-icon">🌸</div>
 <div class="success-title">주문서가 전달됐어요</div>
-<div class="success-sub">영화당 사장님께 주문서가 접수됐어요.<br>확인 후 <strong>010-5496-0736</strong>으로<br>문자 드릴게요 💛</div>
-<div class="section" style="text-align:left;">
-<div class="notice">
+<div class="success-sub">확인 후 <strong>010-5496-0736</strong>으로 연락드릴게요 💛</div>
+<div class="notice" style="text-align:left;margin:0 0 24px;">
 💳 입금 계좌<br>
-<strong>농협은행 3511-2979-4311-3 (김은영)</strong><br>
-<span style="font-size:12px;color:var(--label2);">입금 확인 후 예약이 확정됩니다</span>
+<strong>농협 3511-2979-4311-3 (김은영)</strong><br>
+<span style="font-size:12px;color:var(--text2);">입금 확인 후 예약 확정돼요</span>
 </div>
-</div>
-<div style="margin-top:20px;">
-<button class="primary-btn" onclick="fd={_done:false};render()">새 주문서 작성</button>
-</div>
+<button class="btn-main" onclick="fd={name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,delivery:false,addr:'',photos:[],done:false};renderGuest()">새 주문서 작성</button>
 
   </div>`);
 }
 
-function selSize(id) {
-fd.size = id;
-// 스크롤 위치 보존
-const sizeScroll = document.querySelector(’.size-scroll’);
-const scrollLeft = sizeScroll ? sizeScroll.scrollLeft : 0;
-renderGuest();
-// 렌더 후 스크롤 위치 복원
-requestAnimationFrame(() => {
-const s = document.querySelector(’.size-scroll’);
-if (s) s.scrollLeft = scrollLeft;
-});
-}
-function toggle(k) { fd[k]=!fd[k]; renderGuest(); scrollTo(0,window.scrollY); }
-function selPay(p) { fd.pay=p; renderGuest(); scrollTo(0,window.scrollY); }
-
-function selLettering(text) {
-fd.lettering = fd.lettering === text ? ‘’ : text;
-// textarea만 업데이트 (전체 리렌더 없이)
-const ta = document.querySelector(‘textarea[placeholder=“직접 입력하거나 위 예시를 탭해서 선택하세요”]’);
-if (ta) ta.value = fd.lettering;
-// 칩 색상만 업데이트
-renderGuest();
-scrollTo(0, window.scrollY);
-}
-
-function openChocoInfo() {
-document.getElementById(‘sheet’).innerHTML = ` <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div> <div class="sheet-title-wrap"> <div class="sheet-title">🍫 초콜릿 장식이란?</div> <div class="sheet-subtitle">+3,000원 추가 옵션</div> </div> <div style="padding:16px 16px 0;"> <div style="background:var(--bg);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px;"> <img src="data:image/jpeg;base64,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" style="width:100%;height:200px;object-fit:cover;display:block;"> </div> <div class="info-sheet-body"> <strong>화이트 초콜릿으로 제작하는 장식이에요.</strong><br><br> 사진 속 <strong>아기 천사</strong>처럼 케이크 위에 올라가는 포인트 장식으로, 특히 <strong>돌잔치 케이크</strong>로 인기가 많은 디자인이에요 👶<br><br> 원하시는 모양이나 스타일이 있으시면 디자인 메모에 함께 적어주시면 가능한 범위 내에서 제작해드릴게요 😊<br><br> <span style="color:var(--accent);font-weight:600;">추가 금액: 3,000원</span> </div> <div class="sh-actions" style="padding:16px 0 0;"> <button class="sh-close" onclick="closeSheet()">닫기</button> <button class="sh-save" onclick="fd.choco=true;closeSheet();renderGuest();">이 옵션 추가하기</button> </div> </div>`;
-document.getElementById(‘overlay’).className = ‘overlay show’;
-}
-
-function removePhoto(idx) {
-fd.photos.splice(idx, 1);
-renderGuest();
-scrollTo(0,window.scrollY);
-}
-
-function handlePhotos(e) {
-const files = Array.from(e.target.files);
-const remaining = 3 - (fd.photos||[]).length;
-if (remaining <= 0) { toast(‘사진은 최대 3장까지 첨부할 수 있어요’); return; }
-const toLoad = files.slice(0, remaining);
-let loaded = 0;
-toLoad.forEach(file => {
-const reader = new FileReader();
-reader.onload = ev => {
-if (!fd.photos) fd.photos = [];
+function addPhotos(e) {
+const files = Array.from(e.target.files).slice(0, 3 - (fd.photos||[]).length);
+let n = 0;
+files.forEach(f => {
+const r = new FileReader();
+r.onload = ev => {
 fd.photos.push(ev.target.result);
-loaded++;
-if (loaded === toLoad.length) { renderGuest(); scrollTo(0,window.scrollY); }
+if (++n === files.length) renderGuest();
 };
-reader.readAsDataURL(file);
+r.readAsDataURL(f);
 });
 }
 
-async function submitOrder() {
+async function submit() {
 if (!fd.name.trim())  { toast(‘성함을 입력해주세요’); return; }
 if (!fd.phone.trim()) { toast(‘전화번호를 입력해주세요’); return; }
 if (!fd.date)         { toast(‘픽업 날짜를 선택해주세요’); return; }
 if (!fd.time)         { toast(‘픽업 시간을 선택해주세요’); return; }
 if (!fd.size)         { toast(‘케이크 사이즈를 선택해주세요’); return; }
 if (!fd.pay)          { toast(‘결제 방법을 선택해주세요’); return; }
-
-const sel = SIZES.find(s=>s.id===fd.size);
+const sel = SIZES.find(s => s.id === fd.size);
 const total = sel.price + (fd.choco?3000:0) + (fd.delivery?5000:0);
 W(’<div class="loading">주문서 전송 중…</div>’);
-
 try {
-await dbAddOrder({
-id:‘order_’+Date.now(), name:fd.name, phone:fd.phone,
-pickup_date:fd.date, pickup_time:fd.time,
-cake_size:sel.name, cake_price:sel.price,
-design:fd.design||’’, lettering:fd.lettering||’’,
-payment:fd.pay, choco_deco:fd.choco, delivery:fd.delivery,
-delivery_addr: fd.delivery ? (fd.deliveryAddr||’’) : ‘’,
-total_price:total, status:‘pending’, memo:’’,
-photos: fd.photos||[],
-created_at:Date.now()
+await addOrder({
+id: ‘o_’ + Date.now(),
+name: fd.name, phone: fd.phone,
+pickup_date: fd.date, pickup_time: fd.time,
+cake_size: sel.name, cake_price: sel.price,
+design: fd.design||’’, lettering: fd.lettering||’’,
+payment: fd.pay, choco_deco: fd.choco,
+delivery: fd.delivery, delivery_addr: fd.addr||’’,
+total_price: total, status: ‘pending’, memo: ‘’,
+photos: JSON.stringify(fd.photos||[]),
+created_at: Date.now()
 });
-fd._done=true; render();
-} catch(e) { toast(‘전송 실패, 다시 시도해주세요’); renderGuest(); }
+fd.done = true; renderGuest();
+} catch(e) {
+toast(‘전송 실패, 다시 시도해주세요’);
+renderGuest();
+}
 }
 
-// ══════════════════════
-// ADMIN
-// ══════════════════════
+// ── 어드민 화면 ──
 async function renderAdmin() {
-if (adminPhotoTab === ‘photos’) { renderAdminPhotoManager(); return; }
+if (adminTab === ‘photos’) { await renderPhotoManager(); return; }
 W(’<div class="loading">주문 목록 불러오는 중…</div>’);
-const orders = await dbGetOrders();
-if (!Array.isArray(orders)) { W(’<div class="empty"><div class="empty-icon">⚠️</div><div>불러오기 실패</div></div>’); return; }
+let orders;
+try { orders = await getOrders(); } catch(e) { W(’<div class="empty"><div class="empty-icon">⚠️</div><div>불러오기 실패</div></div>’); return; }
+if (!Array.isArray(orders)) orders = [];
 
-const filt = adminFilter===‘all’ ? orders : orders.filter(o=>o.status===adminFilter);
-const revenue = orders.filter(o=>o.status!==‘cancel’).reduce((s,o)=>s+o.total_price,0);
+const filt = adminFilter === ‘all’ ? orders : orders.filter(o => o.status === adminFilter);
+const revenue = orders.filter(o => o.status !== ‘cancel’).reduce((s,o) => s + (o.total_price||0), 0);
 
 let h = `
 
-  <div class="section" style="padding-top:8px;">
+  <div class="sec" style="padding-top:8px;">
     <div class="stats">
-      <div class="stat-tile"><div class="stat-num">${orders.length}</div><div class="stat-lbl">전체</div></div>
-      <div class="stat-tile"><div class="stat-num" style="color:#c07000;">${orders.filter(o=>o.status==='pending').length}</div><div class="stat-lbl">확인중</div></div>
-      <div class="stat-tile"><div class="stat-num" style="color:#1a8a3a;">${orders.filter(o=>o.status==='confirmed').length}</div><div class="stat-lbl">확정</div></div>
-      <div class="stat-tile"><div class="stat-num" style="font-size:14px;padding-top:4px;">${(revenue/10000).toFixed(0)}만원</div><div class="stat-lbl">매출</div></div>
+      <div class="stat"><div class="stat-n">${orders.length}</div><div class="stat-l">전체</div></div>
+      <div class="stat"><div class="stat-n" style="color:#c07000;">${orders.filter(o=>o.status==='pending').length}</div><div class="stat-l">확인중</div></div>
+      <div class="stat"><div class="stat-n" style="color:#1a8a3a;">${orders.filter(o=>o.status==='confirmed').length}</div><div class="stat-l">확정</div></div>
+      <div class="stat"><div class="stat-n" style="font-size:14px;padding-top:4px;">${Math.round(revenue/10000)}만원</div><div class="stat-l">매출</div></div>
     </div>
-    <div class="filter-row">
-      ${['all','pending','confirmed','done','cancel'].map(f=>{
-        const labels={all:'전체',pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
-        const cnt = f==='all'?orders.length:orders.filter(o=>o.status===f).length;
-        return `<button class="f-chip ${adminFilter===f?'on':''}" onclick="setFilter('${f}')">${labels[f]} ${cnt}</button>`;
+    <div class="filter">
+      ${['all','pending','confirmed','done','cancel'].map(f => {
+        const labels = {all:'전체',pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
+        const cnt = f==='all' ? orders.length : orders.filter(o=>o.status===f).length;
+        return `<button class="fc ${adminFilter===f?'on':''}" onclick="adminFilter='${f}';renderAdmin()">${labels[f]} ${cnt}</button>`;
       }).join('')}
-      <button class="f-chip" onclick="adminPhotoTab='photos';renderAdmin()" style="background:rgba(139,74,74,0.1);color:var(--accent);">🖼 사진 관리</button>
+      <button class="fc" onclick="adminTab='photos';renderAdmin()" style="background:rgba(139,74,74,0.1);color:var(--accent);">🖼 사진 관리</button>
     </div>
   </div>`;
 
@@ -999,243 +560,100 @@ h += `<div class="empty"><div class="empty-icon">🌸</div><div>해당 주문이
 h += filt.map(o => {
 const d = new Date(o.created_at);
 const ds = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-return `<div class="order-card" onclick="openOrder('${o.id}')"> <div class="order-top"> <div class="order-name">${o.name}</div> <div style="display:flex;align-items:center;gap:7px;"> <div class="badge b-${o.status}">${ST[o.status]}</div> <div style="font-size:12px;color:var(--label2);">${ds}</div> </div> </div> <div class="order-body"> <div class="order-meta-line"> 📅 ${o.pickup_date} ${o.pickup_time}<br> 🎂 ${o.cake_size}${o.choco_deco?' · 초콜릿장식':''}${o.delivery?' · 배달':''}<br> 💳 ${o.payment} </div> </div> <div class="order-footer"> <div class="order-phone">${o.phone}</div> <div class="order-total">${o.total_price.toLocaleString()}원</div> </div> </div>`;
+return `<div class="oc" onclick="openOrder('${o.id}')"> <div class="oc-top"> <div class="oc-name">${o.name}</div> <div style="display:flex;align-items:center;gap:7px;"> <div class="badge b-${o.status}">${ST[o.status]}</div> <div style="font-size:12px;color:var(--text2);">${ds}</div> </div> </div> <div class="oc-body">📅 ${o.pickup_date} ${o.pickup_time}<br>🎂 ${o.cake_size}${o.choco_deco?' · 초콜릿':''}${o.delivery?' · 배달':''}<br>💳 ${o.payment}</div> <div class="oc-foot"><div class="oc-phone">${o.phone}</div><div class="oc-total">${(o.total_price||0).toLocaleString()}원</div></div> </div>`;
 }).join(’’);
 }
 W(h);
 }
 
-function setFilter(f) { adminFilter=f; renderAdmin(); }
-
 async function openOrder(id) {
-const orders = await dbGetOrders();
+let orders;
+try { orders = await getOrders(); } catch(e) { return; }
 const o = orders.find(x => x.id === id);
 if (!o) return;
-curOrderId = id;
+curId = id;
 
-const photos = Array.isArray(o.photos) ? o.photos : [];
-document.getElementById(‘sheet’).innerHTML = `
-<div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
-<div class="sheet-title-wrap">
-<div class="sheet-title">${o.name}님 주문</div>
-<div class="sheet-subtitle">${o.pickup_date} ${o.pickup_time} 픽업</div>
-</div>
+let photoArr = [];
+try { photoArr = JSON.parse(o.photos || ‘[]’); } catch(e) {}
 
-```
-<div class="detail-section">
-  <div class="detail-list">
-    <div class="detail-row"><div class="detail-key">이름</div><div class="detail-val">${o.name}</div></div>
-    <div class="detail-row"><div class="detail-key">전화번호</div><div class="detail-val">${o.phone}</div></div>
-    <div class="detail-row"><div class="detail-key">픽업 일시</div><div class="detail-val">${o.pickup_date} ${o.pickup_time}</div></div>
-    <div class="detail-row"><div class="detail-key">케이크</div><div class="detail-val">${o.cake_size}${o.choco_deco?' + 초콜릿장식':''}${o.delivery?' + 배달':''}</div></div>
-    <div class="detail-row"><div class="detail-key">디자인</div><div class="detail-val">${o.design||'—'}</div></div>
-    ${photos.length ? `<div class="detail-row"><div class="detail-key">참고사진</div><div class="detail-val" style="display:flex;gap:7px;flex-wrap:wrap;">${photos.map(p=>`<img src="${p}" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);">`).join('')}</div></div>` : ''}
-    <div class="detail-row"><div class="detail-key">레터링</div><div class="detail-val">${o.lettering||'—'}</div></div>
-    <div class="detail-row"><div class="detail-key">결제</div><div class="detail-val">${o.payment}</div></div>
-    <div class="detail-row"><div class="detail-key">총 금액</div><div class="detail-val" style="font-weight:700;color:var(--accent);">${o.total_price.toLocaleString()}원</div></div>
-  </div>
-</div>
-
-<div class="status-section">
-  <div class="status-lbl">상태 변경</div>
-  <div class="status-btns">
-    <button class="st-btn st-btn-pending   ${o.status==='pending'  ?'active-st':''}" onclick="changeStatus('pending')">확인중</button>
-    <button class="st-btn st-btn-confirmed ${o.status==='confirmed'?'active-st':''}" onclick="changeStatus('confirmed')">예약확정</button>
-    <button class="st-btn st-btn-done      ${o.status==='done'     ?'active-st':''}" onclick="changeStatus('done')">픽업완료</button>
-    <button class="st-btn st-btn-cancel    ${o.status==='cancel'   ?'active-st':''}" onclick="changeStatus('cancel')">취소</button>
-  </div>
-</div>
-
-<div class="memo-section">
-  <div class="status-lbl" style="margin-bottom:8px;">내부 메모</div>
-  <textarea class="memo-ta" id="adminMemo" placeholder="내부 메모...">${o.memo||''}</textarea>
-</div>
-
-<div class="sheet-actions">
-  <button class="sh-del"   onclick="deleteOrder()">삭제</button>
-  <button class="sh-close" onclick="closeSheet()">닫기</button>
-  <button class="sh-save"  onclick="saveMemo()">저장</button>
-</div>`;
-```
-
-document.getElementById(‘overlay’).className = ‘overlay show’;
+showSheet(`<div class="sh-handle-wrap"><div class="sh-handle"></div></div> <div class="sh-title-wrap"> <div class="sh-title">${o.name}님 주문</div> <div class="sh-sub">${o.pickup_date} ${o.pickup_time} 픽업</div> </div> <div class="det-sec"> <div class="det-list"> <div class="det-row"><div class="det-k">이름</div><div class="det-v">${o.name}</div></div> <div class="det-row"><div class="det-k">전화번호</div><div class="det-v">${o.phone}</div></div> <div class="det-row"><div class="det-k">픽업</div><div class="det-v">${o.pickup_date} ${o.pickup_time}</div></div> <div class="det-row"><div class="det-k">케이크</div><div class="det-v">${o.cake_size}${o.choco_deco?' + 초콜릿':''}${o.delivery?' + 배달':''}</div></div> <div class="det-row"><div class="det-k">디자인</div><div class="det-v">${o.design||'—'}</div></div> ${photoArr.length ?`<div class="det-row"><div class="det-k">참고사진</div><div class="det-v" style="display:flex;gap:6px;flex-wrap:wrap;">${photoArr.map(p=>`<img src="${p}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">`).join(’’)}</div></div>`: ''} <div class="det-row"><div class="det-k">레터링</div><div class="det-v">${o.lettering||'—'}</div></div> <div class="det-row"><div class="det-k">결제</div><div class="det-v">${o.payment}</div></div> <div class="det-row"><div class="det-k">금액</div><div class="det-v" style="font-weight:700;color:var(--accent);">${(o.total_price||0).toLocaleString()}원</div></div> </div> </div> <div class="st-sec"> <div class="st-lbl">상태 변경</div> <div class="st-btns"> <button class="stb stb-p ${o.status==='pending'?'act':''}"   onclick="changeStatus('pending')">확인중</button> <button class="stb stb-c ${o.status==='confirmed'?'act':''}" onclick="changeStatus('confirmed')">예약확정</button> <button class="stb stb-d ${o.status==='done'?'act':''}"      onclick="changeStatus('done')">픽업완료</button> <button class="stb stb-x ${o.status==='cancel'?'act':''}"    onclick="changeStatus('cancel')">취소</button> </div> </div> <div class="memo-sec"> <div class="st-lbl" style="margin-bottom:8px;">메모</div> <textarea class="memo-ta" id="memoTa">${o.memo||''}</textarea> </div> <div class="sh-actions"> <button class="sh-del"   onclick="doDelete()">삭제</button> <button class="sh-close" onclick="closeSheet()">닫기</button> <button class="sh-save"  onclick="doSave()">저장</button> </div>`);
 }
 
 async function changeStatus(s) {
-await dbUpdateOrder(curOrderId, { status: s });
+await updateOrder(curId, { status: s });
 toast(‘상태 변경됐어요’);
-await openOrder(curOrderId);
+openOrder(curId);
 renderAdmin();
 }
-
-async function saveMemo() {
-const memo = document.getElementById(‘adminMemo’).value;
-await dbUpdateOrder(curOrderId, { memo });
-toast(‘저장됐어요’);
-closeSheet(); renderAdmin();
+async function doSave() {
+const memo = document.getElementById(‘memoTa’).value;
+await updateOrder(curId, { memo });
+toast(‘저장됐어요’); closeSheet(); renderAdmin();
 }
-
-async function deleteOrder() {
-if (!confirm(‘이 주문을 삭제할까요?’)) return;
-await dbDeleteOrder(curOrderId);
+async function doDelete() {
+if (!confirm(‘삭제할까요?’)) return;
+await delOrder(curId);
 closeSheet(); toast(‘삭제됐어요’); renderAdmin();
 }
 
-function closeSheet() { document.getElementById(‘overlay’).className=‘overlay’; }
-function closeOverlayOuter(e) { if(e.target===document.getElementById(‘overlay’)) closeSheet(); }
-
-// ── 사장님 사진 관리 ──
-let adminPhotoTab = ‘orders’; // ‘orders’ | ‘photos’
-let editPhotoSizeId = null;
-
-function setAdminTab(t) { adminPhotoTab=t; renderAdmin(); }
-
-async function renderAdminPhotoManager() {
+async function renderPhotoManager() {
 W(’<div class="loading">사진 불러오는 중…</div>’);
-await loadCakePhotos();
-
+photos = await getPhotos();
 let h = `
 
-  <div class="section" style="padding-top:8px;">
-    <div class="section-header">케이크 사진 관리</div>
-    <div style="margin:0 16px 14px;font-size:13px;color:var(--label2);line-height:1.6;">
-      각 케이크 종류별로 리뷰 사진을 추가/삭제할 수 있어요.<br>
-      숫자 케이크 기본 사진 3장은 항상 표시돼요.
+  <div class="sec" style="padding-top:8px;">
+    <div style="padding:0 16px 12px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:16px;font-weight:600;">🖼 케이크 사진 관리</div>
+      <button class="fc on" onclick="adminTab='orders';renderAdmin()">← 주문 목록</button>
     </div>`;
 
 for (const s of SIZES) {
-const photos = cakePhotos[s.id] || [];
-const manageable = s.id === ‘sn’ ? photos.slice(3) : photos; // 숫자케이크는 기본3장 제외
-const builtIn    = s.id === ‘sn’ ? photos.slice(0,3) : [];
-
-```
-h += `
-<div class="list" style="margin-bottom:12px;">
-  <div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);">
-    <div style="font-size:14px;font-weight:600;color:var(--label);">${s.emoji} ${s.name}</div>
-    ${s.id==='sn'?'<div style="font-size:11px;color:var(--label2);margin-top:2px;">기본 사진 3장 포함</div>':''}
-  </div>
-  <div style="padding:12px 16px;">
-    <div class="photo-manage-grid">
-      ${builtIn.map(p=>`
-        <div class="photo-thumb-wrap">
-          <img src="${p}" class="photo-thumb">
-          <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:var(--accent);color:white;font-size:8px;font-weight:700;padding:1px 6px;border-radius:6px;white-space:nowrap;">기본</div>
-        </div>`).join('')}
-      ${manageable.map((p,i)=>`
-        <div class="photo-thumb-wrap">
-          <img src="${p}" class="photo-thumb">
-          <button class="photo-del-btn" onclick="deleteAdminPhoto('${s.id}',${builtIn.length+i})">✕</button>
-        </div>`).join('')}
-      ${photos.length < 8 ? `
-      <label style="width:72px;height:72px;border-radius:10px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;background:var(--bg);">
-        <span style="font-size:22px;color:var(--label2);">+</span>
-        <span style="font-size:10px;color:var(--label2);">추가</span>
-        <input type="file" accept="image/*" multiple style="display:none;" onchange="addAdminPhotos(event,'${s.id}')">
-      </label>` : ''}
-    </div>
-  </div>
-</div>`;
-```
-
+const p = photos[s.id] || [];
+h += `<div class="card" style="margin-bottom:12px;"> <div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);font-size:14px;font-weight:600;">${s.e} ${s.name}</div> <div style="padding:12px 16px;"> <div class="photo-grid"> ${p.map((img, i) =>`
+<div class="photo-thumb">
+<img src="${img}" style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid var(--sep);">
+<button class="photo-del" onclick="delPhoto('${s.id}',${i})">✕</button>
+</div>`).join('')} ${p.length < 8 ? `
+<label class="photo-add-label" style="width:72px;height:72px;">
+<span style="font-size:20px;color:var(--text2);">+</span>
+<span style="font-size:10px;color:var(--text2);">추가</span>
+<input type="file" accept="image/*" multiple style="display:none;" onchange="addPhoto(event,'${s.id}')">
+</label>` : ''} </div> </div> </div>`;
 }
 h += `</div>`;
 W(h);
 }
 
-async function addAdminPhotos(e, sizeId) {
-const files = Array.from(e.target.files);
-const cur = (cakePhotos[sizeId]||[]).length;
-const max = sizeId===‘sn’ ? 8 : 8;
-const toLoad = files.slice(0, max - cur);
-if (!toLoad.length) { toast(‘최대 사진 수에 도달했어요’); return; }
-W(’<div class="loading">사진 업로드 중…</div>’);
-
-const newPhotos = await Promise.all(toLoad.map(file => new Promise(res => {
-const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(file);
+async function addPhoto(e, sizeId) {
+const files = Array.from(e.target.files).slice(0, 8 - (photos[sizeId]||[]).length);
+if (!files.length) return;
+W(’<div class="loading">업로드 중…</div>’);
+const newImgs = await Promise.all(files.map(f => new Promise(res => {
+const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(f);
 })));
-
-// 기존 추가 사진 (숫자케이크는 기본3장 제외)
-const existing = sizeId===‘sn’
-? (cakePhotos[sizeId]||[]).slice(3)
-: (cakePhotos[sizeId]||[]);
-const merged = […existing, …newPhotos];
-
-await saveAdminPhotos(sizeId, merged);
-await loadCakePhotos();
-renderAdminPhotoManager();
-toast(‘사진이 추가됐어요 ✅’);
+photos[sizeId] = […(photos[sizeId]||[]), …newImgs];
+await savePhotos(photos);
+toast(‘추가됐어요 ✅’);
+renderPhotoManager();
 }
 
-async function deleteAdminPhoto(sizeId, idx) {
-if (!confirm(‘이 사진을 삭제할까요?’)) return;
-const photos = […(cakePhotos[sizeId]||[])];
-photos.splice(idx,1);
-// 저장할 땐 기본사진 제외
-const toSave = sizeId===‘sn’ ? photos.slice(3) : photos;
-await saveAdminPhotos(sizeId, toSave);
-await loadCakePhotos();
-renderAdminPhotoManager();
+async function delPhoto(sizeId, idx) {
+if (!confirm(‘삭제할까요?’)) return;
+photos[sizeId] = (photos[sizeId]||[]).filter((_,i) => i !== idx);
+await savePhotos(photos);
 toast(‘삭제됐어요’);
+renderPhotoManager();
 }
 
-async function saveAdminPhotos(sizeId, photos) {
-const current = await dbGetPhotos();
-current[sizeId] = photos;
-await dbSavePhotos(current);
-}
-
-function toast(msg) {
-const t=document.getElementById(‘toast’);
-t.textContent=msg; t.className=‘toast t-show’;
-setTimeout(()=>t.className=‘toast’,2400);
-}
-
-// ── INIT ──
-function init() {
+// ── 시작 ──
+async function init() {
 if (IS_ADMIN) {
-renderAdmin().catch(e => {
-document.getElementById(‘wrap’).innerHTML =
-’<div style="padding:20px;color:red;font-size:13px;">오류: ’ + e.message + ‘</div>’;
-});
+await renderAdmin();
 } else {
-try { renderGuest(); } catch(e) {
-document.getElementById(‘wrap’).innerHTML =
-’<div style="padding:20px;color:red;font-size:13px;">오류: ’ + e.message + ‘</div>’;
-}
-loadCakePhotos().then(() => {
-try { renderGuest(); } catch(e) {}
-}).catch(() => {});
+photos = await getPhotos().catch(() => ({}));
+renderGuest();
 }
 }
-
-// module scope → 전역 노출
-window.render = render;
-window.selSize = selSize;
-window.toggle = toggle;
-window.selPay = selPay;
-window.selLettering = selLettering;
-window.removePhoto = removePhoto;
-window.handlePhotos = handlePhotos;
-window.submitOrder = submitOrder;
-window.setFilter = setFilter;
-window.openOrder = openOrder;
-window.changeStatus = changeStatus;
-window.saveMemo = saveMemo;
-window.deleteOrder = deleteOrder;
-window.closeSheet = closeSheet;
-window.closeOverlayOuter = closeOverlayOuter;
-window.toast = toast;
-window.toggleAccordion = toggleAccordion;
-window.openPhotoViewer = openPhotoViewer;
-window.closePhotoViewer = closePhotoViewer;
-window.pvNav = pvNav;
-window.openChocoInfo = openChocoInfo;
-window.setAdminTab = setAdminTab;
-window.addAdminPhotos = addAdminPhotos;
-window.deleteAdminPhoto = deleteAdminPhoto;
-window.renderAdminPhotoManager = renderAdminPhotoManager;
-
 init();
 </script>
 
