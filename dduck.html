@@ -125,7 +125,10 @@ html,body{background:var(--bg);font-family:-apple-system,'Helvetica Neue',sans-s
       <div class="hdr-eye">영화당 · Younghwadang</div>
       <div class="hdr-ttl">🌸 떡케이크 주문</div>
     </div>
-    <div class="pill" id="modePill"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="pill" id="modePill"></div>
+      <button id="settingsBtn" style="display:none;padding:6px 12px;border-radius:20px;background:rgba(139,74,74,0.1);border:none;color:#8b4a4a;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="showSettings()">⚙️</button>
+    </div>
   </div>
 </div>
 <div class="wrap" id="wrap"><div class="loading">불러오는 중...</div></div>
@@ -203,11 +206,16 @@ let fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:''
 let acc = {s:false,t:false};
 let curId = null;
 let aFilter = 'all';
-let aDateFilter = 'all'; // all, today, week, month
+let aDateStart = '';
+let aDateEnd = '';
 
 const pill = document.getElementById('modePill');
 pill.textContent = IS_ADMIN ? '사장님 🔑' : '주문하기';
 pill.className   = 'pill ' + (IS_ADMIN ? 'pill-a' : 'pill-g');
+if (IS_ADMIN) {
+  const sb = document.getElementById('settingsBtn');
+  if (sb) sb.style.display = 'block';
+}
 
 function W(h) { document.getElementById('wrap').innerHTML = h; }
 function toast(msg) {
@@ -297,7 +305,7 @@ function renderGuest() {
   h += '<div class="tog-bd">';
   h += '<div style="display:flex;align-items:center;gap:6px;"><div class="tog-l">🍫 초콜릿 장식<\/div>';
   h += '<div style="font-size:11px;color:#8b4a4a;background:rgba(139,74,74,0.1);padding:2px 8px;border-radius:8px;">설명 보기 ›<\/div><\/div>';
-  h += '<div class="tog-s">화이트 초콜릿 장식 '+CFG.choco_price.toLocaleString()+'원 · 탭해서 자세히 보기<\/div><\/div>';
+  h += '<div class="tog-s">화이트 초콜릿 장식 '+CFG.choco_price.toLocaleString()+'원<\/div><\/div>';
   h += '<div class="sw'+(fd.choco?' on':'')+'" onclick="event.stopPropagation();fd.choco=!fd.choco;renderGuest()"><div class="sw-k"><\/div><\/div><\/div>';
   h += '<div class="tog"><div class="tog-bd"><div class="tog-l">🚗 배달 요청<\/div><div class="tog-s">부여 전 지역 '+CFG.delivery_price.toLocaleString()+'원<\/div><\/div>';
   h += '<div class="sw'+(fd.delivery?' on':'')+'" onclick="fd.delivery=!fd.delivery;renderGuest()"><div class="sw-k"><\/div><\/div><\/div>';
@@ -412,24 +420,19 @@ async function renderAdmin() {
   const orders = await getOrders();
 
   // 날짜 필터 적용
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0,10);
-  const weekAgo = new Date(now - 7*24*60*60*1000);
-  const monthAgo = new Date(now - 30*24*60*60*1000);
-
   let dateFiltered = orders;
-  if (aDateFilter === 'today') {
-    dateFiltered = orders.filter(function(o) { return o.pickup_date === todayStr; });
-  } else if (aDateFilter === 'week') {
-    dateFiltered = orders.filter(function(o) { return new Date(o.pickup_date) >= weekAgo; });
-  } else if (aDateFilter === 'month') {
-    dateFiltered = orders.filter(function(o) { return new Date(o.pickup_date) >= monthAgo; });
+  if (aDateStart || aDateEnd) {
+    dateFiltered = orders.filter(function(o) {
+      const d = o.pickup_date;
+      if (aDateStart && d < aDateStart) return false;
+      if (aDateEnd && d > aDateEnd) return false;
+      return true;
+    });
   }
 
   const filt = aFilter === 'all' ? dateFiltered : dateFiltered.filter(function(o) { return o.status === aFilter; });
   const rev  = dateFiltered.filter(function(o) { return o.status !== 'cancel'; }).reduce(function(s,o) { return s+(o.total_price||0); }, 0);
   const lbls = {all:'전체',pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
-  const dlbls = {all:'전체 기간',today:'오늘 픽업',week:'이번 주',month:'이번 달'};
 
   let h = '<div class="sec" style="padding-top:8px;">';
 
@@ -441,14 +444,17 @@ async function renderAdmin() {
   h += '<div class="stat"><div class="stat-n" style="color:#1a8a3a;">'+dateFiltered.filter(function(o){return o.status==='confirmed';}).length+'<\/div><div class="stat-l">확정<\/div><\/div>';
   h += '<div class="stat"><div class="stat-n" style="font-size:14px;padding-top:4px;">'+Math.round(rev/10000)+'만원<\/div><div class="stat-l">매출<\/div><\/div>';
   h += '<\/div>';
-  h += '<button onclick="showSettings()" style="flex-shrink:0;margin-left:10px;padding:8px 14px;border-radius:12px;background:rgba(139,74,74,0.1);border:none;color:#8b4a4a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;">⚙️ 설정<\/button>';
   h += '<\/div>';
 
-  // 날짜 기간 필터
-  h += '<div class="flt" style="margin-bottom:8px;">';
-  ['all','today','week','month'].forEach(function(d) {
-    h += '<button class="fc'+(aDateFilter===d?' on':'')+'" onclick="aDateFilter=\''+d+'\';renderAdmin()">'+dlbls[d]+'<\/button>';
-  });
+  // 날짜 기간 필터 - 캘린더
+  h += '<div style="display:flex;align-items:center;gap:8px;padding:0 16px;margin-bottom:10px;">';
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);">픽업일<\/div>';
+  h += '<input type="date" value="'+aDateStart+'" onchange="aDateStart=this.value;renderAdmin()" style="flex:1;border:1.5px solid var(--sep);border-radius:10px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--card);outline:none;">';
+  h += '<div style="font-size:13px;color:var(--text2);">~<\/div>';
+  h += '<input type="date" value="'+aDateEnd+'" onchange="aDateEnd=this.value;renderAdmin()" style="flex:1;border:1.5px solid var(--sep);border-radius:10px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--card);outline:none;">';
+  if (aDateStart || aDateEnd) {
+    h += '<button onclick="aDateStart=\'\';aDateEnd=\'\';renderAdmin()" style="padding:7px 10px;border-radius:10px;background:rgba(139,74,74,0.1);border:none;color:#8b4a4a;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">초기화<\/button>';
+  }
   h += '<\/div>';
 
   // 구분선
