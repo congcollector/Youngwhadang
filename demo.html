@@ -23,10 +23,10 @@
   --blue: #007aff;
 }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:var(--text); -webkit-font-smoothing:antialiased; font-size:16px; }
+html,body { background:#f2f2f7; background:var(--bg); font-family:-apple-system,sans-serif; color:#1c1c1e; color:var(--text); -webkit-font-smoothing:antialiased; font-size:16px; }
 
 /* ── 헤더 ── */
-.hdr { background:rgba(242,242,247,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:0.5px solid var(–sep); padding:52px 20px 0; position:sticky; top:0; z-index:50; }
+.hdr { background:#f2f2f7; background:rgba(242,242,247,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:0.5px solid var(–sep); padding:52px 20px 0; position:sticky; top:0; z-index:50; }
 .hdr-top { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px; }
 .hdr-eye { font-size:11px; font-weight:500; color:var(–text2); letter-spacing:0.3px; margin-bottom:2px; }
 .hdr-ttl { font-size:24px; font-weight:700; letter-spacing:-0.5px; }
@@ -35,8 +35,8 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 .pill-a { background:var(–cake); color:#fff; }
 .hdr-tabs { display:flex; border-top:0.5px solid var(–sep); }
 .hdr-tab { flex:1; padding:11px 0; text-align:center; font-size:14px; font-weight:500; color:var(–text2); border-bottom:2px solid transparent; cursor:pointer; transition:all 0.15s; }
-.hdr-tab.cake.on { color:var(–cake); border-bottom-color:var(–cake); font-weight:600; }
-.hdr-tab.hwa.on { color:var(–hwa); border-bottom-color:var(–hwa); font-weight:600; }
+.hdr-tab.cake.on, .hdr-tab.on.cake { color:#6b4c3b; color:var(–cake); border-bottom-color:#6b4c3b; border-bottom-color:var(–cake); font-weight:600; }
+.hdr-tab.hwa.on, .hdr-tab.on.hwa { color:#3a5a7a; color:var(–hwa); border-bottom-color:#3a5a7a; border-bottom-color:var(–hwa); font-weight:600; }
 
 /* ── 레이아웃 ── */
 .wrap { max-width:480px; margin:0 auto; padding:24px 0 100px; }
@@ -48,7 +48,7 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 .sec-foot { font-size:12px; color:var(–text2); padding:8px 20px 0; line-height:1.6; }
 
 /* ── 카드 ── */
-.card { background:var(–card); border-radius:var(–r); margin:0 16px; overflow:hidden; }
+.card { background:#ffffff; background:var(–card); border-radius:13px; border-radius:var(–r); margin:0 16px; overflow:hidden; }
 
 /* ── 행 입력 ── */
 .row { display:flex; align-items:center; padding:0 16px; min-height:48px; border-bottom:0.5px solid var(–sep); }
@@ -59,13 +59,13 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 .inp::placeholder { color:var(–text3); }
 
 /* ── 주문 안내 ── */
-.notice { background:var(–card); border-radius:var(–r); padding:16px; margin:0 16px; font-size:14px; color:var(–text2); line-height:1.7; } .notice strong { color:var(–text); font-weight:600; }
+.notice { background:#ffffff; background:var(–card); border-radius:13px; border-radius:var(–r); padding:16px; margin:0 16px; font-size:14px; color:#8e8e93; color:var(–text2); line-height:1.7; } .notice strong { color:#1c1c1e; color:var(–text); font-weight:600; }
 .notice strong { color:var(–text); font-weight:600; }
 
 /* ── 사이즈 슬라이드 ── */
 .sz-scroll { display:flex; gap:10px; overflow-x:auto; padding:0 16px 4px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
 .sz-scroll::-webkit-scrollbar { display:none; }
-.sz { flex-shrink:0; width:130px; background:var(–card); border-radius:var(–r); padding:14px 12px; text-align:center; border:2px solid transparent; cursor:pointer; transition:all 0.15s; }
+.sz { flex-shrink:0; width:130px; background:#ffffff; background:var(–card); border-radius:var(–r); padding:14px 12px; text-align:center; border:2px solid transparent; cursor:pointer; transition:all 0.15s; }
 .sz.on-cake { border-color:var(–cake); background:var(–cake2); }
 .sz.on-hwa { border-color:var(–hwa); background:var(–hwa2); }
 .sz-e { font-size:26px; margin-bottom:6px; }
@@ -89,7 +89,7 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 
 /* ── 결제 칩 ── */
 .pay-wrap { display:flex; gap:8px; flex-wrap:wrap; padding:14px 16px; }
-.pc { padding:8px 18px; border-radius:20px; font-size:14px; font-weight:500; font-family:inherit; border:1.5px solid var(–sep); cursor:pointer; background:var(–bg); color:var(–text); transition:all 0.15s; }
+.pc { padding:8px 18px; border-radius:20px; font-size:14px; font-weight:500; font-family:inherit; border:1.5px solid rgba(60,60,67,0.1); cursor:pointer; background:#f2f2f7; background:var(–bg); color:var(–text); transition:all 0.15s; }
 .pc.on-cake { background:var(–cake); color:#fff; border-color:var(–cake); }
 .pc.on-hwa { background:var(–hwa); color:#fff; border-color:var(–hwa); }
 
@@ -109,7 +109,7 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 /* ── 시트 ── */
 .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.36); z-index:200; display:none; align-items:flex-end; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
 .overlay.show { display:flex; }
-.sheet { background:var(–bg); border-radius:20px 20px 0 0; padding:0 0 40px; width:100%; animation:up 0.3s cubic-bezier(0.32,0.72,0,1); max-height:90vh; overflow-y:auto; }
+.sheet { background:#f2f2f7; background:var(–bg); border-radius:20px 20px 0 0; padding:0 0 40px; width:100%; animation:up 0.3s cubic-bezier(0.32,0.72,0,1); max-height:90vh; overflow-y:auto; }
 @keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
 .sh-hw { padding:10px 0 6px; text-align:center; }
 .sh-h { display:inline-block; width:36px; height:5px; border-radius:3px; background:rgba(60,60,67,0.18); }
@@ -141,19 +141,19 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 
 /* ── 어드민 통계 ── */
 .stats { display:flex; gap:10px; }
-.stat { flex:1; background:var(–card); border-radius:var(–r); padding:14px 10px; text-align:center; }
+.stat { flex:1; background:#ffffff; background:var(–card); border-radius:13px; border-radius:var(–r); padding:14px 10px; text-align:center; }
 .stat-n { font-size:22px; font-weight:700; letter-spacing:-0.5px; }
 .stat-l { font-size:11px; color:var(–text2); margin-top:3px; font-weight:500; }
 
 /* ── 필터 ── */
 .flt { display:flex; gap:8px; overflow-x:auto; padding:0 16px; margin-bottom:14px; scrollbar-width:none; }
 .flt::-webkit-scrollbar { display:none; }
-.fc { padding:6px 14px; border-radius:20px; font-size:13px; font-weight:500; background:var(–card); color:var(–text2); white-space:nowrap; cursor:pointer; border:none; font-family:inherit; flex-shrink:0; transition:all 0.15s; }
+.fc { padding:6px 14px; border-radius:20px; font-size:13px; font-weight:500; background:#ffffff; background:var(–card); color:var(–text2); white-space:nowrap; cursor:pointer; border:none; font-family:inherit; flex-shrink:0; transition:all 0.15s; }
 .fc.on-cake { background:var(–cake); color:#fff; }
 .fc.on-hwa { background:var(–hwa); color:#fff; }
 
 /* ── 주문 카드 ── */
-.oc { background:var(–card); border-radius:var(–r); margin:0 16px 10px; overflow:hidden; cursor:pointer; }
+.oc { background:#ffffff; background:var(–card); border-radius:var(–r); margin:0 16px 10px; overflow:hidden; cursor:pointer; }
 .oc-top { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; border-bottom:0.5px solid var(–sep); }
 .oc-nm { font-size:16px; font-weight:600; letter-spacing:-0.2px; }
 .oc-bd { padding:10px 16px 12px; font-size:13px; color:var(–text2); line-height:1.8; }
@@ -212,7 +212,7 @@ html,body { background:var(--bg); font-family:-apple-system,sans-serif; color:va
 
 /* ── 옵션 칩 ── */
 .opt-wrap { display:flex; gap:8px; flex-wrap:wrap; padding:14px 16px; }
-.opt-chip { padding:8px 16px; border-radius:20px; font-size:14px; font-weight:500; font-family:inherit; border:1.5px solid var(–sep); cursor:pointer; background:var(–bg); color:var(–text); transition:all 0.15s; }
+.opt-chip { padding:8px 16px; border-radius:20px; font-size:14px; font-weight:500; font-family:inherit; border:1.5px solid rgba(60,60,67,0.1); cursor:pointer; background:#f2f2f7; background:var(–bg); color:var(–text); transition:all 0.15s; }
 .opt-chip.on-hwa { background:var(–hwa); color:#fff; border-color:var(–hwa); }
 .opt-chip.on-cake { background:var(–cake); color:#fff; border-color:var(–cake); }
 </style>
