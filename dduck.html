@@ -236,6 +236,8 @@ async function loadSettings() {
         });
       }
       if (saved.hwa_photos) CFG.hwa_photos = saved.hwa_photos;
+      if (saved.ship_packing_photo !== undefined) CFG.ship_packing_photo = saved.ship_packing_photo;
+      if (saved.ship_packing_desc !== undefined) CFG.ship_packing_desc = saved.ship_packing_desc;
     }
   } catch(e) {}
 }
@@ -277,7 +279,9 @@ const DEFAULT_CFG = {
   ],
   hwa_delivery_price:4000,
   hwa_storage:['🧊 냉동보관 2주 권장','❄️ 받은 즉시 차갑게 보관해주세요','🚫 방부제 X 첨가물 X · 유통기한이 짧습니다. 빠르게 드셔주세요 🙏'],
-  hwa_notice:'주문서 제출 후 010-5496-0736으로 확인 연락드려요.'
+  hwa_notice:'주문서 제출 후 010-5496-0736으로 확인 연락드려요.',
+  ship_packing_photo:'',
+  ship_packing_desc:'냉동 보관이 필요한 화과자를 안전하게 배송하기 위해\n보냉 박스에 아이스팩을 함께 포장하여 발송합니다.\n📦 우체국 택배 · 1-2일 후 도착\n💰 택배비 4,000원 (5만원 이상 무료배송)'
 };
 
 let CFG = JSON.parse(JSON.stringify(DEFAULT_CFG));
@@ -297,9 +301,9 @@ let aDateEnd = '';
 let acc = {s:false,t:false,hs:false};
 
 // 떡케이크 폼
-let fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
+let fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
 // 화과자 폼
-let hf = {name:'',phone:'',size:'',method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
+let hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
 
 const pill = document.getElementById('modePill');
 pill.textContent = IS_ADMIN ? '사장님 🔑' : '주문하기';
@@ -333,20 +337,47 @@ function switchTab(tab) {
 // ══════════════════════
 // 떡케이크 손님
 // ══════════════════════
+function toggleCakeSize(id) {
+  if (!fd.sizes) fd.sizes = {};
+  if (fd.sizes[id]) { delete fd.sizes[id]; } else { fd.sizes[id] = 1; }
+  renderCake();
+}
+function changeCakeQty(id, delta) {
+  if (!fd.sizes) fd.sizes = {};
+  const cur = fd.sizes[id] || 0;
+  const next = cur + delta;
+  if (next <= 0) { delete fd.sizes[id]; } else { fd.sizes[id] = next; }
+  renderCake();
+}
+function toggleHwaSize(id) {
+  if (!hf.sizes) hf.sizes = {};
+  if (hf.sizes[id]) { delete hf.sizes[id]; } else { hf.sizes[id] = 1; }
+  renderHwa();
+}
+function changeHwaQty(id, delta) {
+  if (!hf.sizes) hf.sizes = {};
+  const cur = hf.sizes[id] || 0;
+  const next = cur + delta;
+  if (next <= 0) { delete hf.sizes[id]; } else { hf.sizes[id] = next; }
+  renderHwa();
+}
+
 function selLet(idx) {
   const lt = CFG.lets[parseInt(idx)];
   fd.lettering = (fd.lettering === lt ? '' : lt);
   renderCake();
 }
 function resetCake() {
-  fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
+  fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
   renderCake();
 }
 
 function renderCake() {
   if (fd.done) { renderCakeSuccess(); return; }
-  const sel = CFG.sizes.find(function(s){ return s.id === fd.size; });
-  const total = (sel?sel.price:0) + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
+  let cakeSubtotal = 0;
+  CFG.sizes.forEach(function(s){ cakeSubtotal += s.price * (fd.sizes[s.id]||0); });
+  const total = cakeSubtotal + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
+  const hasSizes = Object.keys(fd.sizes).some(function(k){ return fd.sizes[k]>0; });
   let h = '';
 
   h += '<div class="sec"><div class="sec-hdr">주문 안내</div>';
@@ -380,7 +411,8 @@ function renderCake() {
   CFG.sizes.forEach(function(s) {
     const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
     const pidx = (window._szPhotoIdx && window._szPhotoIdx[s.id]) || 0;
-    h += '<div class="sz'+(fd.size===s.id?' on-cake':'')+'" onclick="fd.size=\''+s.id+'\';renderCake()">';
+    const cqty = fd.sizes[s.id] || 0;
+    h += '<div class="sz'+(cqty>0?' on-cake':'')+'" onclick="toggleCakeSize(\''+s.id+'\')">';
     if (photos.length > 0) {
       h += '<div style="width:100%;height:80px;border-radius:8px;overflow:hidden;margin-bottom:4px;position:relative;">';
       h += '<img src="'+photos[pidx]+'" onclick="event.stopPropagation();showSzPhotoModal(\''+s.id+'\','+pidx+')" style="width:100%;height:100%;object-fit:cover;cursor:pointer;">';
@@ -398,7 +430,15 @@ function renderCake() {
       h += '<div class="sz-e">'+s.e+'<\/div>';
     }
     h += '<div class="sz-n">'+s.name+'<\/div><div class="sz-c">'+s.cm+'<\/div>';
-    h += '<div class="sz-p sz-p-cake">'+s.price.toLocaleString()+'원<\/div><\/div>';
+    h += '<div class="sz-p sz-p-cake">'+s.price.toLocaleString()+'원<\/div>';
+    if (cqty > 0) {
+      h += '<div style="margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="event.stopPropagation()">';
+      h += '<button onclick="changeCakeQty(\''+s.id+'\', -1)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--cake);background:transparent;color:var(--cake);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">−<\/button>';
+      h += '<span style="font-size:14px;font-weight:700;color:var(--cake);min-width:16px;text-align:center;">'+cqty+'<\/span>';
+      h += '<button onclick="changeCakeQty(\''+s.id+'\', 1)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--cake);background:var(--cake);color:white;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+<\/button>';
+      h += '<\/div>';
+    }
+    h += '<\/div>';
   });
   h += '<\/div><\/div>';
 
@@ -463,14 +503,6 @@ function renderCake() {
   }
   h += '<\/div><\/div>';
 
-  if (sel) {
-    h += '<div class="sec"><div class="sec-hdr">결제 금액</div><div class="card">';
-    h += '<div class="pr"><span class="pk">'+sel.name+'<\/span><span class="pv">'+sel.price.toLocaleString()+'원<\/span><\/div>';
-    if (fd.choco) h += '<div class="pr"><span class="pk">초콜릿 장식<\/span><span class="pv">+'+CFG.choco_price.toLocaleString()+'원<\/span><\/div>';
-    if (fd.delivery) h += '<div class="pr"><span class="pk">배달<\/span><span class="pv">+'+CFG.delivery_price.toLocaleString()+'원<\/span><\/div>';
-    h += '<div class="pr"><span class="pkb">총 결제 금액<\/span><span class="pvb-cake">'+total.toLocaleString()+'원<\/span><\/div>';
-    h += '<\/div><\/div>';
-  }
   h += '<div class="sec"><button class="btn-cake" onclick="submitCake()">주문서 제출하기<\/button><\/div>';
   W(h);
 }
@@ -490,17 +522,21 @@ async function submitCake() {
   if (!fd.phone.trim()) { toast('전화번호를 입력해주세요'); return; }
   if (!fd.date) { toast('픽업 날짜를 선택해주세요'); return; }
   if (!fd.time) { toast('픽업 시간을 선택해주세요'); return; }
-  if (!fd.size) { toast('케이크 사이즈를 선택해주세요'); return; }
+  const hasSel = fd.sizes && Object.keys(fd.sizes).some(function(k){ return fd.sizes[k]>0; });
+  if (!hasSel) { toast('케이크 사이즈를 선택해주세요'); return; }
   if (!fd.pay) { toast('결제 방법을 선택해주세요'); return; }
-  const sel = CFG.sizes.find(function(s){ return s.id===fd.size; });
-  const total = sel.price + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
+  let cakeSub = 0;
+  const sizeNames = [];
+  CFG.sizes.forEach(function(s){ const q=fd.sizes[s.id]||0; if(q>0){cakeSub+=s.price*q; sizeNames.push(s.name+' x'+q);} });
+  const total = cakeSub + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
       id:'c_'+Date.now(), type:'cake',
       name:fd.name, phone:fd.phone,
       pickup_date:fd.date, pickup_time:fd.time,
-      cake_size:sel.name, cake_price:sel.price,
+      cake_size:sizeNames.join(', '), cake_price:cakeSub,
+      sizes:JSON.stringify(fd.sizes),
       design:fd.design||'', lettering:fd.lettering||'',
       payment:fd.pay, choco_deco:fd.choco,
       delivery:fd.method==='delivery', delivery_addr:fd.method==='delivery'?fd.addr||'':'',
@@ -516,20 +552,22 @@ async function submitCake() {
 // 화과자 손님
 // ══════════════════════
 function resetHwa() {
-  hf = {name:'',phone:'',size:'',method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
+  hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
   renderHwa();
 }
 
 function renderHwa() {
   if (hf.done) { renderHwaSuccess(); return; }
-  const sel = CFG.hwa_sizes.find(function(s){ return s.id===hf.size; });
-  let total = sel ? sel.price : 0;
+  let hwaSubtotal = 0;
+  CFG.hwa_sizes.forEach(function(s){ hwaSubtotal += s.price * (hf.sizes[s.id]||0); });
+  let total = hwaSubtotal;
   hf.packing.forEach(function(pid) {
     const p = CFG.hwa_packing.find(function(x){ return x.id===pid; });
     if (p) total += p.price;
   });
   if (hf.method==='ship') total += CFG.hwa_delivery_price;
   if (hf.method==='delivery') total += CFG.hwa_delivery_price;
+  const hasHwaSizes = Object.keys(hf.sizes).some(function(k){ return hf.sizes[k]>0; });
   let h = '';
   h += '<div class="sec"><div class="sec-hdr">주문 안내</div>';
   h += '<div class="notice">주문서 제출 후 <strong class="hwa-accent">'+CFG.shop_phone+'<\/strong>으로 확인 연락드려요.<br>입금 계좌: <strong class="hwa-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div><\/div>';
@@ -541,7 +579,8 @@ function renderHwa() {
   CFG.hwa_sizes.forEach(function(s) {
     const photos = (CFG.hwa_photos && CFG.hwa_photos[s.id]) || [];
     const pidx = (window._hwaPhotoIdx && window._hwaPhotoIdx[s.id]) || 0;
-    h += '<div class="sz'+(hf.size===s.id?' on-hwa':'')+'" onclick="hf.size=\''+s.id+'\';renderHwa()" style="width:140px;">';
+    const hqty = hf.sizes[s.id] || 0;
+    h += '<div class="sz'+(hqty>0?' on-hwa':'')+'" onclick="toggleHwaSize(\''+s.id+'\')" style="width:140px;">';
     if (photos.length > 0) {
       h += '<div style="width:100%;height:80px;border-radius:8px;overflow:hidden;margin-bottom:4px;position:relative;">';
       h += '<img src="'+photos[pidx]+'" onclick="event.stopPropagation();showHwaSzModal(\''+s.id+'\','+pidx+')" style="width:100%;height:100%;object-fit:cover;cursor:pointer;">';
@@ -559,8 +598,16 @@ function renderHwa() {
       h += '<div class="sz-e">🌸<\/div>';
     }
     h += '<div class="sz-n">'+s.name+'<\/div>';
-    h += '<div class="sz-c" style="line-height:1.4;margin-bottom:8px;">'+s.desc+'<\/div>';
-    h += '<div class="sz-p sz-p-hwa">'+s.price.toLocaleString()+'원<\/div><\/div>';
+    h += '<div class="sz-c" style="line-height:1.4;margin-bottom:8px;min-height:36px;">'+s.desc+'<\/div>';
+    h += '<div class="sz-p sz-p-hwa">'+s.price.toLocaleString()+'원<\/div>';
+    if (hqty > 0) {
+      h += '<div style="margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="event.stopPropagation()">';
+      h += '<button onclick="changeHwaQty(\''+s.id+'\', -1)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--hwa);background:transparent;color:var(--hwa);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">−<\/button>';
+      h += '<span style="font-size:14px;font-weight:700;color:var(--hwa);min-width:16px;text-align:center;">'+hqty+'<\/span>';
+      h += '<button onclick="changeHwaQty(\''+s.id+'\', 1)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--hwa);background:var(--hwa);color:white;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+<\/button>';
+      h += '<\/div>';
+    }
+    h += '<\/div>';
   });
   h += '<\/div><\/div>';
   h += '<div class="sec"><div class="sec-hdr">수령 방법</div><div class="card">';
@@ -569,6 +616,9 @@ function renderHwa() {
   h += '<button class="opt-chip'+(hf.method==='delivery'?' on-hwa':'')+'" onclick="hf.method=\'delivery\';renderHwa()">🚗 배달<\/button>';
   h += '<button class="opt-chip'+(hf.method==='ship'?' on-hwa':'')+'" onclick="hf.method=\'ship\';renderHwa()">📦 택배<\/button>';
   h += '<\/div>';
+  if (hf.method==='ship') {
+    h += '<div style="padding:8px 16px;border-top:0.5px solid var(--sep);"><button onclick="showShipPackingModal()" style="padding:6px 12px;border-radius:20px;background:rgba(120,120,128,0.1);border:none;color:var(--text2);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;">📦 택배 포장 보기 ›<\/button><\/div>';
+  }
   if (hf.method === 'pickup') {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
@@ -630,9 +680,12 @@ function renderHwa() {
     h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:13px;color:var(--text2);line-height:1.8;">💳 입금 계좌<br><strong style="color:var(--hwa);">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
   }
   h += '<\/div><\/div>';
-  if (sel) {
+  if (hasHwaSizes) {
     h += '<div class="sec"><div class="sec-hdr">결제 금액</div><div class="card">';
-    h += '<div class="pr"><span class="pk">화과자 '+sel.name+'<\/span><span class="pv">'+sel.price.toLocaleString()+'원<\/span><\/div>';
+    CFG.hwa_sizes.forEach(function(s) {
+      const qty = hf.sizes[s.id]||0;
+      if (qty > 0) h += '<div class="pr"><span class="pk">화과자 '+s.name+' x'+qty+'<\/span><span class="pv">'+(s.price*qty).toLocaleString()+'원<\/span><\/div>';
+    });
     hf.packing.forEach(function(pid) {
       const p = CFG.hwa_packing.find(function(x){ return x.id===pid; });
       if (p) h += '<div class="pr"><span class="pk">'+p.name+'<\/span><span class="pv">+'+p.price.toLocaleString()+'원<\/span><\/div>';
@@ -665,23 +718,28 @@ function renderHwaSuccess() {
 async function submitHwa() {
   if (!hf.name.trim()) { toast('성함을 입력해주세요'); return; }
   if (!hf.phone.trim()) { toast('연락처를 입력해주세요'); return; }
-  if (!hf.size) { toast('화과자 수량을 선택해주세요'); return; }
+  const hasHwaSel = hf.sizes && Object.keys(hf.sizes).some(function(k){ return hf.sizes[k]>0; });
+  if (!hasHwaSel) { toast('화과자 수량을 선택해주세요'); return; }
   if (hf.method==='pickup' && !hf.pickup_date) { toast('픽업 날짜를 선택해주세요'); return; }
   if (hf.method==='ship' && !hf.ship_addr.trim()) { toast('배송 주소를 입력해주세요'); return; }
   if (!hf.pay) { toast('결제 방법을 선택해주세요'); return; }
-  const sel = CFG.hwa_sizes.find(function(s){ return s.id===hf.size; });
-  let total = sel.price;
+  let hwaSub = 0;
+  const hwaSizeNames = [];
+  CFG.hwa_sizes.forEach(function(s){ const q=hf.sizes[s.id]||0; if(q>0){hwaSub+=s.price*q; hwaSizeNames.push(s.name+' x'+q);} });
+  let total = hwaSub;
   hf.packing.forEach(function(pid) {
     const p = CFG.hwa_packing.find(function(x){ return x.id===pid; });
     if (p) total += p.price;
   });
   if (hf.method==='ship') total += CFG.hwa_delivery_price;
+  if (hf.method==='delivery') total += CFG.hwa_delivery_price;
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
       id:'h_'+Date.now(), type:'hwa',
       name:hf.name, phone:hf.phone,
-      cake_size:sel.name, cake_price:sel.price,
+      cake_size:sizeNames.join(', '), cake_price:cakeSub,
+      sizes:JSON.stringify(fd.sizes),
       method:hf.method,
       pickup_date:hf.method==='pickup'?hf.pickup_date:hf.ship_date,
       pickup_time:hf.pickup_time||'',
@@ -968,6 +1026,28 @@ function showHwaSzModal(sizeId, startIdx) {
   document.body.appendChild(modal);
 }
 
+function showShipPackingModal() {
+  let modal = document.getElementById('ship_pk_modal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'ship_pk_modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+  modal.onclick = function(e){if(e.target===modal)modal.remove();};
+  let inner = '<div style="background:#f7f3f0;border-radius:20px 20px 0 0;padding:0 0 40px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:up 0.28s cubic-bezier(0.32,0.72,0,1);">';
+  inner += '<div style="padding:10px 0 6px;text-align:center;"><div style="display:inline-block;width:36px;height:5px;border-radius:3px;background:rgba(60,60,67,0.2);"><\/div><\/div>';
+  inner += '<div style="padding:4px 20px 16px;border-bottom:0.5px solid var(--sep);"><div style="font-size:17px;font-weight:600;">📦 택배 포장 안내<\/div><\/div>';
+  if (CFG.ship_packing_photo) {
+    inner += '<div style="padding:16px 16px 0;"><img src="'+CFG.ship_packing_photo+'" style="width:100%;border-radius:12px;object-fit:cover;max-height:240px;"><\/div>';
+  }
+  const desc = (CFG.ship_packing_desc||'').replace(/\n/g,'<br>');
+  inner += '<div style="padding:16px 20px;font-size:14px;color:#6b6b70;line-height:1.9;">'+desc+'<\/div>';
+  inner += '<div style="padding:0 16px;">';
+  inner += '<button onclick="document.getElementById(\'ship_pk_modal\').remove()" style="width:100%;padding:13px;border-radius:14px;background:rgba(120,120,128,0.12);border:none;color:#6b6b70;font-size:14px;font-family:inherit;cursor:pointer;">닫기<\/button>';
+  inner += '<\/div><\/div>';
+  modal.innerHTML = inner;
+  document.body.appendChild(modal);
+}
+
 function showHwaPackingModal(packingId) {
   const p = CFG.hwa_packing.find(function(x){ return x.id===packingId; });
   if (!p) return;
@@ -1047,6 +1127,18 @@ function addChocoPhoto(e) {
 }
 function removeChocoPhoto() {
   CFG.choco_photo = '';
+  saveSettings(Object.assign({},CFG)).then(function(){ toast('삭제됐어요'); showSettings(); });
+}
+
+function addShipPackingPhoto(e) {
+  const file = e.target.files[0]; if (!file) return;
+  resizeImage(file, 1200, 900, function(data) {
+    CFG.ship_packing_photo = data;
+    saveSettings(Object.assign({},CFG)).then(function(){ toast('사진 추가됐어요 ✅'); showSettings(); });
+  });
+}
+function removeShipPackingPhoto() {
+  CFG.ship_packing_photo = '';
   saveSettings(Object.assign({},CFG)).then(function(){ toast('삭제됐어요'); showSettings(); });
 }
 
@@ -1201,6 +1293,19 @@ function showSettings() {
     h += '<div class="dl" style="margin-bottom:14px;">';
     h += '<div class="dr"><div class="dk">택배비<\/div><div class="dv"><input id="cfg_hwa_delivery" type="number" style="border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;width:100%;text-align:right;" value="'+CFG.hwa_delivery_price+'"><\/div><\/div>';
     h += '<\/div>';
+    h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">택배 포장 안내<\/div>';
+    h += '<div class="dl" style="margin-bottom:14px;">';
+    h += '<div class="dr" style="flex-direction:column;gap:8px;">';
+    h += '<div style="font-size:12px;color:var(--text2);font-weight:500;">설명 문구<\/div>';
+    h += '<textarea id="cfg_ship_desc" style="width:100%;border:1px solid var(--sep);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);resize:none;height:90px;outline:none;line-height:1.6;">'+(CFG.ship_packing_desc||'')+'<\/textarea>';
+    h += '<div style="font-size:12px;color:var(--text2);font-weight:500;">사진<\/div>';
+    if (CFG.ship_packing_photo) {
+      h += '<div style="position:relative;display:inline-block;"><img src="'+CFG.ship_packing_photo+'" style="width:120px;height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);">';
+      h += '<button onclick="removeShipPackingPhoto()" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
+    } else {
+      h += '<label style="width:120px;height:90px;border-radius:8px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:var(--bg);"><span style="font-size:22px;color:var(--text2);">📦<\/span><span style="font-size:10px;color:var(--text2);">사진 추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addShipPackingPhoto(event)"><\/label>';
+    }
+    h += '<\/div><\/div>';
     h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">보관 방법<\/div>';
     h += '<div class="dl" style="margin-bottom:14px;">';
     CFG.hwa_storage.forEach(function(t,i) {
@@ -1249,6 +1354,9 @@ async function saveSettingsFromForm() {
     newCFG.hwa_delivery_price = parseInt(document.getElementById('cfg_hwa_delivery').value)||4000;
     newCFG.hwa_storage = CFG.hwa_storage.map(function(_,i){ return document.getElementById('cfg_hwa_storage_'+i).value; });
     newCFG.hwa_notice = document.getElementById('cfg_hwa_notice').value;
+    const shipDesc = document.getElementById('cfg_ship_desc');
+    if (shipDesc) newCFG.ship_packing_desc = shipDesc.value;
+    newCFG.ship_packing_photo = CFG.ship_packing_photo || '';
   }
   await saveSettings(newCFG);
   CFG = newCFG;
