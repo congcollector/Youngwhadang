@@ -363,10 +363,9 @@ function renderCake() {
   h += '<button class="opt-chip'+(fd.method==='delivery'?' on-cake':'')+'" onclick="fd.method=\'delivery\';renderCake()">🚗 배달<\/button>';
   h += '<\/div>';
   if (fd.method==='pickup') {
-    h += '<div style="padding:8px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-    h += '<div style="padding:8px 16px;font-size:12px;color:var(--text2);">'+CFG.pickup_notice+'<\/div>';
+    h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'<br>📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
   } else {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
@@ -458,7 +457,11 @@ function renderCake() {
   PAYS.forEach(function(p) {
     h += '<button class="pc'+(fd.pay===p?' on-cake':'')+'" onclick="fd.pay=\''+p+'\';renderCake()">'+p+'<\/button>';
   });
-  h += '<\/div><\/div><\/div>';
+  h += '<\/div>';
+  if (fd.pay==='계좌이체') {
+    h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:13px;color:var(--text2);line-height:1.8;">💳 입금 계좌<br><strong style="color:var(--cake);">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
+  }
+  h += '<\/div><\/div>';
 
   if (sel) {
     h += '<div class="sec"><div class="sec-hdr">결제 금액</div><div class="card">';
@@ -567,15 +570,15 @@ function renderHwa() {
   h += '<button class="opt-chip'+(hf.method==='ship'?' on-hwa':'')+'" onclick="hf.method=\'ship\';renderHwa()">📦 택배<\/button>';
   h += '<\/div>';
   if (hf.method === 'pickup') {
-    h += '<div style="padding:8px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
+    h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
   } else if (hf.method === 'delivery') {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
     h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value">';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +'+CFG.hwa_delivery_price.toLocaleString()+'원<\/div>';
+    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +5,000원<\/div>';
     h += '<\/div>';
   } else {
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
@@ -622,7 +625,11 @@ function renderHwa() {
   PAYS.forEach(function(p) {
     h += '<button class="pc'+(hf.pay===p?' on-hwa':'')+'" onclick="hf.pay=\''+p+'\';renderHwa()">'+p+'<\/button>';
   });
-  h += '<\/div><\/div><\/div>';
+  h += '<\/div>';
+  if (hf.pay==='계좌이체') {
+    h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:13px;color:var(--text2);line-height:1.8;">💳 입금 계좌<br><strong style="color:var(--hwa);">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
+  }
+  h += '<\/div><\/div>';
   if (sel) {
     h += '<div class="sec"><div class="sec-hdr">결제 금액</div><div class="card">';
     h += '<div class="pr"><span class="pk">화과자 '+sel.name+'<\/span><span class="pv">'+sel.price.toLocaleString()+'원<\/span><\/div>';
