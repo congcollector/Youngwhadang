@@ -169,6 +169,7 @@ html,body{background:var(--bg);font-family:-apple-system,'Helvetica Neue',sans-s
 .opt-wrap{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;}
 .opt-chip{padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;font-family:inherit;border:1.5px solid var(--sep);cursor:pointer;background:var(--bg);color:var(--text);transition:all 0.15s;}
 .opt-chip.on-hwa{background:var(--hwa);color:#fff;border-color:var(--hwa);}
+.opt-chip.on-cake{background:var(--cake);color:#fff;border-color:var(--cake);}
 </style>
 </head>
 <body>
@@ -228,7 +229,13 @@ async function loadSettings() {
       if (saved.transport_tips) CFG.transport_tips = saved.transport_tips;
       if (saved.size_photos) CFG.size_photos = saved.size_photos;
       if (saved.hwa_sizes) CFG.hwa_sizes = saved.hwa_sizes;
-      if (saved.hwa_packing) CFG.hwa_packing = saved.hwa_packing;
+      if (saved.hwa_packing) {
+        CFG.hwa_packing = saved.hwa_packing.map(function(p,i) {
+          const def = DEFAULT_CFG.hwa_packing[i] || {};
+          return Object.assign({}, def, p);
+        });
+      }
+      if (saved.hwa_photos) CFG.hwa_photos = saved.hwa_photos;
     }
   } catch(e) {}
 }
@@ -262,10 +269,11 @@ const DEFAULT_CFG = {
     {id:'h15',name:'15구',price:64000,desc:'쑥/흑임자/인절미/무화과/완두'},
     {id:'h20',name:'20구',price:85000,desc:'쑥/흑임자/인절미/무화과/완두/밤'}
   ],
+  hwa_photos:{},
   hwa_packing:[
-    {id:'p_crystal',name:'크리스탈 보자기',price:10000,desc:'노리개+추석 띠지 · 살구색/은색'},
-    {id:'p_bojagi',name:'보자기+리본 띠지',price:8000,desc:'20글자 내외 문구 포함'},
-    {id:'p_bag',name:'쇼핑백',price:2000,desc:'자체제작 고급쇼핑백'}
+    {id:'p_crystal',name:'크리스탈 보자기',price:10000,desc:'노리개+추석 띠지 · 살구색/은색',photo:'',popup_desc:'크리스탈 보자기 포장이에요.'},
+    {id:'p_bojagi',name:'보자기+리본 띠지',price:8000,desc:'20글자 내외 문구 포함',photo:'',popup_desc:'보자기+리본 띠지 포장이에요.'},
+    {id:'p_bag',name:'쇼핑백',price:2000,desc:'자체제작 고급쇼핑백',photo:'',popup_desc:'영화당 자체제작 고급쇼핑백이에요.'}
   ],
   hwa_delivery_price:4000,
   hwa_storage:['🧊 냉동보관 2주 권장','❄️ 받은 즉시 차갑게 보관해주세요','🚫 방부제 X 첨가물 X · 유통기한이 짧습니다. 빠르게 드셔주세요 🙏'],
@@ -289,7 +297,7 @@ let aDateEnd = '';
 let acc = {s:false,t:false,hs:false};
 
 // 떡케이크 폼
-let fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,delivery:false,addr:'',photos:[],done:false};
+let fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
 // 화과자 폼
 let hf = {name:'',phone:'',size:'',method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
 
@@ -331,14 +339,14 @@ function selLet(idx) {
   renderCake();
 }
 function resetCake() {
-  fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,delivery:false,addr:'',photos:[],done:false};
+  fd = {name:'',phone:'',date:'',time:'',size:'',design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
   renderCake();
 }
 
 function renderCake() {
   if (fd.done) { renderCakeSuccess(); return; }
   const sel = CFG.sizes.find(function(s){ return s.id === fd.size; });
-  const total = (sel?sel.price:0) + (fd.choco?CFG.choco_price:0) + (fd.delivery?CFG.delivery_price:0);
+  const total = (sel?sel.price:0) + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
   let h = '';
 
   h += '<div class="sec"><div class="sec-hdr">주문 안내</div>';
@@ -349,10 +357,25 @@ function renderCake() {
   h += '<div class="row"><div class="row-lbl">전화번호 <span class="req">*</span><\/div><input class="inp" type="tel" placeholder="010-0000-0000" value="'+fd.phone+'" oninput="fd.phone=this.value"><\/div>';
   h += '<\/div><\/div>';
 
-  h += '<div class="sec"><div class="sec-hdr">픽업 일정</div><div class="card">';
-  h += '<div class="row"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
-  h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-  h += '<\/div><div class="sec-foot">'+CFG.pickup_notice+'<\/div><\/div>';
+  h += '<div class="sec"><div class="sec-hdr">수령 방법</div><div class="card">';
+  h += '<div class="opt-wrap">';
+  h += '<button class="opt-chip'+(fd.method==='pickup'?' on-cake':'')+'" onclick="fd.method=\'pickup\';renderCake()">🏪 픽업<\/button>';
+  h += '<button class="opt-chip'+(fd.method==='delivery'?' on-cake':'')+'" onclick="fd.method=\'delivery\';renderCake()">🚗 배달<\/button>';
+  h += '<\/div>';
+  if (fd.method==='pickup') {
+    h += '<div style="padding:8px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
+    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
+    h += '<div style="padding:8px 16px;font-size:12px;color:var(--text2);">'+CFG.pickup_notice+'<\/div>';
+  } else {
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
+    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
+    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
+    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value">';
+    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원<\/div>';
+    h += '<\/div>';
+  }
+  h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">케이크 사이즈</div><div class="sz-scroll">';
   CFG.sizes.forEach(function(s) {
@@ -386,14 +409,7 @@ function renderCake() {
   h += '<div style="font-size:11px;color:var(--cake);background:var(--cake2);padding:2px 8px;border-radius:8px;">설명 보기 ›<\/div><\/div>';
   h += '<div class="tog-s">화이트 초콜릿 장식 '+CFG.choco_price.toLocaleString()+'원<\/div><\/div>';
   h += '<div class="sw'+(fd.choco?' on-cake':'')+'" onclick="event.stopPropagation();fd.choco=!fd.choco;renderCake()"><div class="sw-k"><\/div><\/div><\/div>';
-  h += '<div class="tog" onclick="fd.delivery=!fd.delivery;renderCake()">';
-  h += '<div class="tog-bd"><div class="tog-l">🚗 배달 요청<\/div><div class="tog-s">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원<\/div><\/div>';
-  h += '<div class="sw'+(fd.delivery?' on-cake':'')+'" onclick="event.stopPropagation();fd.delivery=!fd.delivery;renderCake()"><div class="sw-k"><\/div><\/div><\/div>';
-  if (fd.delivery) {
-    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소" value="'+fd.addr+'" oninput="fd.addr=this.value">';
-    h += '<\/div>';
-  }
+
   h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">안내사항</div><div class="card">';
@@ -474,7 +490,7 @@ async function submitCake() {
   if (!fd.size) { toast('케이크 사이즈를 선택해주세요'); return; }
   if (!fd.pay) { toast('결제 방법을 선택해주세요'); return; }
   const sel = CFG.sizes.find(function(s){ return s.id===fd.size; });
-  const total = sel.price + (fd.choco?CFG.choco_price:0) + (fd.delivery?CFG.delivery_price:0);
+  const total = sel.price + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
@@ -484,7 +500,7 @@ async function submitCake() {
       cake_size:sel.name, cake_price:sel.price,
       design:fd.design||'', lettering:fd.lettering||'',
       payment:fd.pay, choco_deco:fd.choco,
-      delivery:fd.delivery, delivery_addr:fd.addr||'',
+      delivery:fd.method==='delivery', delivery_addr:fd.method==='delivery'?fd.addr||'':'',
       total_price:total, status:'pending', memo:'',
       photos:JSON.stringify(fd.photos||[]),
       created_at:Date.now()
@@ -509,61 +525,92 @@ function renderHwa() {
     const p = CFG.hwa_packing.find(function(x){ return x.id===pid; });
     if (p) total += p.price;
   });
-  if (hf.bag) total += 2000;
-  if (hf.method === 'ship') total += CFG.hwa_delivery_price;
-
+  if (hf.method==='ship') total += CFG.hwa_delivery_price;
+  if (hf.method==='delivery') total += CFG.hwa_delivery_price;
   let h = '';
   h += '<div class="sec"><div class="sec-hdr">주문 안내</div>';
-  h += '<div class="notice">주문서 제출 후 <strong class="hwa-accent">'+CFG.shop_phone+'</strong>으로 확인 연락드려요.<br>입금 계좌: <strong class="hwa-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')</strong><\/div><\/div>';
-
+  h += '<div class="notice">주문서 제출 후 <strong class="hwa-accent">'+CFG.shop_phone+'<\/strong>으로 확인 연락드려요.<br>입금 계좌: <strong class="hwa-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div><\/div>';
   h += '<div class="sec"><div class="sec-hdr">기본 정보</div><div class="card">';
   h += '<div class="row"><div class="row-lbl">성함 <span class="req">*</span><\/div><input class="inp" placeholder="주문자 성함" value="'+hf.name+'" oninput="hf.name=this.value"><\/div>';
   h += '<div class="row"><div class="row-lbl">연락처 <span class="req">*</span><\/div><input class="inp" type="tel" placeholder="010-0000-0000" value="'+hf.phone+'" oninput="hf.phone=this.value"><\/div>';
   h += '<\/div><\/div>';
-
   h += '<div class="sec"><div class="sec-hdr">화과자 수량</div><div class="sz-scroll">';
   CFG.hwa_sizes.forEach(function(s) {
+    const photos = (CFG.hwa_photos && CFG.hwa_photos[s.id]) || [];
+    const pidx = (window._hwaPhotoIdx && window._hwaPhotoIdx[s.id]) || 0;
     h += '<div class="sz'+(hf.size===s.id?' on-hwa':'')+'" onclick="hf.size=\''+s.id+'\';renderHwa()" style="width:140px;">';
-    h += '<div class="sz-e">🌸<\/div>';
+    if (photos.length > 0) {
+      h += '<div style="width:100%;height:80px;border-radius:8px;overflow:hidden;margin-bottom:4px;position:relative;">';
+      h += '<img src="'+photos[pidx]+'" onclick="event.stopPropagation();showHwaSzModal(\''+s.id+'\','+pidx+')" style="width:100%;height:100%;object-fit:cover;cursor:pointer;">';
+      if (photos.length > 1) {
+        h += '<div onclick="event.stopPropagation();prevHwaPhoto(\''+s.id+'\','+photos.length+')" style="position:absolute;left:2px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.4);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;">‹<\/div>';
+        h += '<div onclick="event.stopPropagation();nextHwaPhoto(\''+s.id+'\','+photos.length+')" style="position:absolute;right:2px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.4);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;">›<\/div>';
+        h += '<div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);display:flex;gap:3px;">';
+        for (let pi=0; pi<photos.length; pi++) {
+          h += '<div style="width:5px;height:5px;border-radius:50%;background:'+(pi===pidx?'white':'rgba(255,255,255,0.5)')+';display:inline-block;"><\/div>';
+        }
+        h += '<\/div>';
+      }
+      h += '<\/div>';
+    } else {
+      h += '<div class="sz-e">🌸<\/div>';
+    }
     h += '<div class="sz-n">'+s.name+'<\/div>';
     h += '<div class="sz-c" style="line-height:1.4;margin-bottom:8px;">'+s.desc+'<\/div>';
     h += '<div class="sz-p sz-p-hwa">'+s.price.toLocaleString()+'원<\/div><\/div>';
   });
   h += '<\/div><\/div>';
-
   h += '<div class="sec"><div class="sec-hdr">수령 방법</div><div class="card">';
   h += '<div class="opt-wrap">';
   h += '<button class="opt-chip'+(hf.method==='pickup'?' on-hwa':'')+'" onclick="hf.method=\'pickup\';renderHwa()">🏪 픽업<\/button>';
+  h += '<button class="opt-chip'+(hf.method==='delivery'?' on-hwa':'')+'" onclick="hf.method=\'delivery\';renderHwa()">🚗 배달<\/button>';
   h += '<button class="opt-chip'+(hf.method==='ship'?' on-hwa':'')+'" onclick="hf.method=\'ship\';renderHwa()">📦 택배<\/button>';
   h += '<\/div>';
   if (hf.method === 'pickup') {
+    h += '<div style="padding:8px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
+  } else if (hf.method === 'delivery') {
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
+    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
+    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
+    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value">';
+    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +'+CFG.hwa_delivery_price.toLocaleString()+'원<\/div>';
+    h += '<\/div>';
   } else {
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;margin-bottom:8px;" placeholder="배송 주소 <span class="req">*</span>" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value">';
-    h += '<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">발송 날짜</div>';
+    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;margin-bottom:8px;" placeholder="배송 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value">';
+    h += '<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">발송 날짜<\/div>';
     h += '<input type="date" style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" value="'+hf.ship_date+'" oninput="hf.ship_date=this.value">';
     h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">📦 우체국 택배 · 1-2일 후 도착 · 택배비 '+CFG.hwa_delivery_price.toLocaleString()+'원 (5만원 이상 무료)<\/div>';
     h += '<\/div>';
   }
   h += '<\/div><\/div>';
-
   h += '<div class="sec"><div class="sec-hdr">포장 옵션</div><div class="card">';
   CFG.hwa_packing.forEach(function(p) {
     const isOn = hf.packing.indexOf(p.id) >= 0;
-    h += '<div class="tog" onclick="togglePacking(\''+p.id+'\')">';
-    h += '<div class="tog-bd"><div class="tog-l">'+p.name+'<\/div><div class="tog-s">+'+p.price.toLocaleString()+'원 · '+p.desc+'<\/div><\/div>';
-    h += '<div class="sw'+(isOn?' on-hwa':'')+'" onclick="event.stopPropagation();togglePacking(\''+p.id+'\')"><div class="sw-k"><\/div><\/div><\/div>';
-  });
-  if (hf.packing.indexOf('p_bojagi') >= 0 || hf.packing.indexOf('p_crystal') >= 0) {
-    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">띠지 문구 (20글자 내외)<\/div>';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="예) 사랑하는 부모님 / 늘 감사합니다" value="'+hf.packing_text+'" oninput="hf.packing_text=this.value">';
+    const needsText = (p.id==='p_bojagi'||p.id==='p_crystal') && isOn;
+    h += '<div class="tog" onclick="togglePacking(\''+p.id+'\')" style="align-items:flex-start;padding-top:14px;flex-direction:column;">';
+    h += '<div style="display:flex;align-items:center;width:100%;">';
+    h += '<div class="tog-bd">';
+    h += '<div style="display:flex;align-items:center;gap:6px;"><div class="tog-l">'+p.name+'<\/div>';
+    if (p.photo) {
+      h += '<div style="font-size:11px;color:var(--hwa);background:var(--hwa2);padding:2px 8px;border-radius:8px;cursor:pointer;" onclick="event.stopPropagation();showHwaPackingModal(\''+p.id+'\')">설명 보기 ›<\/div>';
+    }
     h += '<\/div>';
-  }
+    h += '<div class="tog-s">+'+p.price.toLocaleString()+'원 · '+(p.desc||'')+'<\/div>';
+    h += '<\/div>';
+    h += '<div class="sw'+(isOn?' on-hwa':'')+'" onclick="event.stopPropagation();togglePacking(\''+p.id+'\')" style="margin-top:3px;flex-shrink:0;"><div class="sw-k"><\/div><\/div>';
+    h += '<\/div>';
+    if (needsText) {
+      h += '<div style="width:100%;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--sep);" onclick="event.stopPropagation()">';
+      h += '<input maxlength="20" style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:8px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="띠지 문구 (20글자 이내)" value="'+hf.packing_text+'" oninput="hf.packing_text=this.value.slice(0,20)">';
+      h += '<div style="font-size:11px;color:var(--text3);margin-top:4px;text-align:right;">'+hf.packing_text.length+'/20<\/div>';
+      h += '<\/div>';
+    }
+    h += '<\/div>';
+  });
   h += '<\/div><\/div>';
-
   h += '<div class="sec"><div class="sec-hdr">안내사항</div><div class="card">';
   h += '<div class="acc-row" onclick="acc.hs=!acc.hs;renderHwa()">';
   h += '<div style="width:30px;height:30px;border-radius:8px;background:var(--hwa2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🧊<\/div>';
@@ -571,13 +618,11 @@ function renderHwa() {
   h += '<div class="arr'+(acc.hs?' open':'')+'">&#8250;<\/div><\/div>';
   if (acc.hs) { h += '<div class="acc-bd">'+CFG.hwa_storage.map(function(t){return '<div class="acc-it">'+t+'<\/div>';}).join('')+'<\/div>'; }
   h += '<\/div><\/div>';
-
   h += '<div class="sec"><div class="sec-hdr">결제 방법</div><div class="card"><div class="pay-wrap">';
   PAYS.forEach(function(p) {
     h += '<button class="pc'+(hf.pay===p?' on-hwa':'')+'" onclick="hf.pay=\''+p+'\';renderHwa()">'+p+'<\/button>';
   });
   h += '<\/div><\/div><\/div>';
-
   if (sel) {
     h += '<div class="sec"><div class="sec-hdr">결제 금액</div><div class="card">';
     h += '<div class="pr"><span class="pk">화과자 '+sel.name+'<\/span><span class="pv">'+sel.price.toLocaleString()+'원<\/span><\/div>';
@@ -586,6 +631,7 @@ function renderHwa() {
       if (p) h += '<div class="pr"><span class="pk">'+p.name+'<\/span><span class="pv">+'+p.price.toLocaleString()+'원<\/span><\/div>';
     });
     if (hf.method==='ship') h += '<div class="pr"><span class="pk">택배비<\/span><span class="pv">+'+CFG.hwa_delivery_price.toLocaleString()+'원<\/span><\/div>';
+    if (hf.method==='delivery') h += '<div class="pr"><span class="pk">배달비<\/span><span class="pv">+'+CFG.hwa_delivery_price.toLocaleString()+'원<\/span><\/div>';
     h += '<div class="pr"><span class="pkb">총 결제 금액<\/span><span class="pvb-hwa">'+total.toLocaleString()+'원<\/span><\/div>';
     h += '<\/div><\/div>';
   }
@@ -877,6 +923,69 @@ function showSzPhotoModal(sizeId, startIdx) {
   renderModal();
 }
 
+function nextHwaPhoto(sizeId, total) {
+  if (!window._hwaPhotoIdx) window._hwaPhotoIdx = {};
+  window._hwaPhotoIdx[sizeId] = ((window._hwaPhotoIdx[sizeId]||0)+1)%total;
+  renderHwa();
+}
+function prevHwaPhoto(sizeId, total) {
+  if (!window._hwaPhotoIdx) window._hwaPhotoIdx = {};
+  window._hwaPhotoIdx[sizeId] = ((window._hwaPhotoIdx[sizeId]||0)-1+total)%total;
+  renderHwa();
+}
+function showHwaSzModal(sizeId, startIdx) {
+  const photos = (CFG.hwa_photos && CFG.hwa_photos[sizeId]) || [];
+  if (!photos.length) return;
+  const s = CFG.hwa_sizes.find(function(x){return x.id===sizeId;});
+  let idx = startIdx || 0;
+  window.hwaModalGo = function(newIdx, sid) { showHwaSzModal(sid, newIdx); };
+  let modal = document.getElementById('hwa_sz_modal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'hwa_sz_modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+  modal.onclick = function(e){if(e.target===modal)modal.remove();};
+  let html = '<button onclick="document.getElementById(\'hwa_sz_modal\').remove()" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);color:white;border:none;font-size:18px;cursor:pointer;">✕<\/button>';
+  html += '<div style="color:white;font-size:14px;font-weight:600;margin-bottom:12px;">'+(s?s.name:'')+(photos.length>1?' '+(idx+1)+'/'+photos.length:'')+'<\/div>';
+  html += '<img src="'+photos[idx]+'" style="max-width:92vw;max-height:72vh;border-radius:12px;object-fit:contain;">';
+  if (photos.length > 1) {
+    const prevIdx = (idx - 1 + photos.length) % photos.length;
+    const nextIdx = (idx + 1) % photos.length;
+    html += '<div style="display:flex;gap:8px;margin-top:16px;">';
+    photos.forEach(function(p,i){ html += '<div style="width:8px;height:8px;border-radius:50%;background:'+(i===idx?'white':'rgba(255,255,255,0.4)')+';cursor:pointer;" onclick="event.stopPropagation();showHwaSzModal(\''+sizeId+'\','+i+')"><\/div>'; });
+    html += '<\/div>';
+    html += '<button onclick="event.stopPropagation();showHwaSzModal(\''+sizeId+'\','+prevIdx+')" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);color:white;border:none;font-size:22px;cursor:pointer;">‹<\/button>';
+    html += '<button onclick="event.stopPropagation();showHwaSzModal(\''+sizeId+'\','+nextIdx+')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);color:white;border:none;font-size:22px;cursor:pointer;">›<\/button>';
+  }
+  modal.innerHTML = html;
+  document.body.appendChild(modal);
+}
+
+function showHwaPackingModal(packingId) {
+  const p = CFG.hwa_packing.find(function(x){ return x.id===packingId; });
+  if (!p) return;
+  let modal = document.getElementById('hwa_pk_modal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'hwa_pk_modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+  modal.onclick = function(e){if(e.target===modal)modal.remove();};
+  let inner = '<div style="background:#f7f3f0;border-radius:20px 20px 0 0;padding:0 0 40px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:up 0.28s cubic-bezier(0.32,0.72,0,1);">';
+  inner += '<div style="padding:10px 0 6px;text-align:center;"><div style="display:inline-block;width:36px;height:5px;border-radius:3px;background:rgba(60,60,67,0.2);"><\/div><\/div>';
+  inner += '<div style="padding:4px 20px 16px;border-bottom:0.5px solid var(--sep);"><div style="font-size:17px;font-weight:600;">'+p.name+'<\/div>';
+  inner += '<div style="font-size:13px;color:#6b6b70;margin-top:2px;">+'+p.price.toLocaleString()+'원<\/div><\/div>';
+  if (p.photo) {
+    inner += '<div style="padding:16px 16px 0;"><img src="'+p.photo+'" style="width:100%;border-radius:12px;object-fit:cover;max-height:220px;"><\/div>';
+  }
+  inner += '<div style="padding:16px 20px;font-size:14px;color:#6b6b70;line-height:1.8;">'+(p.popup_desc||p.desc)+'<\/div>';
+  inner += '<div style="padding:0 16px;display:flex;gap:10px;">';
+  inner += '<button onclick="document.getElementById(\'hwa_pk_modal\').remove()" style="flex:1;padding:13px;border-radius:14px;background:rgba(120,120,128,0.12);border:none;color:#6b6b70;font-size:14px;font-family:inherit;cursor:pointer;">닫기<\/button>';
+  inner += '<button onclick="if(hf.packing.indexOf(\''+packingId+'\')>=0){} else{hf.packing.push(\''+packingId+'\')};document.getElementById(\'hwa_pk_modal\').remove();renderHwa()" style="flex:1;padding:13px;border-radius:14px;background:var(--hwa);border:none;color:white;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">이 옵션 추가하기<\/button>';
+  inner += '<\/div><\/div>';
+  modal.innerHTML = inner;
+  document.body.appendChild(modal);
+}
+
 function showChocoModal() {
   let modal = document.getElementById('choco_modal');
   if (modal) modal.remove();
@@ -931,6 +1040,36 @@ function addChocoPhoto(e) {
 }
 function removeChocoPhoto() {
   CFG.choco_photo = '';
+  saveSettings(Object.assign({},CFG)).then(function(){ toast('삭제됐어요'); showSettings(); });
+}
+
+function addHwaPhoto(e, idx) {
+  const file = e.target.files[0]; if (!file) return;
+  resizeImage(file, 1200, 1200, function(data) {
+    if (!CFG.hwa_photos) CFG.hwa_photos = {};
+    const sizeId = CFG.hwa_sizes[idx].id;
+    if (!CFG.hwa_photos[sizeId]) CFG.hwa_photos[sizeId] = [];
+    if (CFG.hwa_photos[sizeId].length >= 3) { toast('최대 3장까지 가능해요'); return; }
+    CFG.hwa_photos[sizeId].push(data);
+    saveSettings(Object.assign({},CFG)).then(function(){ toast('사진 추가됐어요 ✅'); showSettings(); });
+  });
+}
+function removeHwaPhoto(idx, photoIdx) {
+  const sizeId = CFG.hwa_sizes[idx].id;
+  if (CFG.hwa_photos && CFG.hwa_photos[sizeId]) {
+    CFG.hwa_photos[sizeId].splice(photoIdx,1);
+    saveSettings(Object.assign({},CFG)).then(function(){ toast('삭제됐어요'); showSettings(); });
+  }
+}
+function addHwaPkPhoto(e, idx) {
+  const file = e.target.files[0]; if (!file) return;
+  resizeImage(file, 1200, 900, function(data) {
+    CFG.hwa_packing[idx].photo = data;
+    saveSettings(Object.assign({},CFG)).then(function(){ toast('사진 추가됐어요 ✅'); showSettings(); });
+  });
+}
+function removeHwaPkPhoto(idx) {
+  CFG.hwa_packing[idx].photo = '';
   saveSettings(Object.assign({},CFG)).then(function(){ toast('삭제됐어요'); showSettings(); });
 }
 
@@ -1013,20 +1152,42 @@ function showSettings() {
     h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">화과자 종류 & 가격<\/div>';
     h += '<div class="dl" style="margin-bottom:14px;">';
     CFG.hwa_sizes.forEach(function(s,i) {
-      h += '<div class="dr" style="flex-wrap:wrap;gap:6px;">';
+      const photos = (CFG.hwa_photos && CFG.hwa_photos[s.id]) || [];
+      h += '<div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);">';
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
       h += '<input id="cfg_hwa_name_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:70px;" value="'+s.name+'">';
       h += '<input id="cfg_hwa_price_'+i+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:80px;" value="'+s.price+'">';
-      h += '<input id="cfg_hwa_desc_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);flex:1;min-width:120px;" value="'+s.desc+'">';
+      h += '<input id="cfg_hwa_desc_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);flex:1;min-width:100px;" value="'+s.desc+'">';
       h += '<\/div>';
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      photos.forEach(function(p,j) {
+        h += '<div style="position:relative;"><img src="'+p+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);">';
+        h += '<button onclick="removeHwaPhoto('+i+','+j+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
+      });
+      if (photos.length < 3) {
+        h += '<label style="width:64px;height:64px;border-radius:8px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:var(--bg);"><span style="font-size:18px;color:var(--text2);">+<\/span><span style="font-size:9px;color:var(--text2);">사진추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addHwaPhoto(event,'+i+')"><\/label>';
+      }
+      h += '<\/div><\/div>';
     });
     h += '<\/div>';
     h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">포장 옵션<\/div>';
     h += '<div class="dl" style="margin-bottom:14px;">';
     CFG.hwa_packing.forEach(function(p,i) {
-      h += '<div class="dr" style="flex-wrap:wrap;gap:6px;">';
+      h += '<div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);">';
+      h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">';
       h += '<input id="cfg_hwa_pk_name_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:130px;" value="'+p.name+'">';
       h += '<input id="cfg_hwa_pk_price_'+i+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:75px;" value="'+p.price+'">';
+      h += '<input id="cfg_hwa_pk_desc_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);flex:1;min-width:140px;" placeholder="서브텍스트" value="'+(p.desc||'')+'">';
       h += '<\/div>';
+      h += '<input id="cfg_hwa_pk_popup_'+i+'" style="width:100%;border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;color:var(--text);background:var(--bg);" placeholder="팝업 설명 문구" value="'+(p.popup_desc||'')+'">';
+      h += '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;">';
+      if (p.photo) {
+        h += '<div style="position:relative;"><img src="'+p.photo+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);">';
+        h += '<button onclick="removeHwaPkPhoto('+i+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
+      } else {
+        h += '<label style="width:64px;height:64px;border-radius:8px;border:1.5px dashed var(--sep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:var(--bg);"><span style="font-size:18px;color:var(--text2);">+<\/span><span style="font-size:9px;color:var(--text2);">팝업사진<\/span><input type="file" accept="image/*" style="display:none;" onchange="addHwaPkPhoto(event,'+i+')"><\/label>';
+      }
+      h += '<\/div><\/div>';
     });
     h += '<\/div>';
     h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">택배비<\/div>';
@@ -1071,8 +1232,12 @@ async function saveSettingsFromForm() {
     newCFG.hwa_sizes = CFG.hwa_sizes.map(function(s,i) {
       return {id:s.id, name:document.getElementById('cfg_hwa_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_price_'+i).value)||s.price, desc:document.getElementById('cfg_hwa_desc_'+i).value};
     });
+    newCFG.hwa_photos = CFG.hwa_photos || {};
     newCFG.hwa_packing = CFG.hwa_packing.map(function(p,i) {
-      return {id:p.id, name:document.getElementById('cfg_hwa_pk_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_pk_price_'+i).value)||p.price, desc:p.desc};
+      return {id:p.id, name:document.getElementById('cfg_hwa_pk_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_pk_price_'+i).value)||p.price, desc:document.getElementById('cfg_hwa_pk_desc_'+i)?document.getElementById('cfg_hwa_pk_desc_'+i).value:(p.desc||''), popup_desc:document.getElementById('cfg_hwa_pk_popup_'+i)?document.getElementById('cfg_hwa_pk_popup_'+i).value:(p.popup_desc||''), photo:p.photo||''};
+    });
+    newCFG.hwa_sizes = CFG.hwa_sizes.map(function(s,i) {
+      return {id:s.id, name:document.getElementById('cfg_hwa_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_price_'+i).value)||s.price, desc:document.getElementById('cfg_hwa_desc_'+i).value};
     });
     newCFG.hwa_delivery_price = parseInt(document.getElementById('cfg_hwa_delivery').value)||4000;
     newCFG.hwa_storage = CFG.hwa_storage.map(function(_,i){ return document.getElementById('cfg_hwa_storage_'+i).value; });
