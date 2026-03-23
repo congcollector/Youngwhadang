@@ -388,33 +388,6 @@ function renderCake() {
   h += '<div class="row"><div class="row-lbl">전화번호 <span class="req">*</span><\/div><input class="inp" type="tel" placeholder="010-0000-0000" value="'+fd.phone+'" oninput="fd.phone=this.value"><\/div>';
   h += '<\/div><\/div>';
 
-  h += '<div class="sec"><div class="sec-hdr">수령 방법</div><div class="card">';
-  h += '<div class="opt-wrap">';
-  h += '<button class="opt-chip'+(fd.method==='pickup'?' on-cake':'')+'" onclick="fd.method=\'pickup\';renderCake()">🏪 픽업<\/button>';
-  h += '<button class="opt-chip'+(fd.method==='delivery'?' on-cake':'')+'" onclick="fd.method=\'delivery\';renderCake()">🚗 배달<\/button>';
-  h += '<\/div>';
-  if (fd.method==='pickup') {
-    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
-    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-    h += '<div style="border-top:0.5px solid var(--sep);cursor:pointer;" onclick="fd._addrOpen=!fd._addrOpen;renderCake()">';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">';
-    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내<\/div>';
-    h += '<div style="font-size:12px;color:var(--text3);">'+(fd._addrOpen?'▲':'▼')+'<\/div>';
-    h += '<\/div>';
-    if (fd._addrOpen) {
-      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'<br>📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
-    }
-    h += '<\/div>';
-  } else {
-    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
-    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value">';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원<\/div>';
-    h += '<\/div>';
-  }
-  h += '<\/div><\/div>';
-
   h += '<div class="sec"><div class="sec-hdr">케이크 사이즈</div><div class="sz-scroll">';
   CFG.sizes.forEach(function(s) {
     const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
@@ -448,6 +421,33 @@ function renderCake() {
     }
     h += '<\/div>';
   });
+  h += '<\/div><\/div>';
+
+  h += '<div class="sec"><div class="sec-hdr">수령 방법</div><div class="card">';
+  h += '<div class="opt-wrap">';
+  h += '<button class="opt-chip'+(fd.method==='pickup'?' on-cake':'')+'" onclick="fd.method=\'pickup\';renderCake()">🏪 픽업<\/button>';
+  h += '<button class="opt-chip'+(fd.method==='delivery'?' on-cake':'')+'" onclick="fd.method=\'delivery\';renderCake()">🚗 배달<\/button>';
+  h += '<\/div>';
+  if (fd.method==='pickup') {
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
+    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
+    h += '<div style="border-top:0.5px solid var(--sep);cursor:pointer;" onclick="fd._addrOpen=!fd._addrOpen;renderCake()">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">';
+    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내<\/div>';
+    h += '<div style="font-size:12px;color:var(--text3);">'+(fd._addrOpen?'▲':'▼')+'<\/div>';
+    h += '<\/div>';
+    if (fd._addrOpen) {
+      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'<br>📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+    }
+    h += '<\/div>';
+  } else {
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
+    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
+    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
+    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value">';
+    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원<\/div>';
+    h += '<\/div>';
+  }
   h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">추가 옵션</div><div class="card">';
