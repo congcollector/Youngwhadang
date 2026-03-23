@@ -301,9 +301,9 @@ let aDateEnd = '';
 let acc = {s:false,t:false,hs:false};
 
 // 떡케이크 폼
-let fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
+let fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false,_addrOpen:false};
 // 화과자 폼
-let hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
+let hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false,_addrOpen:false};
 
 const pill = document.getElementById('modePill');
 pill.textContent = IS_ADMIN ? '사장님 🔑' : '주문하기';
@@ -368,7 +368,7 @@ function selLet(idx) {
   renderCake();
 }
 function resetCake() {
-  fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false};
+  fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false,_addrOpen:false};
   renderCake();
 }
 
@@ -396,7 +396,15 @@ function renderCake() {
   if (fd.method==='pickup') {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-    h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'<br>📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+    h += '<div style="border-top:0.5px solid var(--sep);cursor:pointer;" onclick="fd._addrOpen=!fd._addrOpen;renderCake()">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">';
+    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내<\/div>';
+    h += '<div style="font-size:12px;color:var(--text3);">'+(fd._addrOpen?'▲':'▼')+'<\/div>';
+    h += '<\/div>';
+    if (fd._addrOpen) {
+      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'<br>📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+    }
+    h += '<\/div>';
   } else {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
@@ -552,7 +560,7 @@ async function submitCake() {
 // 화과자 손님
 // ══════════════════════
 function resetHwa() {
-  hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false};
+  hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false,_addrOpen:false};
   renderHwa();
 }
 
@@ -622,7 +630,15 @@ function renderHwa() {
   if (hf.method === 'pickup') {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
-    h += '<div style="padding:10px 16px 12px;border-top:0.5px solid var(--sep);font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+    h += '<div style="border-top:0.5px solid var(--sep);cursor:pointer;" onclick="hf._addrOpen=!hf._addrOpen;renderHwa()">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">';
+    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내<\/div>';
+    h += '<div style="font-size:12px;color:var(--text3);">'+(hf._addrOpen?'▲':'▼')+'<\/div>';
+    h += '<\/div>';
+    if (hf._addrOpen) {
+      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+    }
+    h += '<\/div>';
   } else if (hf.method === 'delivery') {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value"><\/div>';
     h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+hf.pickup_time+'" oninput="hf.pickup_time=this.value"><\/div>';
