@@ -235,7 +235,7 @@ function addDesignPhotos(e) {
   if (!files.length) return;
   if (!fd.photos) fd.photos = [];
   files.forEach(function(f) {
-    resizeImage(f, 800, 800, function(data) {
+    resizeImage(f, 1200, 1200, function(data) {
       fd.photos.push(data);
       if (++n === files.length) renderGuest();
     });
@@ -330,8 +330,8 @@ function renderGuest() {
   h += '<\/div><\/div>';
 
   h += '<div class="sec"><div class="sec-hdr">디자인<\/div><div class="card"><div style="padding:14px 16px;">';
-  h += '<div style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5;">원하는 색감이나 스타일을 적어주세요. 참고 사진을 함께 올려주시면 최대한 가깝게 제작해드려요 🌸<\/div>';
-  h += '<textarea style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);resize:none;height:72px;outline:none;line-height:1.5;" placeholder="예) 핑크 파스텔톤, 노랑색, 파란색 계열..." oninput="fd.design=this.value">'+fd.design+'<\/textarea>';
+  h += '<div style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.5;">'+(CFG.design_desc||'원하는 색감이나 스타일을 적어주세요. 참고 사진을 함께 올려주시면 최대한 가깝게 제작해드려요 🌸')+'<\/div>';
+  h += '<textarea style="width:100%;border:1.5px solid var(--sep);border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);resize:none;height:72px;outline:none;line-height:1.5;" placeholder="'+(CFG.design_placeholder||'예) 핑크 파스텔톤, 노랑색, 파란색 계열...')+'" oninput="fd.design=this.value">'+fd.design+'<\/textarea>';
   h += '<\/div>';
   h += '<div style="border-top:0.5px solid var(--sep);padding:12px 16px;">';
   h += '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">📎 참고 사진 <span style="font-size:11px;color:var(--text2);font-weight:400;">최대 3장<\/span><\/div>';
@@ -566,7 +566,7 @@ function resizeImage(file, maxW, maxH, cb) {
       if (h > maxH) { w = w * maxH / h; h = maxH; }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      cb(canvas.toDataURL('image/jpeg', 0.7));
+      cb(canvas.toDataURL('image/jpeg', 0.95));
     };
     img.src = e.target.result;
   };
@@ -603,7 +603,7 @@ function removeSzPhoto(idx, photoIdx) {
 function addChocoPhoto(e) {
   const file = e.target.files[0];
   if (!file) return;
-  resizeImage(file, 600, 400, function(data) {
+  resizeImage(file, 1200, 900, function(data) {
     CFG.choco_photo = data;
     saveSettings(Object.assign({}, CFG)).then(function() {
       toast('사진 추가됐어요 ✅');
@@ -767,6 +767,14 @@ function showSettings() {
   h += '<\/div>';
 
   h += '<\/div>';
+  // 디자인 안내 문구
+  h += '<div style="padding:0 16px;">';
+  h += '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">디자인 안내 문구<\/div>';
+  h += '<div class="dl" style="margin-bottom:14px;">';
+  h += '<div class="dr"><div class="dk">설명<\/div><div class="dv"><textarea id="cfg_design_desc" style="border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;width:100%;resize:none;height:50px;line-height:1.5;">'+( CFG.design_desc||'원하는 색감이나 스타일을 적어주세요. 참고 사진을 함께 올려주시면 최대한 가깝게 제작해드려요 🌸')+'<\/textarea><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">예시 문구<\/div><div class="dv"><input id="cfg_design_ph" style="border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text);background:transparent;width:100%;" value="'+(CFG.design_placeholder||'예) 핑크 파스텔톤, 노랑색, 파란색 계열...')+'"><\/div><\/div>';
+  h += '<\/div><\/div>';
+
   h += '<div class="sh-act"><button class="sh-cls" onclick="closeSheet()">닫기<\/button><button class="sh-sav" onclick="saveSettingsFromForm()">저장<\/button><\/div>';
   showSheet(h);
 }
@@ -782,6 +790,8 @@ async function saveSettingsFromForm() {
     delivery_price: parseInt(document.getElementById('cfg_delivery').value)||5000,
     choco_photo: CFG.choco_photo || '',
     size_photos: CFG.size_photos || {},
+    design_desc: document.getElementById('cfg_design_desc') ? document.getElementById('cfg_design_desc').value : (CFG.design_desc||''),
+    design_placeholder: document.getElementById('cfg_design_ph') ? document.getElementById('cfg_design_ph').value : (CFG.design_placeholder||''),
     sizes: CFG.sizes.map(function(s,i) {
       return {
         id: s.id, e: s.e,
