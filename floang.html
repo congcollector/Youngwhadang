@@ -542,7 +542,10 @@ const PAYS = ['계좌이체','지역화폐','카드'];
 const ST = {pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
 
 let curTab = 'cake'; // 'cake' | 'hwa'
-let adminTab = 'cake';
+let adminTab = 'all';
+let adminSelDate = null;
+let adminWeekOffset = 0;
+let adminOrders = [];
 let cfgTab = 'cake';
 let curId = null;
 let aFilter = 'all';
@@ -1084,104 +1087,171 @@ async function renderAdmin() {
     if (r.ok) allOrders = await r.json();
   } catch(e) {}
   if (!Array.isArray(allOrders)) allOrders = [];
+  adminOrders = allOrders.filter(function(o){ return o.type==='cake'; });
+  renderAdminView();
+}
 
-  const cakeOrders = allOrders.filter(function(o){ return o.type==='cake'; });
-  const orders = cakeOrders;
-  adminTab = 'cake';
-  const isCake = true;
+function renderAdminView() {
+  const orders = adminOrders;
 
-  let dateFiltered = orders;
-  if (aDateStart || aDateEnd) {
-    dateFiltered = orders.filter(function(o) {
-      const d = o.pickup_date;
-      if (aDateStart && d < aDateStart) return false;
-      if (aDateEnd && d > aDateEnd) return false;
-      return true;
-    });
+  // 선택된 날짜 기본값: 오늘
+  if (!adminSelDate) {
+    const t = new Date();
+    adminSelDate = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   }
-  const filt = aFilter==='all' ? dateFiltered : dateFiltered.filter(function(o){ return o.status===aFilter; });
-  const rev  = dateFiltered.filter(function(o){ return o.status!=='cancel'; }).reduce(function(s,o){ return s+(o.total_price||0); },0);
-  const lbls = {all:'전체',pending:'확인중',confirmed:'예약확정',done:'픽업완료',cancel:'취소'};
+
+  // 주간 날짜 계산
+  const selD = new Date(adminSelDate+'T00:00:00');
+  const dow = selD.getDay(); // 0=일
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const weekStart = new Date(selD);
+  weekStart.setDate(selD.getDate() + mondayOffset + adminWeekOffset * 7);
+
+  const weekDays = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    weekDays.push({ date: ds, day: d, label: ['일','월','화','수','목','금','토'][d.getDay()] });
+  }
+
+  const today = (function(){ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
+
+  // 선택된 날짜의 주문
+  const dayOrders = orders.filter(function(o){ return o.pickup_date === adminSelDate; });
+  const tabOrders = adminTab === 'all' ? dayOrders
+    : dayOrders.filter(function(o){ return o.status === adminTab; });
+
+  // 날짜별 주문 수 맵
+  const orderCountMap = {};
+  orders.forEach(function(o){
+    if (!orderCountMap[o.pickup_date]) orderCountMap[o.pickup_date] = 0;
+    orderCountMap[o.pickup_date]++;
+  });
+
+  const monthLabel = (selD.getMonth()+1)+'월';
+  const weekTotalCount = weekDays.reduce(function(s,d){ return s+(orderCountMap[d.date]||0); }, 0);
 
   let h = '';
 
-  // ── 상품 탭 ──
-  h += '<div style="display:flex;gap:0;margin:0 16px 20px;background:#ffffff;border-radius:16px;overflow:hidden;padding:3px;">';
-  h += '<button onclick="adminTab=\'cake\';aFilter=\'all\';renderAdmin()" class="seg-btn btn-active-cake" style="cursor:default;">주문 목록<\/button>';
+  // ── 주간 캘린더 헤더 ──
+  h += '<div style="background:rgba(245,242,239,0.96);position:sticky;top:52px;z-index:40;border-bottom:0.5px solid rgba(50,40,35,0.1);">';
+
+  // 월 + 주 이동
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;">';
+  h += '<div style="display:flex;align-items:center;gap:12px;">';
+  h += '<button onclick="adminWeekOffset--;renderAdminView()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(50,40,35,0.07);color:#1a1714;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹<\/button>';
+  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">'+monthLabel+'<\/div>';
+  h += '<button onclick="adminWeekOffset++;renderAdminView()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(50,40,35,0.07);color:#1a1714;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">›<\/button>';
+  h += '<\/div>';
+  h += '<div style="font-size:12px;color:#b8a99e;">이번주 '+weekTotalCount+'건<\/div>';
   h += '<\/div>';
 
-  // ── 통계 카드 ──
-  h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:20px;">';
-  const statClass = isCake ? 'stat-num-cake' : 'stat-num-hwa';
-  const statItems = [
-    {n:dateFiltered.length, l:'전체 주문', cls:statClass},
-    {n:dateFiltered.filter(function(o){return o.status==='pending';}).length, l:'확인중', cls:''},
-    {n:dateFiltered.filter(function(o){return o.status==='confirmed';}).length, l:'예약확정', cls:''},
-    {n:Math.round(rev/10000)+'만', l:'매출', cls:''}
-  ];
-  statItems.forEach(function(s,i) {
-    h += '<div style="background:#ffffff;border-radius:16px;padding:12px 8px;text-align:center;">';
-    h += '<div class="'+(i===0?s.cls:i===1?'':'')+(i===1?'stat-num-pending':i===2?'stat-num-confirmed':i===3?'stat-n':'')+(i===0?'':'')+'" style="font-size:20px;font-weight:700;letter-spacing:-0.5px;color:'+(i===0?(isCake?'#7a4f3a':'#3a5a7a'):i===1?'#b86800':i===2?'#1f8a3a':'#1a1714')+';">'+s.n+'<\/div>';
-    h += '<div style="font-size:10px;color:#8a837c;margin-top:3px;font-weight:500;">'+s.l+'<\/div>';
+  // 주간 날짜 칸
+  h += '<div style="display:flex;padding:0 8px 12px;gap:4px;">';
+  weekDays.forEach(function(d) {
+    const isToday = d.date === today;
+    const isSel = d.date === adminSelDate;
+    const cnt = orderCountMap[d.date] || 0;
+    const bg = isSel ? '#7a4f3a' : 'transparent';
+    const textColor = isSel ? '#fff' : (isToday ? '#7a4f3a' : '#1a1714');
+    const labelColor = isSel ? 'rgba(255,255,255,0.65)' : '#b8a99e';
+
+    h += '<div onclick="adminSelDate=\''+d.date+'\';adminTab=\'all\';renderAdminView()" style="flex:1;text-align:center;padding:7px 2px;border-radius:12px;cursor:pointer;background:'+bg+';transition:all 0.15s;">';
+    h += '<div style="font-size:10px;color:'+labelColor+';margin-bottom:3px;font-weight:500;">'+d.label+'<\/div>';
+    h += '<div style="font-size:17px;font-weight:700;color:'+textColor+';">'+d.day.getDate()+'<\/div>';
+    if (cnt > 0) {
+      h += '<div style="width:5px;height:5px;border-radius:50%;background:'+(isSel?'rgba(255,255,255,0.6)':'#7a4f3a')+';margin:3px auto 0;"><\/div>';
+    } else {
+      h += '<div style="width:5px;height:5px;margin:3px auto 0;"><\/div>';
+    }
     h += '<\/div>';
   });
   h += '<\/div>';
 
-  // ── 날짜 필터 ──
-  const accentColor = isCake ? '#7a4f3a' : '#3a5a7a';
-  h += '<div style="padding:0 16px;margin-bottom:8px;">';
-  h += '<div style="font-size:12px;font-weight:600;color:#8a837c;margin-bottom:8px;letter-spacing:0.2px;">픽업일 기간 조회<\/div>';
-  h += '<div style="display:flex;align-items:center;gap:8px;">';
-  h += '<input type="date" value="'+aDateStart+'" onchange="aDateStart=this.value;renderAdmin()" style="flex:1;border:1.5px solid '+(aDateStart?accentColor:'rgba(50,40,35,0.08)')+';border-radius:12px;padding:9px 12px;font-size:13px;font-family:inherit;color:#1a1714;background:#ffffff;outline:none;">';
-  h += '<div style="font-size:13px;color:#c4bdb7;flex-shrink:0;">—<\/div>';
-  h += '<input type="date" value="'+aDateEnd+'" onchange="aDateEnd=this.value;renderAdmin()" style="flex:1;border:1.5px solid '+(aDateEnd?accentColor:'rgba(50,40,35,0.08)')+';border-radius:12px;padding:9px 12px;font-size:13px;font-family:inherit;color:#1a1714;background:#ffffff;outline:none;">';
-  if (aDateStart || aDateEnd) {
-    h += '<button onclick="aDateStart=\'\';aDateEnd=\'\';renderAdmin()" style="padding:9px 14px;border-radius:12px;background:rgba(255,59,48,0.08);border:none;color:#ff3b30;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;flex-shrink:0;">초기화<\/button>';
-  }
-  h += '<\/div><\/div>';
+  // 상태 탭
+  const pendingCnt = dayOrders.filter(function(o){return o.status==='pending';}).length;
+  const confirmedCnt = dayOrders.filter(function(o){return o.status==='confirmed';}).length;
+  const doneCnt = dayOrders.filter(function(o){return o.status==='done';}).length;
 
-  // ── 상태 필터 ──
-  h += '<div style="padding:0 16px;margin:12px 0 16px;">';
-  h += '<div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;">';
-  ['all','pending','confirmed','done','cancel'].forEach(function(f) {
-    const cnt = f==='all' ? dateFiltered.length : dateFiltered.filter(function(o){return o.status===f;}).length;
-    const isOn = aFilter===f;
-    const onBg = isCake ? '#7a4f3a' : '#3a5a7a';
-    h += '<button onclick="aFilter=\''+f+'\';renderAdmin()" class="pill-btn" style="font-weight:'+(isOn?'600':'400')+';background:'+(isOn?onBg:'#ffffff')+';color:'+(isOn?'#fff':'#8a837c')+';">'+lbls[f]+' <span style="opacity:0.7;">'+cnt+'<\/span><\/button>';
+  h += '<div style="display:flex;border-top:0.5px solid rgba(50,40,35,0.08);">';
+  [
+    {k:'all', l:'전체', cnt:dayOrders.length},
+    {k:'pending', l:'확인중', cnt:pendingCnt},
+    {k:'confirmed', l:'예약확정', cnt:confirmedCnt},
+    {k:'done', l:'픽업완료', cnt:doneCnt}
+  ].forEach(function(t) {
+    const isOn = adminTab === t.k;
+    h += '<div onclick="adminTab=\''+t.k+'\';renderAdminView()" style="flex:1;text-align:center;padding:10px 0;font-size:12px;font-weight:'+(isOn?'700':'500')+';color:'+(isOn?'#7a4f3a':'#b8a99e')+';border-bottom:2px solid '+(isOn?'#7a4f3a':'transparent')+';cursor:pointer;transition:all 0.15s;">';
+    h += t.l+(t.cnt>0?' '+t.cnt:'');
+    h += '<\/div>';
   });
   h += '<\/div><\/div>';
 
+  // ── 날짜 헤더 ──
+  const selDateObj = new Date(adminSelDate+'T00:00:00');
+  const dayNames = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+  const selDateLabel = (selDateObj.getMonth()+1)+'월 '+selDateObj.getDate()+'일 '+dayNames[selDateObj.getDay()];
+  const isSelToday = adminSelDate === today;
+
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px;">';
+  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">'+selDateLabel+'<\/div>';
+  h += '<div style="display:flex;align-items:center;gap:8px;">';
+  if (isSelToday) h += '<div style="background:#7a4f3a;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">오늘<\/div>';
+  if (tabOrders.length > 0) h += '<div style="background:rgba(122,79,58,0.1);color:#7a4f3a;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">'+tabOrders.length+'건<\/div>';
+  h += '<\/div><\/div>';
+
   // ── 주문 목록 ──
-  if (!filt.length) {
-    h += '<div class="empty"><div style="font-size:40px;margin-bottom:12px;">🌸<\/div><div style="font-size:15px;color:#8a837c;">해당 주문이 없어요<\/div><\/div>';
+  if (tabOrders.length === 0) {
+    h += '<div style="text-align:center;padding:60px 20px;">';
+    h += '<div style="font-size:36px;margin-bottom:12px;">🌸<\/div>';
+    h += '<div style="font-size:15px;color:#b8a99e;">'+selDateLabel+'<br>주문이 없어요<\/div>';
+    h += '<\/div>';
   } else {
-    filt.forEach(function(o) {
-      const d = new Date(o.created_at);
-      const ds = (d.getMonth()+1)+'/'+ d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-      const cardClass = isCake ? 'order-card-cake' : 'order-card-hwa';
-      const priceClass = isCake ? 'order-price-cake' : 'order-price-hwa';
-      h += '<div class="'+cardClass+'" onclick="openOrder(\''+o.id+'\')">'; 
-      h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;">';
-      h += '<div style="font-size:16px;font-weight:600;letter-spacing:-0.2px;">'+o.name+'<\/div>';
-      h += '<div style="display:flex;align-items:center;gap:8px;"><div class="badge b-'+o.status+'">'+ST[o.status]+'<\/div><div style="font-size:11px;color:#c4bdb7;">'+ds+'<\/div><\/div>';
+    // 픽업 시간순 정렬
+    const sorted = tabOrders.slice().sort(function(a,b){
+      return (a.pickup_time||'').localeCompare(b.pickup_time||'');
+    });
+
+    sorted.forEach(function(o) {
+      const statusColors = {
+        pending: {bg:'rgba(255,149,0,0.1)', c:'#b06800', l:'확인중'},
+        confirmed: {bg:'rgba(52,199,89,0.1)', c:'#1a7a33', l:'예약확정'},
+        done: {bg:'rgba(50,40,35,0.07)', c:'#8a837c', l:'픽업완료'},
+        cancel: {bg:'rgba(255,59,48,0.08)', c:'#ff3b30', l:'취소'}
+      };
+      const sc = statusColors[o.status] || statusColors.pending;
+
+      h += '<div style="background:#fff;border-radius:16px;margin:0 16px 10px;overflow:hidden;cursor:pointer;border-left:3px solid #7a4f3a;box-shadow:0 1px 0 rgba(50,40,35,0.06),0 2px 8px rgba(50,40,35,0.04);" onclick="openOrder(\''+o.id+'\')">';
+
+      // 상단: 이름 + 시간 + 상태
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px 8px;">';
+      h += '<div style="display:flex;align-items:center;gap:8px;">';
+      h += '<div style="font-size:16px;font-weight:700;">'+o.name+'<\/div>';
+      if (o.pickup_time) h += '<div style="font-size:13px;color:#b8a99e;font-weight:500;">'+o.pickup_time+'<\/div>';
       h += '<\/div>';
-      h += '<div style="padding:0 16px 12px;">';
-      if (o.type==='cake') {
-        h += '<div style="font-size:13px;color:#8a837c;">'+o.pickup_date+' '+o.pickup_time+' 픽업 &nbsp;·&nbsp; '+o.cake_size+(o.choco_deco?' + 초콜릿':'')+'<\/div>';
-      } else {
-        const pkg = JSON.parse(o.packing||'[]');
-        h += '<div style="font-size:13px;color:#8a837c;">'+o.pickup_date+' '+(o.method==='ship'?'택배':'픽업')+' &nbsp;·&nbsp; 화과자 '+o.cake_size+(pkg.length?' + 포장':'')+'<\/div>';
-      }
+      h += '<div style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:'+sc.bg+';color:'+sc.c+';">'+sc.l+'<\/div>';
       h += '<\/div>';
-      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:0.5px solid rgba(50,40,35,0.08);">';
-      h += '<div style="font-size:13px;color:#8a837c;">'+o.phone+' &nbsp;·&nbsp; '+o.payment+'<\/div>';
-      h += '<div class="'+priceClass+'">'+(o.total_price||0).toLocaleString()+'원<\/div>';
+
+      // 주문 핵심 정보
+      const designInfo = o.design || '';
+      h += '<div style="padding:0 14px 10px;font-size:13px;color:#8a837c;line-height:1.7;">'+o.cake_size;
+      if (designInfo) h += '<br>'+designInfo;
+      h += '<\/div>';
+
+      // 하단: 연락처 + 금액
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:0.5px solid rgba(50,40,35,0.07);">';
+      h += '<div style="font-size:13px;color:#b8a99e;">'+o.phone+'<\/div>';
+      h += '<div style="font-size:16px;font-weight:700;color:#7a4f3a;">'+(o.total_price||0).toLocaleString()+'원<\/div>';
       h += '<\/div><\/div>';
     });
   }
 
+  // 하단 여백
+  h += '<div style="height:40px;"><\/div>';
   W(h);
 }
+
 
 
 async function openOrder(id) {
