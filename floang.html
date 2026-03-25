@@ -1139,18 +1139,16 @@ function renderAdminView() {
   // ── 주간 캘린더 헤더 ──
   h += '<div style="background:rgba(245,242,239,0.96);position:sticky;top:52px;z-index:40;border-bottom:0.5px solid rgba(50,40,35,0.1);">';
 
-  // 월 + 주 이동
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;">';
-  h += '<div style="display:flex;align-items:center;gap:12px;">';
-  h += '<button onclick="adminWeekOffset--;renderAdminView()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(50,40,35,0.07);color:#1a1714;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹<\/button>';
-  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">'+monthLabel+'<\/div>';
-  h += '<button onclick="adminWeekOffset++;renderAdminView()" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(50,40,35,0.07);color:#1a1714;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">›<\/button>';
-  h += '<\/div>';
+  // 월 + 주문 수
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;">';
+  h += '<div style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">'+monthLabel+'<\/div>';
   h += '<div style="font-size:12px;color:#b8a99e;">이번주 '+weekTotalCount+'건<\/div>';
   h += '<\/div>';
 
-  // 주간 날짜 칸
-  h += '<div style="display:flex;padding:0 8px 12px;gap:4px;">';
+  // 화살표 + 날짜 한 줄 (화살표가 날짜와 동일 row에 위치)
+  h += '<div style="display:flex;align-items:center;padding:0 4px 12px;gap:2px;">';
+  h += '<button onclick="event.stopPropagation();adminWeekOffset--;renderAdminView()" style="width:36px;height:56px;border:none;background:transparent;color:#c4bdb7;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;">‹<\/button>';
+  h += '<div style="flex:1;display:flex;gap:2px;">';
   weekDays.forEach(function(d) {
     const isToday = d.date === today;
     const isSel = d.date === adminSelDate;
@@ -1169,6 +1167,8 @@ function renderAdminView() {
     }
     h += '<\/div>';
   });
+  h += '<\/div>';
+  h += '<button onclick="event.stopPropagation();adminWeekOffset++;renderAdminView()" style="width:36px;height:56px;border:none;background:transparent;color:#c4bdb7;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;">›<\/button>';
   h += '<\/div>';
 
   // 상태 탭
@@ -1257,103 +1257,139 @@ function renderAdminView() {
 
 
 async function openOrder(id) {
-  const r = await api('/cake_orders?id=eq.'+id);
-  if (!r.ok) return;
-  const arr = await r.json();
-  const o = arr[0];
+  // 데모 모드: _demoOrders에서 직접 찾기
+  let o = _demoOrders.find(function(x){ return x.id === id; });
+  if (!o) {
+    try {
+      const r = await api('/cake_orders?id=eq.'+id);
+      if (r.ok) { const arr = await r.json(); o = arr[0]; }
+    } catch(e) {}
+  }
   if (!o) return;
   curId = id;
-  const color = o.type==='cake' ? 'cake' : 'hwa';
-  const colorVal = color==='cake' ? '#7a4f3a' : '#3a5a7a';
+
+  const statusList = [
+    {k:'pending',   l:'확인중',   bg:'rgba(255,149,0,0.1)',   c:'#b06800'},
+    {k:'confirmed', l:'예약확정', bg:'rgba(52,199,89,0.1)',   c:'#1a7a33'},
+    {k:'done',      l:'픽업완료', bg:'rgba(0,122,255,0.1)',   c:'#0060c7'},
+    {k:'cancel',    l:'취소',     bg:'rgba(255,59,48,0.08)',  c:'#ff3b30'}
+  ];
+  const sc = statusList.find(function(s){ return s.k===o.status; }) || statusList[0];
 
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
 
-  // 헤더
-  h += '<div style="padding:8px 20px 16px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;">';
+  // 헤더: 이름 + 금액
+  h += '<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
+  h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;">';
   h += '<div>';
-  h += '<div style="font-size:18px;font-weight:700;letter-spacing:-0.4px;">'+o.name+'<\/div>';
+  h += '<div style="font-size:20px;font-weight:700;letter-spacing:-0.4px;">'+o.name+'<\/div>';
   h += '<div style="font-size:13px;color:#8a837c;margin-top:2px;">'+o.phone+'<\/div>';
   h += '<\/div>';
   h += '<div style="text-align:right;">';
-  h += '<div style="font-size:20px;font-weight:700;color:'+colorVal+';letter-spacing:-0.5px;">'+(o.total_price||0).toLocaleString()+'원<\/div>';
-  h += '<div class="badge b-'+o.status+'" style="margin-top:4px;display:inline-block;">'+ST[o.status]+'<\/div>';
-  h += '<\/div><\/div><\/div>';
-
-  // 주문 정보
-  h += '<div style="padding:16px 20px 0;">';
-  h += '<div style="font-size:11px;font-weight:600;color:#8a837c;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:10px;">주문 정보<\/div>';
-  h += '<div style="background:#ffffff;border-radius:16px;overflow:hidden;">';
-
-  if (o.type==='cake') {
-    h += '<div class="dr"><div class="dk">날짜<\/div><div class="dv"><input id="e_date" type="date" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+o.pickup_date+'"><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">시간<\/div><div class="dv"><input id="e_time" type="time" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+o.pickup_time+'"><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">케이크<\/div><div class="dv" style="color:#8a837c;">'+o.cake_size+(o.choco_deco?' + 초콜릿':'')+(o.delivery?' + 배달':'')+'<\/div><\/div>';
-    if (o.design) h += '<div class="dr"><div class="dk">디자인<\/div><div class="dv"><textarea id="e_design" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;resize:none;height:52px;line-height:1.5;">'+o.design+'<\/textarea><\/div><\/div>';
-    if (o.lettering) h += '<div class="dr"><div class="dk">레터링<\/div><div class="dv"><textarea id="e_lettering" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;resize:none;height:52px;line-height:1.5;">'+o.lettering+'<\/textarea><\/div><\/div>';
-    const orderPhotos = JSON.parse(o.photos||'[]');
-    if (orderPhotos.length > 0) {
-      h += '<div class="dr"><div class="dk">참고사진<\/div><div class="dv" style="display:flex;gap:6px;flex-wrap:wrap;">';
-      orderPhotos.forEach(function(p){ h += '<img src="'+p+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;">'; });
-      h += '<\/div><\/div>';
-    }
-  } else {
-    h += '<div class="dr"><div class="dk">날짜<\/div><div class="dv"><input id="e_date" type="date" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+o.pickup_date+'"><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">수령<\/div><div class="dv" style="color:#8a837c;">'+(o.method==='ship'?'택배':'픽업')+'<\/div><\/div>';
-    h += '<div class="dr"><div class="dk">화과자<\/div><div class="dv" style="color:#8a837c;">'+o.cake_size+'<\/div><\/div>';
-    if (o.delivery_addr) h += '<div class="dr"><div class="dk">주소<\/div><div class="dv" style="color:#8a837c;">'+o.delivery_addr+'<\/div><\/div>';
-    const pkg = JSON.parse(o.packing||'[]');
-    if (pkg.length) h += '<div class="dr"><div class="dk">포장<\/div><div class="dv" style="color:#8a837c;">'+pkg.join(', ')+(o.packing_text?' · '+o.packing_text:'')+'<\/div><\/div>';
-  }
-  h += '<div class="dr"><div class="dk">결제<\/div><div class="dv" style="color:#8a837c;">'+o.payment+'<\/div><\/div>';
+  h += '<div style="font-size:22px;font-weight:700;color:#7a4f3a;letter-spacing:-0.5px;">'+(o.total_price||0).toLocaleString()+'원<\/div>';
+  h += '<\/div>';
   h += '<\/div><\/div>';
 
-  // 상태 변경
-  h += '<div style="padding:16px 20px 0;">';
-  h += '<div style="font-size:11px;font-weight:600;color:#8a837c;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:10px;">상태 변경<\/div>';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-  const statusList = [
-    {k:'pending', l:'확인중', bg:'rgba(255,149,0,0.1)', c:'#b86800'},
-    {k:'confirmed', l:'예약 확정', bg:'rgba(52,199,89,0.1)', c:'#1f8a3a'},
-    {k:'done', l:'픽업 완료', bg:'rgba(0,122,255,0.1)', c:'#0060c7'},
-    {k:'cancel', l:'취소', bg:'rgba(255,59,48,0.1)', c:'#ff3b30'}
-  ];
-  const stMap = {pending:'p', confirmed:'c', done:'d', cancel:'x'};
+  // 상태 변경 (4개 칩)
+  h += '<div style="padding:14px 16px 12px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;">상태<\/div>';
+  h += '<div style="display:flex;gap:7px;flex-wrap:wrap;">';
   statusList.forEach(function(s) {
     const isOn = o.status === s.k;
-    const stCls = stMap[s.k];
-    h += '<button onclick="chgSt(\''+s.k+'\')" class="status-btn '+(isOn?'status-btn-on-'+stCls:'status-btn-off-'+stCls)+'">'+s.l+'<\/button>';
+    h += '<button onclick="chgStLocal(\''+id+'\',\''+s.k+'\')" style="padding:8px 16px;border-radius:22px;border:1.5px solid '+(isOn?s.c:'rgba(50,40,35,0.1)')+';background:'+(isOn?s.bg:'transparent')+';color:'+(isOn?s.c:'#8a837c')+';font-size:13px;font-weight:'+(isOn?'700':'500')+';font-family:inherit;cursor:pointer;transition:all 0.15s;">'+s.l+'<\/button>';
   });
   h += '<\/div><\/div>';
 
-  // 메모
-  h += '<div style="padding:16px 20px 0;">';
-  h += '<div style="font-size:11px;font-weight:600;color:#8a837c;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:10px;">메모<\/div>';
-  h += '<textarea class="memo-ta" id="memoTa" placeholder="내부 메모를 입력하세요">'+(o.memo||'')+'<\/textarea>';
+  // 주문 정보
+  h += '<div style="padding:14px 16px 0;">';
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;">주문 정보<\/div>';
+  h += '<div style="background:#f5f2ef;border-radius:14px;overflow:hidden;">';
+
+  // 픽업일시
+  h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);">';
+  h += '<div style="font-size:13px;color:#b8a99e;min-width:60px;">픽업<\/div>';
+  h += '<div style="font-size:13px;font-weight:500;">'+o.pickup_date+' '+o.pickup_time+'<\/div>';
   h += '<\/div>';
 
-  // 액션 버튼
-  h += '<div style="display:flex;gap:10px;padding:16px 20px 0;">';
-  h += '<button onclick="doDel()" style="padding:14px 20px;border-radius:16px;background:rgba(255,59,48,0.08);border:none;color:#ff3b30;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;">삭제<\/button>';
-  h += '<button onclick="closeSheet()" style="flex:1;padding:14px;border-radius:16px;background:rgba(120,120,128,0.1);border:none;color:#8a837c;font-size:14px;font-family:inherit;cursor:pointer;">닫기<\/button>';
-  h += '<button onclick="doSav()" class="save-btn-'+color+'">저장하기<\/button>';
+  // 케이크
+  h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);">';
+  h += '<div style="font-size:13px;color:#b8a99e;min-width:60px;">케이크<\/div>';
+  h += '<div style="font-size:13px;font-weight:500;">'+o.cake_size+'<\/div>';
   h += '<\/div>';
+
+  // 디자인
+  if (o.design) {
+    h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);">';
+    h += '<div style="font-size:13px;color:#b8a99e;min-width:60px;">디자인<\/div>';
+    h += '<div style="font-size:13px;line-height:1.6;flex:1;">'+o.design+'<\/div>';
+    h += '<\/div>';
+  }
+
+  // 결제
+  h += '<div style="display:flex;padding:11px 14px;">';
+  h += '<div style="font-size:13px;color:#b8a99e;min-width:60px;">결제<\/div>';
+  h += '<div style="font-size:13px;font-weight:500;">'+o.payment+'<\/div>';
+  h += '<\/div>';
+
+  h += '<\/div><\/div>';
+
+  // 참고 사진
+  const photos = JSON.parse(o.photos||'[]');
+  if (photos.length > 0) {
+    h += '<div style="padding:14px 16px 0;">';
+    h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;">참고 사진<\/div>';
+    h += '<div style="display:flex;gap:8px;">';
+    photos.forEach(function(p){ h += '<img src="'+p+'" style="width:80px;height:80px;border-radius:12px;object-fit:cover;">'; });
+    h += '<\/div><\/div>';
+  }
+
+  // 메모
+  h += '<div style="padding:14px 16px 0;">';
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:8px;">메모<\/div>';
+  h += '<textarea id="memoTa" style="width:100%;background:#f5f2ef;border:none;border-radius:12px;padding:12px 14px;font-size:13px;font-family:inherit;color:#1a1714;resize:none;height:72px;outline:none;line-height:1.5;" placeholder="내부 메모 (손님에게 보이지 않아요)">'+(o.memo||'')+'<\/textarea>';
+  h += '<\/div>';
+
+  // 버튼
+  h += '<div style="display:flex;gap:10px;padding:14px 16px 0;">';
+  h += '<button onclick="doSav(\''+id+'\')" style="flex:1;padding:14px;border-radius:14px;background:#7a4f3a;border:none;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">저장하기<\/button>';
+  h += '<button onclick="closeSheet()" style="padding:14px 18px;border-radius:14px;background:rgba(50,40,35,0.07);border:none;color:#8a837c;font-size:14px;font-family:inherit;cursor:pointer;">닫기<\/button>';
+  h += '<\/div>';
+
+  h += '<div style="height:8px;"><\/div>';
 
   showSheet(h);
 }
 
 
 async function chgSt(s) { await updateOrder(curId,{status:s}); toast('상태 변경됐어요'); openOrder(curId); renderAdmin(); }
-async function doSav() {
-  const patch = {memo: document.getElementById('memoTa').value};
-  const name = document.getElementById('e_name'); if (name) patch.name = name.value;
-  const phone = document.getElementById('e_phone'); if (phone) patch.phone = phone.value;
-  const date = document.getElementById('e_date'); if (date) patch.pickup_date = date.value;
-  const time = document.getElementById('e_time'); if (time) patch.pickup_time = time.value;
-  const design = document.getElementById('e_design'); if (design) patch.design = design.value;
-  const lettering = document.getElementById('e_lettering'); if (lettering) patch.lettering = lettering.value;
-  await updateOrder(curId, patch);
-  toast('저장됐어요'); closeSheet(); renderAdmin();
+async function chgStLocal(id, s) {
+  await updateOrder(id, {status:s});
+  // 팝업 내 상태 버튼 즉시 갱신
+  const statusList = [
+    {k:'pending',l:'확인중',bg:'rgba(255,149,0,0.1)',c:'#b06800'},
+    {k:'confirmed',l:'예약확정',bg:'rgba(52,199,89,0.1)',c:'#1a7a33'},
+    {k:'done',l:'픽업완료',bg:'rgba(0,122,255,0.1)',c:'#0060c7'},
+    {k:'cancel',l:'취소',bg:'rgba(255,59,48,0.08)',c:'#ff3b30'}
+  ];
+  document.querySelectorAll('[onclick*="chgStLocal"]').forEach(function(btn) {
+    const btnStatus = btn.getAttribute('onclick').match(/'([^']+)'\)$/)?.[1];
+    const sc = statusList.find(function(x){return x.k===btnStatus;});
+    if (!sc) return;
+    const isOn = btnStatus === s;
+    btn.style.borderColor = isOn ? sc.c : 'rgba(50,40,35,0.1)';
+    btn.style.background = isOn ? sc.bg : 'transparent';
+    btn.style.color = isOn ? sc.c : '#8a837c';
+    btn.style.fontWeight = isOn ? '700' : '500';
+  });
+  toast('상태 변경됐어요');
+  renderAdminView();
+}
+async function doSav(id) {
+  const targetId = id || curId;
+  const memo = document.getElementById('memoTa');
+  const patch = {memo: memo ? memo.value : ''};
+  await updateOrder(targetId, patch);
+  toast('저장됐어요'); closeSheet(); renderAdminView();
 }
 async function doDel() { if (!confirm('삭제할까요?')) return; await delOrder(curId); closeSheet(); toast('삭제됐어요'); renderAdmin(); }
 
