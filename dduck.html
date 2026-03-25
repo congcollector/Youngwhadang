@@ -124,9 +124,9 @@ position:sticky; top:0; z-index:50;
 .btn-hwa:active { opacity:.88; transform:scale(0.99); }
 
 /* ── 오버레이/시트 ── */
-.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:200; display:none; align-items:flex-end; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:200; display:none; align-items:flex-end; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); touch-action:none; }
 .overlay.show { display:flex; }
-.sheet { background:#f7f3f0; border-radius:22px 22px 0 0; padding:0 0 44px; width:100%; animation:sheetUp 0.32s cubic-bezier(0.32,0.72,0,1); max-height:92vh; overflow-y:auto; }
+.sheet { background:#f7f3f0; border-radius:22px 22px 0 0; padding:0 0 44px; width:100%; animation:sheetUp 0.32s cubic-bezier(0.32,0.72,0,1); max-height:92vh; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 @keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
 .sh-hw { padding:12px 0 6px; text-align:center; }
 .sh-h  { display:inline-block; width:36px; height:4px; border-radius:2px; background:rgba(50,40,35,0.15); }
@@ -247,7 +247,7 @@ body { background:#ede8e1; }
 .btn-cake, .btn-hwa { width:calc(100% - 48px); margin:0 24px; border-radius:16px; }
 .notice { margin:0 24px; border-radius:18px; }
 .overlay { align-items:center; justify-content:center; }
-.sheet { border-radius:22px; max-width:600px; width:100%; max-height:88vh; margin:0 auto; animation:sheetFade 0.22s ease; }
+.sheet { border-radius:22px; max-width:600px; width:100%; max-height:88vh; margin:0 auto; animation:sheetFade 0.22s ease; overflow-y:auto; -webkit-overflow-scrolling:touch; }
 @keyframes sheetFade { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
 }
 @media (min-width: 1280px) {
@@ -542,7 +542,7 @@ function renderCake() {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value;renderCake()"></div>';
     h += buildTimeChips('fd.time', fd.time, fd.date, '#8b4a4a');
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value"></div>';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;padding:0 16px 8px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원</div>';
+    h += '<div style="font-size:13px;color:#ff6b6b;margin-top:6px;padding:0 16px 8px;font-weight:500;">배달 예약이 마감되었습니다.</div>';
   }
   h += '<\/div><\/div>';
 
@@ -874,7 +874,7 @@ function renderHwa() {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value;renderHwa()"></div>';
     h += buildTimeChips('hf.pickup_time', hf.pickup_time, hf.pickup_date, '#8b4a4a');
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" placeholder="배달 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value"></div>';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;padding:0 16px 8px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원</div>';
+    h += '<div style="font-size:13px;color:#ff6b6b;margin-top:6px;padding:0 16px 8px;font-weight:500;">배달 예약이 마감되었습니다.</div>';
   } else {
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;margin-bottom:8px;" placeholder="배송 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value"></div>';
     h += '<div style="font-size:12px;color:var(--text2);padding:0 16px 6px;">발송 날짜</div>';
@@ -882,7 +882,7 @@ function renderHwa() {
     h += '<div style="font-size:11px;color:var(--text2);padding:0 16px 8px;">📦 우체국 택배 · 1-2일 후 도착 · 택배비 '+CFG.hwa_delivery_price.toLocaleString()+'원 (5만원 이상 무료)</div>';
   }
   h += '<\/div><\/div>';
-  h += '<div class="sec"><div class="sec-hdr">포장 옵션</div><div class="card">';
+  h += '<div class="sec" style="margin-top:32px;"><div class="sec-hdr">포장 옵션</div><div class="card">';
   CFG.hwa_packing.forEach(function(p) {
     const isOn = hf.packing.indexOf(p.id) >= 0;
     const needsText = (p.id==='p_bojagi'||p.id==='p_crystal') && isOn;
@@ -1542,13 +1542,13 @@ function showBlockCalendar() {
 
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
   h += '<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);display:flex;align-items:center;justify-content:space-between;">';
-  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">픽업 예약 막아놓기<\/div>';
+  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">픽업·배달 예약 막아놓기<\/div>';
   h += '<div onclick="closeSheet()" style="width:30px;height:30px;border-radius:50%;background:rgba(50,40,35,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#8a837c;flex-shrink:0;">✕<\/div>';
   h += '<\/div>';
 
   // ── 운영 시간 ──
   h += '<div style="padding:14px 16px 0;">';
-  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">픽업 운영 시간<\/div>';
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">픽업·배달 운영 시간<\/div>';
   h += '<div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 0 rgba(50,40,35,0.06);margin-bottom:4px;">';
   h += '<span style="font-size:13px;color:#8a837c;flex-shrink:0;">시작<\/span>';
   h += '<select id="openTimeSelect" onchange="saveOpenClose()" style="flex:1;border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:6px 10px;font-size:14px;font-family:inherit;background:#f7f3f0;text-align:center;">';
@@ -1623,6 +1623,11 @@ function showBlockCalendar() {
   h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(50,40,35,0.06);border:1px solid rgba(50,40,35,0.1);"><\/div>정기 마감<\/div>';
   h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(139,74,74,0.12);border:1px solid #8b4a4a;"><\/div>추가 마감<\/div>';
   h += '<\/div>';
+  h += '<\/div>';
+  // 저장/닫기 버튼
+  h += '<div style="display:flex;gap:10px;padding:16px 16px 0;justify-content:center;">';
+  h += '<button onclick="closeSheet()" style="flex:1;max-width:140px;padding:14px;border-radius:14px;background:rgba(50,40,35,0.07);border:none;color:#8a837c;font-size:14px;font-family:inherit;cursor:pointer;">닫기<\/button>';
+  h += '<button onclick="saveBlockSettings();closeSheet()" style="flex:1;max-width:140px;padding:14px;border-radius:14px;background:#8b4a4a;border:none;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">저장<\/button>';
   h += '<\/div>';
   h += '<div style="height:20px;"><\/div>';
 
@@ -1769,13 +1774,15 @@ function showSettings() {
     CFG.sizes.forEach(function(s,i) {
       const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
       h += '<div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);">';
-      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
-      h += '<span style="font-size:18px;">'+s.e+'<\/span>';
-      h += '<input id="cfg_sz_name_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:75px;" value="'+s.name+'">';
-      h += '<input id="cfg_sz_cm_'+i+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:88px;" value="'+s.cm+'">';
-      h += '<input id="cfg_sz_price_'+i+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:78px;" value="'+s.price+'">';
+      h += '<div style="padding:12px 16px;border-bottom:0.5px solid var(--sep);">';
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">';
+      h += '<span style="font-size:16px;flex-shrink:0;">'+s.e+'<\/span>';
+      h += '<input id="cfg_sz_name_'+i+'" placeholder="이름" style="border:1px solid var(--sep);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;background:var(--bg);flex:1;min-width:0;" value="'+s.name+'">';
       h += '<\/div>';
-      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
+      h += '<input id="cfg_sz_cm_'+i+'" placeholder="사이즈" style="border:1px solid var(--sep);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;background:var(--bg);flex:1;min-width:0;" value="'+s.cm+'">';
+      h += '<input id="cfg_sz_price_'+i+'" type="number" placeholder="가격" style="border:1px solid var(--sep);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;background:var(--bg);width:80px;flex-shrink:0;" value="'+s.price+'">';
+      h += '<\/div>';
       photos.forEach(function(p,j) {
         h += '<div style="position:relative;"><img src="'+p+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid var(--sep);">';
         h += '<button onclick="removeSzPhoto('+i+','+j+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
@@ -1793,11 +1800,13 @@ function showSettings() {
     h += '<div class="dl" style="margin-bottom:14px;">';
     const opts = CFG.extra_options || [];
     opts.forEach(function(opt, oi) {
-      h += '<div class="dr" style="gap:6px;align-items:center;">';
-      h += '<input id="cfg_opt_name_'+oi+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);flex:1;" value="'+opt.name+'" placeholder="옵션명">';
-      h += '<input id="cfg_opt_price_'+oi+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:75px;" value="'+opt.price+'" placeholder="가격">';
-      h += '<input id="cfg_opt_desc_'+oi+'" style="border:1px solid var(--sep);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg);width:90px;" value="'+(opt.desc||'')+'" placeholder="설명">';
-      h += '<button onclick="removeExtraOption('+oi+')" style="width:24px;height:24px;border-radius:50%;background:rgba(255,59,48,0.1);border:none;color:#cc2a22;font-size:14px;cursor:pointer;flex-shrink:0;">✕<\/button>';
+      h += '<div style="padding:10px 16px;border-bottom:0.5px solid var(--sep);">';
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">';
+      h += '<input id="cfg_opt_name_'+oi+'" style="border:1px solid var(--sep);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;background:var(--bg);flex:1;min-width:0;" value="'+opt.name+'" placeholder="옵션명">';
+      h += '<input id="cfg_opt_price_'+oi+'" type="number" style="border:1px solid var(--sep);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;background:var(--bg);width:80px;flex-shrink:0;" value="'+opt.price+'" placeholder="가격">';
+      h += '<button onclick="removeExtraOption('+oi+')" style="width:26px;height:26px;border-radius:50%;background:rgba(255,59,48,0.1);border:none;color:#cc2a22;font-size:14px;cursor:pointer;flex-shrink:0;">&#10005;<\/button>';
+      h += '<\/div>';
+      h += '<input id="cfg_opt_desc_'+oi+'" placeholder="설명 (선택)" style="border:1px solid var(--sep);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;background:var(--bg);width:100%;" value="'+(opt.desc||'')+'">';
       h += '<\/div>';
     });
     h += '<div class="dr" style="flex-direction:column;align-items:flex-start;gap:8px;"><div class="dk" style="padding-top:4px;">초콜릿사진<\/div>';
