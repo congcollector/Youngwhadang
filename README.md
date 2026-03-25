@@ -345,7 +345,74 @@ SELECT * FROM cake_orders WHERE shop_id = 'shop_001';
 
 -----
 
-## 11. 향후 추가할 기능 (피드백 기반)
+## 11. 가게별 전용 앱 디자인 시스템 (플로앙 v1)
+
+플로앙 앙금플라워 케이크 전용으로 만든 디자인 시스템. 따뜻하고 우아한 느낌.
+
+### 컬러 팔레트
+
+```css
+--bg: #f5f2ef;          /* 따뜻한 아이보리 배경 */
+--card: #ffffff;
+--text: #1a1714;        /* 따뜻한 블랙 */
+--text2: #8a837c;       /* 보조 텍스트 */
+--text3: #c4bdb7;       /* 힌트 */
+--sep: rgba(50,40,35,0.08);  /* 구분선 */
+--accent: #7a4f3a;      /* 딥 로즈브라운 포인트 */
+--accent2: rgba(122,79,58,0.07);
+```
+
+### 핵심 디자인 원칙
+
+- border-radius **16px** (카드), **14px** (버튼/시트), **22px** (칩/토스트)
+- 그림자: `0 1px 0 rgba(50,40,35,0.06), 0 2px 8px rgba(50,40,35,0.04)` (얇고 섬세하게)
+- 버튼 주요 액션: `box-shadow:0 4px 16px rgba(122,79,58,0.25)` (색상 그림자)
+- 토글 스프링: `cubic-bezier(0.34,1.56,0.64,1)` (iOS 느낌)
+- 버튼 탭: `transition: opacity 0.15s, transform 0.12s` + `:active { transform:scale(0.97); }`
+- 헤더 블러: `backdrop-filter:blur(24px) saturate(1.8)`
+- 토스트: `backdrop-filter:blur(8px)` 추가
+
+### 선택 박스(sz) 테두리 잘림 방지
+
+```css
+/* sz-scroll에 padding 여유 확보 */
+.sz-scroll { padding:4px 16px 6px; }
+
+/* 선택 시 box-shadow 링 쓰지 말 것 → border만 사용 */
+.sz.on-cake { border-color:#7a4f3a; background:rgba(122,79,58,0.05); }
+/* ❌ box-shadow:0 0 0 3px ... 는 overflow로 잘림 */
+```
+
+### 가게 특화 섹션 추가 방법
+
+기존 사이즈 선택과 동일한 sz 슬라이드 패턴으로 추가 선택 항목 구현:
+
+```javascript
+// 스타일 선택 (돔/크레센트/리스 등)
+const styles = [{id:'dome', name:'돔', desc:'가득찬 둥근형', e:'🌸'}, ...];
+styles.forEach(function(st) {
+  const isOn = fd.style === st.id;
+  h += '<div class="sz'+(isOn?' on-cake':'')+'" onclick="fd.style=\''+st.id+'\';renderCake()">';
+  // ... 내용
+});
+
+// fd 초기화에 추가 필드 포함
+let fd = {sizes:{}, style:'', taste:'', delivery:false, ...};
+
+// 주문 제출 전 유효성 검사
+if (!fd.style) { toast('스타일을 선택해주세요'); return; }
+if (!fd.taste) { toast('맛을 선택해주세요'); return; }
+```
+
+### 불필요 섹션 제거 시 주의
+
+- renderCake() 함수에서 해당 섹션 h += 블록 통째로 제거
+- DEFAULT_CFG에서도 관련 필드 제거 또는 유지 (설정 화면에 영향)
+- fd 초기화, submitCake() 유효성 검사, addOrder() 호출부도 함께 확인
+
+-----
+
+## 12. 향후 추가할 기능 (피드백 기반)
 
 실제 사용 가게 생기면 추가할 기능들:
 
