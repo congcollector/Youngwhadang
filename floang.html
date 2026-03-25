@@ -1079,9 +1079,9 @@ async function renderAdmin() {
   if (!Array.isArray(allOrders)) allOrders = [];
 
   const cakeOrders = allOrders.filter(function(o){ return o.type==='cake'; });
-  const hwaOrders  = allOrders.filter(function(o){ return o.type==='hwa'; });
-  const orders = adminTab==='cake' ? cakeOrders : hwaOrders;
-  const isCake = adminTab==='cake';
+  const orders = cakeOrders;
+  adminTab = 'cake';
+  const isCake = true;
 
   let dateFiltered = orders;
   if (aDateStart || aDateEnd) {
@@ -1100,8 +1100,7 @@ async function renderAdmin() {
 
   // ── 상품 탭 ──
   h += '<div style="display:flex;gap:0;margin:0 16px 20px;background:#ffffff;border-radius:16px;overflow:hidden;padding:3px;">';
-  h += '<button onclick="adminTab=\'cake\';aFilter=\'all\';renderAdmin()" class="seg-btn '+(isCake?'btn-active-cake':'btn-inactive')+'">떡케이크<\/button>';
-  h += '<button onclick="adminTab=\'hwa\';aFilter=\'all\';renderAdmin()" class="seg-btn '+(!isCake?'btn-active-hwa':'btn-inactive')+'">화과자<\/button>';
+  h += '<button onclick="adminTab=\'cake\';aFilter=\'all\';renderAdmin()" class="seg-btn btn-active-cake" style="cursor:default;">주문 목록<\/button>';
   h += '<\/div>';
 
   // ── 통계 카드 ──
@@ -1147,7 +1146,7 @@ async function renderAdmin() {
 
   // ── 주문 목록 ──
   if (!filt.length) {
-    h += '<div class="empty"><div style="font-size:40px;margin-bottom:12px;">'+(isCake?'🎂':'🌸')+'<\/div><div style="font-size:15px;color:#8a837c;">해당 주문이 없어요<\/div><\/div>';
+    h += '<div class="empty"><div style="font-size:40px;margin-bottom:12px;">🌸<\/div><div style="font-size:15px;color:#8a837c;">해당 주문이 없어요<\/div><\/div>';
   } else {
     filt.forEach(function(o) {
       const d = new Date(o.created_at);
@@ -1560,221 +1559,253 @@ function removeHwaPackingOption(idx) {
 function showSettings() {
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
   h += '<div class="sh-tw"><div class="sh-t">⚙️ 주문서 설정<\/div><\/div>';
-  // 설정 탭
-  h += '<div class="cfg-tabs">';
-  h += '<div class="cfg-tab cfg-tab-cake'+(cfgTab==='cake'?' on':'')+'" onclick="cfgTab=\'cake\';showSettings()">떡케이크<\/div>';
-  h += '<div class="cfg-tab cfg-tab-hwa'+(cfgTab==='hwa'?' on':'')+'" onclick="cfgTab=\'hwa\';showSettings()">화과자<\/div>';
-  h += '<\/div>';
-  h += '<div style="padding:0 16px;">';
+  h += '<div style="padding:0 16px 24px;">';
 
-  if (cfgTab === 'cake') {
-    // ── 떡케이크 설정 ──
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">가게 정보<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    h += '<div class="dr"><div class="dk">가게명<\/div><div class="dv"><input id="cfg_shop_name" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+CFG.shop_name+'"><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">연락처<\/div><div class="dv"><input id="cfg_phone" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+CFG.shop_phone+'"><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">입금계좌<\/div><div class="dv"><input id="cfg_account" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+CFG.bank_account+'"><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">계좌주<\/div><div class="dv"><input id="cfg_holder" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+CFG.bank_holder+'"><\/div><\/div>';
-    h += '<\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">케이크 종류 & 가격<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    CFG.sizes.forEach(function(s,i) {
-      const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
-      h += '<div style="padding:12px 16px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
-      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
-      h += '<span style="font-size:18px;">'+s.e+'<\/span>';
-      h += '<input id="cfg_sz_name_'+i+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:75px;" value="'+s.name+'">';
-      h += '<input id="cfg_sz_cm_'+i+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:88px;" value="'+s.cm+'">';
-      h += '<input id="cfg_sz_price_'+i+'" type="number" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:78px;" value="'+s.price+'">';
-      h += '<\/div>';
-      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-      photos.forEach(function(p,j) {
-        h += '<div style="position:relative;"><img src="'+p+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid rgba(50,40,35,0.08);">';
-        h += '<button onclick="removeSzPhoto('+i+','+j+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
-      });
-      if (photos.length < 3) {
-        h += '<label style="width:64px;height:64px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:#f5f2ef;"><span style="font-size:18px;color:#8a837c;">+<\/span><span style="font-size:9px;color:#8a837c;">사진추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addSzPhoto(event,'+i+')"><\/label>';
-      }
-      h += '<\/div><\/div>';
-    });
-    h += '<\/div>';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;">추가 옵션</div>';
-    h += '<button onclick="addExtraOption()" style="padding:4px 10px;border-radius:12px;background:rgba(122,79,58,0.07);border:none;color:#7a4f3a;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">+ 추가<\/button>';
-    h += '<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    const opts = CFG.extra_options || [];
-    opts.forEach(function(opt, oi) {
-      h += '<div class="dr" style="gap:6px;align-items:center;">';
-      h += '<input id="cfg_opt_name_'+oi+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;flex:1;" value="'+opt.name+'" placeholder="옵션명">';
-      h += '<input id="cfg_opt_price_'+oi+'" type="number" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:75px;" value="'+opt.price+'" placeholder="가격">';
-      h += '<input id="cfg_opt_desc_'+oi+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:90px;" value="'+(opt.desc||'')+'" placeholder="설명">';
-      h += '<button onclick="removeExtraOption('+oi+')" style="width:24px;height:24px;border-radius:50%;background:rgba(255,59,48,0.1);border:none;color:#cc2a22;font-size:14px;cursor:pointer;flex-shrink:0;">✕<\/button>';
-      h += '<\/div>';
-    });
-    h += '<div class="dr" style="flex-direction:column;align-items:flex-start;gap:8px;"><div class="dk" style="padding-top:4px;">초콜릿사진<\/div>';
-    if (CFG.choco_photo) {
-      h += '<div style="position:relative;display:inline-block;"><img src="'+CFG.choco_photo+'" style="width:120px;height:90px;border-radius:8px;object-fit:cover;border:1px solid rgba(50,40,35,0.08);">';
-      h += '<button onclick="removeChocoPhoto()" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
-    } else {
-      h += '<label style="width:120px;height:90px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:#f5f2ef;"><span style="font-size:22px;color:#8a837c;">🍫<\/span><span style="font-size:10px;color:#8a837c;">사진 추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addChocoPhoto(event)"><\/label>';
-    }
-    h += '<\/div><\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">안내 문구<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    h += '<div class="dr"><div class="dk">픽업안내<\/div><div class="dv"><textarea id="cfg_pickup" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;resize:none;height:50px;line-height:1.5;">'+CFG.pickup_notice+'<\/textarea><\/div><\/div>';
-    CFG.storage_tips.forEach(function(t,i) {
-      h += '<div class="dr"><div class="dk">보관'+(i+1)+'<\/div><div class="dv"><input id="cfg_storage_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
-    });
-    CFG.transport_tips.forEach(function(t,i) {
-      h += '<div class="dr"><div class="dk">픽업주의'+(i+1)+'<\/div><div class="dv"><input id="cfg_transport_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
-    });
-    h += '<\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">레터링 예시<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    CFG.lets.forEach(function(t,i) {
-      h += '<div class="dr"><div class="dk">예시'+(i+1)+'<\/div><div class="dv"><input id="cfg_let_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
-    });
-    h += '<\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">디자인 안내 문구<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    h += '<div class="dr"><div class="dk">설명<\/div><div class="dv"><textarea id="cfg_design_desc" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;resize:none;height:50px;line-height:1.5;">'+(CFG.design_desc||'')+'<\/textarea><\/div><\/div>';
-    h += '<div class="dr"><div class="dk">예시 문구<\/div><div class="dv"><input id="cfg_design_ph" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+(CFG.design_placeholder||'')+'"><\/div><\/div>';
-    h += '<\/div>';
-  } else {
-    // ── 화과자 설정 ──
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">화과자 종류 & 가격<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    CFG.hwa_sizes.forEach(function(s,i) {
-      const photos = (CFG.hwa_photos && CFG.hwa_photos[s.id]) || [];
-      h += '<div style="padding:12px 16px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
-      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
-      h += '<input id="cfg_hwa_name_'+i+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:70px;" value="'+s.name+'">';
-      h += '<input id="cfg_hwa_price_'+i+'" type="number" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:80px;" value="'+s.price+'">';
-      h += '<input id="cfg_hwa_desc_'+i+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;flex:1;min-width:100px;" value="'+s.desc+'">';
-      h += '<\/div>';
-      h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
-      photos.forEach(function(p,j) {
-        h += '<div style="position:relative;"><img src="'+p+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid rgba(50,40,35,0.08);">';
-        h += '<button onclick="removeHwaPhoto('+i+','+j+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
-      });
-      if (photos.length < 3) {
-        h += '<label style="width:64px;height:64px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:#f5f2ef;"><span style="font-size:18px;color:#8a837c;">+<\/span><span style="font-size:9px;color:#8a837c;">사진추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addHwaPhoto(event,'+i+')"><\/label>';
-      }
-      h += '<\/div><\/div>';
-    });
-    h += '<\/div>';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;">포장 옵션<\/div>';
-    h += '<button onclick="addHwaPackingOption()" style="padding:4px 10px;border-radius:12px;background:rgba(58,90,122,0.08);border:none;color:#3a5a7a;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">+ 추가<\/button>';
-    h += '<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    CFG.hwa_packing.forEach(function(p,i) {
-      h += '<div style="padding:12px 16px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
-      h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">';
-      h += '<input id="cfg_hwa_pk_name_'+i+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:120px;" value="'+p.name+'">';
-      h += '<input id="cfg_hwa_pk_price_'+i+'" type="number" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;width:70px;" value="'+p.price+'">';
-      h += '<input id="cfg_hwa_pk_desc_'+i+'" style="border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;flex:1;min-width:100px;" placeholder="서브텍스트" value="'+(p.desc||'')+'">';
-      h += '<button onclick="removeHwaPackingOption('+i+')" style="width:24px;height:24px;border-radius:50%;background:rgba(255,59,48,0.1);border:none;color:#cc2a22;font-size:14px;cursor:pointer;flex-shrink:0;">✕<\/button>';
-      h += '<\/div>';
-      h += '<input id="cfg_hwa_pk_popup_'+i+'" style="width:100%;border:1px solid rgba(50,40,35,0.08);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;color:#1a1714;background:#f5f2ef;margin-bottom:8px;" placeholder="팝업 설명 문구" value="'+(p.popup_desc||'')+'">';
-      h += '<div style="display:flex;gap:8px;align-items:center;">';
-      if (p.photo) {
-        h += '<div style="position:relative;"><img src="'+p.photo+'" style="width:64px;height:64px;border-radius:8px;object-fit:cover;border:1px solid rgba(50,40,35,0.08);">';
-        h += '<button onclick="removeHwaPkPhoto('+i+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
-      } else {
-        h += '<label style="width:64px;height:64px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:#f5f2ef;"><span style="font-size:18px;color:#8a837c;">+<\/span><span style="font-size:9px;color:#8a837c;">팝업사진<\/span><input type="file" accept="image/*" style="display:none;" onchange="addHwaPkPhoto(event,'+i+')"><\/label>';
-      }
-      h += '<\/div><\/div>';
-    });
-    h += '<\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">택배비<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    h += '<div class="dr"><div class="dk">택배비<\/div><div class="dv"><input id="cfg_hwa_delivery" type="number" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;text-align:right;" value="'+CFG.hwa_delivery_price+'"><\/div><\/div>';
-    h += '<\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">택배 포장 안내<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    h += '<div class="dr" style="flex-direction:column;gap:8px;">';
-    h += '<div style="font-size:12px;color:#8a837c;font-weight:500;">설명 문구<\/div>';
-    h += '<textarea id="cfg_ship_desc" style="width:100%;border:1px solid rgba(50,40,35,0.08);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:#1a1714;background:#f5f2ef;resize:none;height:90px;outline:none;line-height:1.6;">'+(CFG.ship_packing_desc||'')+'<\/textarea>';
-    h += '<div style="font-size:12px;color:#8a837c;font-weight:500;">사진<\/div>';
-    if (CFG.ship_packing_photo) {
-      h += '<div style="position:relative;display:inline-block;"><img src="'+CFG.ship_packing_photo+'" style="width:120px;height:90px;border-radius:8px;object-fit:cover;border:1px solid rgba(50,40,35,0.08);">';
-      h += '<button onclick="removeShipPackingPhoto()" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:rgba(60,60,67,0.75);color:white;border:none;font-size:10px;cursor:pointer;">✕<\/button><\/div>';
-    } else {
-      h += '<label style="width:120px;height:90px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:#f5f2ef;"><span style="font-size:22px;color:#8a837c;">📦<\/span><span style="font-size:10px;color:#8a837c;">사진 추가<\/span><input type="file" accept="image/*" style="display:none;" onchange="addShipPackingPhoto(event)"><\/label>';
-    }
-    h += '<\/div><\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">보관 방법<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    CFG.hwa_storage.forEach(function(t,i) {
-      h += '<div class="dr"><div class="dk">보관'+(i+1)+'<\/div><div class="dv"><input id="cfg_hwa_storage_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
-    });
-    h += '<\/div>';
-    h += '<div style="font-size:12px;font-weight:600;color:#8a837c;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">주문 안내 문구<\/div>';
-    h += '<div class="dl" style="margin-bottom:14px;">';
-    h += '<div class="dr"><div class="dk">안내<\/div><div class="dv"><textarea id="cfg_hwa_notice" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;resize:none;height:50px;line-height:1.5;">'+(CFG.hwa_notice||'')+'<\/textarea><\/div><\/div>';
-    h += '<\/div>';
-  }
+  // ── 가게 정보 ──
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;text-transform:uppercase;letter-spacing:0.8px;margin:20px 0 8px;">가게 정보<\/div>';
+  h += '<div class="dl" style="margin-bottom:18px;">';
+  h += '<div class="dr"><div class="dk">가게명<\/div><div class="dv"><input id="cfg_shop_name" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;text-align:right;" value="'+CFG.shop_name+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">연락처<\/div><div class="dv"><input id="cfg_phone" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;text-align:right;" value="'+CFG.shop_phone+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">입금계좌<\/div><div class="dv"><input id="cfg_account" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;text-align:right;" value="'+CFG.bank_account+'"><\/div><\/div>';
+  h += '<div class="dr"><div class="dk">계좌주<\/div><div class="dv"><input id="cfg_holder" style="border:none;outline:none;font-size:14px;font-family:inherit;color:#1a1714;background:transparent;width:100%;text-align:right;" value="'+CFG.bank_holder+'"><\/div><\/div>';
   h += '<\/div>';
-  h += '<div class="sh-act"><button class="sh-cls" onclick="closeSheet()">닫기<\/button><button class="sh-sav-'+(cfgTab==='cake'?'cake':'hwa')+'" onclick="saveSettingsFromForm()">저장<\/button><\/div>';
+
+  // ── 케이크 사이즈 (드래그 순서 변경) ──
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 8px;">케이크 사이즈 <span style="font-size:10px;font-weight:400;">길게 눌러 순서 변경<\/span><\/div>';
+  h += '<div id="cfg_sizes_list" style="margin-bottom:18px;">';
+  CFG.sizes.forEach(function(s,i) {
+    const photos = (CFG.size_photos && CFG.size_photos[s.id]) || [];
+    h += '<div class="cfg-drag-item" data-idx="'+i+'" draggable="true" style="background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 0 rgba(50,40,35,0.06);touch-action:none;">';
+    h += '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:0.5px solid rgba(50,40,35,0.07);">';
+    h += '<div style="font-size:18px;cursor:grab;color:#c4bdb7;padding:0 4px;">≡<\/div>';
+    h += '<input id="cfg_sz_e_'+i+'" style="width:32px;font-size:18px;border:none;outline:none;background:transparent;" value="'+s.e+'">';
+    h += '<input id="cfg_sz_name_'+i+'" style="flex:1;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;" value="'+s.name+'">';
+    h += '<input id="cfg_sz_cm_'+i+'" style="width:90px;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;" value="'+s.cm+'">';
+    h += '<input id="cfg_sz_price_'+i+'" type="number" style="width:80px;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;" value="'+s.price+'">';
+    h += '<button onclick="removeCfgSize('+i+')" style="background:rgba(255,59,48,0.08);border:none;border-radius:6px;padding:5px 8px;color:#ff3b30;font-size:12px;cursor:pointer;">✕<\/button>';
+    h += '<\/div>';
+    // 사진
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;">';
+    photos.forEach(function(p,j) {
+      h += '<div style="position:relative;"><img src="'+p+'" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">';
+      h += '<button onclick="removeCfgSzPhoto('+i+','+j+')" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#ff3b30;border:none;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕<\/button><\/div>';
+    });
+    if (photos.length < 3) {
+      h += '<label style="width:60px;height:60px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#c4bdb7;">';
+      h += '<input type="file" accept="image/*" style="display:none;" onchange="addCfgSzPhoto('+i+',this)">+<\/label>';
+    }
+    h += '<\/div><\/div>';
+  });
+  h += '<\/div>';
+  h += '<button onclick="addCfgSize()" style="width:100%;padding:10px;border-radius:10px;background:rgba(122,79,58,0.07);border:none;color:#7a4f3a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:18px;">+ 사이즈 추가<\/button>';
+
+  // ── 추가 옵션 ──
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 8px;">추가 옵션 <span style="font-size:10px;font-weight:400;">길게 눌러 순서 변경<\/span><\/div>';
+  h += '<div id="cfg_opts_list" style="margin-bottom:8px;">';
+  (CFG.extra_options||[]).forEach(function(opt,oi) {
+    h += '<div class="cfg-drag-opt" data-idx="'+oi+'" draggable="true" style="background:#fff;border-radius:12px;margin-bottom:8px;padding:10px 12px;box-shadow:0 1px 0 rgba(50,40,35,0.06);touch-action:none;">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
+    h += '<div style="font-size:16px;cursor:grab;color:#c4bdb7;">≡<\/div>';
+    h += '<input id="cfg_opt_name_'+oi+'" style="flex:1;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;" value="'+opt.name+'" placeholder="옵션명">';
+    h += '<input id="cfg_opt_price_'+oi+'" type="number" style="width:80px;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;" value="'+opt.price+'" placeholder="가격">';
+    h += '<button onclick="removeCfgOpt('+oi+')" style="background:rgba(255,59,48,0.08);border:none;border-radius:6px;padding:5px 8px;color:#ff3b30;font-size:12px;cursor:pointer;">✕<\/button>';
+    h += '<\/div>';
+    h += '<input id="cfg_opt_desc_'+oi+'" style="width:100%;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;" value="'+(opt.desc||'')+'" placeholder="설명 (선택)">';
+    h += '<\/div>';
+  });
+  h += '<\/div>';
+  h += '<button onclick="addCfgOpt()" style="width:100%;padding:10px;border-radius:10px;background:rgba(122,79,58,0.07);border:none;color:#7a4f3a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:18px;">+ 옵션 추가<\/button>';
+
+  // ── 안내 문구 ──
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 8px;">안내 문구<\/div>';
+  h += '<div class="dl" style="margin-bottom:18px;">';
+  h += '<div class="dr" style="flex-direction:column;align-items:flex-start;gap:4px;"><div class="dk">픽업 안내<\/div><textarea id="cfg_pickup" style="width:100%;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit;resize:none;height:52px;outline:none;">'+( CFG.pickup_notice||'')+'<\/textarea><\/div>';
+  h += '<div class="dr" style="flex-direction:column;align-items:flex-start;gap:4px;"><div class="dk">주문 안내<\/div><textarea id="cfg_cake_notice" style="width:100%;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit;resize:none;height:52px;outline:none;">'+(CFG.cake_notice||'')+'<\/textarea><\/div>';
+  CFG.storage_tips.forEach(function(t,i) {
+    h += '<div class="dr"><div class="dk">보관'+(i+1)+'<\/div><div class="dv"><input id="cfg_storage_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
+  });
+  CFG.transport_tips.forEach(function(t,i) {
+    h += '<div class="dr"><div class="dk">픽업주의'+(i+1)+'<\/div><div class="dv"><input id="cfg_transport_'+i+'" style="border:none;outline:none;font-size:13px;font-family:inherit;color:#1a1714;background:transparent;width:100%;" value="'+t+'"><\/div><\/div>';
+  });
+  h += '<\/div>';
+
+  // ── 디자인 안내 ──
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;text-transform:uppercase;letter-spacing:0.8px;margin:0 0 8px;">디자인 안내<\/div>';
+  h += '<div class="dl" style="margin-bottom:18px;">';
+  h += '<div class="dr" style="flex-direction:column;align-items:flex-start;gap:4px;"><div class="dk">안내 문구<\/div><textarea id="cfg_design_desc" style="width:100%;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit;resize:none;height:64px;outline:none;">'+(CFG.design_guide||CFG.design_desc||'')+'<\/textarea><\/div>';
+  h += '<\/div>';
+
+  h += '<div style="display:flex;gap:10px;padding-top:4px;">';
+  h += '<button class="sh-cls" onclick="closeSheet()">닫기<\/button>';
+  h += '<button class="cfg-save-cake" onclick="saveSettingsFromForm()">저장<\/button>';
+  h += '<\/div>';
+  h += '<\/div>';
+
   showSheet(h);
+
+  // 드래그 순서 변경 초기화
+  setTimeout(function() {
+    initDragSort('cfg_sizes_list', 'cfg-drag-item');
+    initDragSort('cfg_opts_list', 'cfg-drag-opt');
+  }, 100);
+}
+
+// 드래그 정렬
+function initDragSort(listId, itemClass) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  let dragEl = null;
+  let touchStartY = 0;
+  let touchEl = null;
+
+  list.querySelectorAll('.'+itemClass).forEach(function(item) {
+    // 마우스 드래그
+    item.addEventListener('dragstart', function(e) {
+      dragEl = item;
+      setTimeout(function(){ item.style.opacity='0.4'; }, 0);
+    });
+    item.addEventListener('dragend', function() {
+      item.style.opacity='1';
+      dragEl = null;
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (!dragEl || dragEl === item) return;
+      const rect = item.getBoundingClientRect();
+      const mid = rect.top + rect.height/2;
+      if (e.clientY < mid) {
+        list.insertBefore(dragEl, item);
+      } else {
+        list.insertBefore(dragEl, item.nextSibling);
+      }
+    });
+
+    // 터치 드래그 (모바일)
+    item.addEventListener('touchstart', function(e) {
+      touchEl = item;
+      touchStartY = e.touches[0].clientY;
+      setTimeout(function(){ item.style.background='rgba(122,79,58,0.05)'; }, 200);
+    }, {passive:true});
+    item.addEventListener('touchmove', function(e) {
+      if (!touchEl) return;
+      const y = e.touches[0].clientY;
+      const items = list.querySelectorAll('.'+itemClass);
+      items.forEach(function(other) {
+        if (other === touchEl) return;
+        const rect = other.getBoundingClientRect();
+        const mid = rect.top + rect.height/2;
+        if (y > rect.top && y < rect.bottom) {
+          if (y < mid) list.insertBefore(touchEl, other);
+          else list.insertBefore(touchEl, other.nextSibling);
+        }
+      });
+    }, {passive:true});
+    item.addEventListener('touchend', function() {
+      if (touchEl) touchEl.style.background='#fff';
+      touchEl = null;
+    });
+  });
+}
+
+// 사이즈 추가/삭제
+function addCfgSize() {
+  CFG.sizes.push({id:'s_'+Date.now(), e:'🌸', name:'새 사이즈', cm:'', price:0});
+  showSettings();
+}
+function removeCfgSize(i) {
+  CFG.sizes.splice(i,1);
+  showSettings();
+}
+function addCfgSzPhoto(i, input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    if (!CFG.size_photos) CFG.size_photos = {};
+    const id = CFG.sizes[i].id;
+    if (!CFG.size_photos[id]) CFG.size_photos[id] = [];
+    if (CFG.size_photos[id].length < 3) {
+      CFG.size_photos[id].push(e.target.result);
+      showSettings();
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function removeCfgSzPhoto(i, j) {
+  const id = CFG.sizes[i].id;
+  if (CFG.size_photos && CFG.size_photos[id]) {
+    CFG.size_photos[id].splice(j,1);
+    showSettings();
+  }
+}
+
+// 옵션 추가/삭제
+function addCfgOpt() {
+  if (!CFG.extra_options) CFG.extra_options = [];
+  CFG.extra_options.push({id:'opt_'+Date.now(), name:'새 옵션', price:0, desc:'', active:true});
+  showSettings();
+}
+function removeCfgOpt(i) {
+  CFG.extra_options.splice(i,1);
+  showSettings();
 }
 
 async function saveSettingsFromForm() {
   const newCFG = Object.assign({}, CFG);
-  if (cfgTab === 'cake') {
-    newCFG.shop_name = document.getElementById('cfg_shop_name').value;
-    newCFG.shop_phone = document.getElementById('cfg_phone').value;
-    newCFG.bank_account = document.getElementById('cfg_account').value;
-    newCFG.bank_holder = document.getElementById('cfg_holder').value;
-    newCFG.pickup_notice = document.getElementById('cfg_pickup').value;
-    newCFG.choco_price = parseInt(document.getElementById('cfg_choco') ? document.getElementById('cfg_choco').value : '3000')||3000;
-    newCFG.delivery_price = parseInt(document.getElementById('cfg_delivery') ? document.getElementById('cfg_delivery').value : '5000')||5000;
-    const optEls = CFG.extra_options || [];
-    newCFG.extra_options = optEls.map(function(opt, oi) {
-      return {
-        id: opt.id || ('opt_'+oi),
-        name: document.getElementById('cfg_opt_name_'+oi) ? document.getElementById('cfg_opt_name_'+oi).value : opt.name,
-        price: parseInt(document.getElementById('cfg_opt_price_'+oi) ? document.getElementById('cfg_opt_price_'+oi).value : opt.price) || opt.price,
-        desc: document.getElementById('cfg_opt_desc_'+oi) ? document.getElementById('cfg_opt_desc_'+oi).value : (opt.desc||''),
-        active: true
-      };
-    });
-    newCFG.design_desc = document.getElementById('cfg_design_desc') ? document.getElementById('cfg_design_desc').value : CFG.design_desc;
-    newCFG.design_placeholder = document.getElementById('cfg_design_ph') ? document.getElementById('cfg_design_ph').value : CFG.design_placeholder;
-    newCFG.sizes = CFG.sizes.map(function(s,i) {
-      return {id:s.id, e:s.e, name:document.getElementById('cfg_sz_name_'+i).value, cm:document.getElementById('cfg_sz_cm_'+i).value, price:parseInt(document.getElementById('cfg_sz_price_'+i).value)||s.price};
-    });
-    newCFG.storage_tips = CFG.storage_tips.map(function(_,i){ return document.getElementById('cfg_storage_'+i).value; });
-    newCFG.transport_tips = CFG.transport_tips.map(function(_,i){ return document.getElementById('cfg_transport_'+i).value; });
-    newCFG.lets = CFG.lets.map(function(_,i){ return document.getElementById('cfg_let_'+i).value; });
-  } else {
-    newCFG.hwa_sizes = CFG.hwa_sizes.map(function(s,i) {
-      return {id:s.id, name:document.getElementById('cfg_hwa_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_price_'+i).value)||s.price, desc:document.getElementById('cfg_hwa_desc_'+i).value};
-    });
-    newCFG.hwa_photos = CFG.hwa_photos || {};
-    newCFG.hwa_packing = CFG.hwa_packing.map(function(p,i) {
-      return {id:p.id, name:document.getElementById('cfg_hwa_pk_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_pk_price_'+i).value)||p.price, desc:document.getElementById('cfg_hwa_pk_desc_'+i)?document.getElementById('cfg_hwa_pk_desc_'+i).value:(p.desc||''), popup_desc:document.getElementById('cfg_hwa_pk_popup_'+i)?document.getElementById('cfg_hwa_pk_popup_'+i).value:(p.popup_desc||''), photo:p.photo||''};
-    });
-    newCFG.hwa_sizes = CFG.hwa_sizes.map(function(s,i) {
-      return {id:s.id, name:document.getElementById('cfg_hwa_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_price_'+i).value)||s.price, desc:document.getElementById('cfg_hwa_desc_'+i).value};
-    });
-    newCFG.hwa_delivery_price = parseInt(document.getElementById('cfg_hwa_delivery').value)||4000;
-    newCFG.hwa_storage = CFG.hwa_storage.map(function(_,i){ return document.getElementById('cfg_hwa_storage_'+i).value; });
-    newCFG.hwa_notice = document.getElementById('cfg_hwa_notice').value;
-    const shipDesc = document.getElementById('cfg_ship_desc');
-    if (shipDesc) newCFG.ship_packing_desc = shipDesc.value;
-    newCFG.ship_packing_photo = CFG.ship_packing_photo || '';
+
+  // 가게 정보
+  newCFG.shop_name = document.getElementById('cfg_shop_name').value;
+  newCFG.shop_phone = document.getElementById('cfg_phone').value;
+  newCFG.bank_account = document.getElementById('cfg_account').value;
+  newCFG.bank_holder = document.getElementById('cfg_holder').value;
+  newCFG.pickup_notice = document.getElementById('cfg_pickup').value;
+  newCFG.cake_notice = document.getElementById('cfg_cake_notice').value;
+
+  // 사이즈 (DOM 순서 기준으로 저장)
+  const sizeItems = document.querySelectorAll('.cfg-drag-item');
+  newCFG.sizes = Array.from(sizeItems).map(function(el) {
+    const i = parseInt(el.dataset.idx);
+    const s = CFG.sizes[i];
+    return {
+      id: s.id,
+      e: document.getElementById('cfg_sz_e_'+i) ? document.getElementById('cfg_sz_e_'+i).value : s.e,
+      name: document.getElementById('cfg_sz_name_'+i).value,
+      cm: document.getElementById('cfg_sz_cm_'+i).value,
+      price: parseInt(document.getElementById('cfg_sz_price_'+i).value)||s.price
+    };
+  });
+
+  // 옵션 (DOM 순서 기준)
+  const optItems = document.querySelectorAll('.cfg-drag-opt');
+  newCFG.extra_options = Array.from(optItems).map(function(el) {
+    const oi = parseInt(el.dataset.idx);
+    const opt = CFG.extra_options[oi];
+    return {
+      id: opt.id,
+      name: document.getElementById('cfg_opt_name_'+oi) ? document.getElementById('cfg_opt_name_'+oi).value : opt.name,
+      price: parseInt(document.getElementById('cfg_opt_price_'+oi) ? document.getElementById('cfg_opt_price_'+oi).value : opt.price)||0,
+      desc: document.getElementById('cfg_opt_desc_'+oi) ? document.getElementById('cfg_opt_desc_'+oi).value : (opt.desc||''),
+      active: true
+    };
+  });
+
+  // 안내 문구
+  newCFG.storage_tips = CFG.storage_tips.map(function(_,i){ return document.getElementById('cfg_storage_'+i) ? document.getElementById('cfg_storage_'+i).value : CFG.storage_tips[i]; });
+  newCFG.transport_tips = CFG.transport_tips.map(function(_,i){ return document.getElementById('cfg_transport_'+i) ? document.getElementById('cfg_transport_'+i).value : CFG.transport_tips[i]; });
+  newCFG.design_guide = document.getElementById('cfg_design_desc') ? document.getElementById('cfg_design_desc').value : CFG.design_guide;
+  newCFG.size_photos = CFG.size_photos;
+
+  toast('저장 중...');
+  try {
+    await saveSettings(newCFG);
+    CFG = newCFG;
+    closeSheet();
+    toast('저장됐어요!');
+  } catch(e) {
+    toast('저장 실패');
   }
-  await saveSettings(newCFG);
-  CFG = newCFG;
-  toast('설정이 저장됐어요 ✅');
-  closeSheet();
-  if (IS_ADMIN) renderAdmin(); else { if(curTab==='cake') renderCake(); else renderHwa(); }
 }
 
-// ── 시작 ──
+
 function render() {
   if (IS_ADMIN) renderAdmin();
   else { if (curTab==='cake') renderCake(); else renderHwa(); }
