@@ -1012,9 +1012,10 @@ async function renderAdmin() {
   renderAdminView();
 }
 
+
 function renderAdminView() {
   const isCake = adminTab === 'cake';
-  const accentColor = isCake ? '#8b4a4a' : '#4a6b8b';
+  const accent = isCake ? '#8b4a4a' : '#4a6b8b';
   const orders = adminOrders.filter(function(o){ return o.type === adminTab; });
 
   if (!adminSelDate) {
@@ -1036,7 +1037,10 @@ function renderAdminView() {
     weekDays.push({ date:ds, day:d, label:['일','월','화','수','목','금','토'][d.getDay()] });
   }
 
-  const today = (function(){ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); })();
+  const today = (function(){
+    const t = new Date();
+    return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  })();
 
   const dayOrders = orders.filter(function(o){ return o.pickup_date === adminSelDate; });
   const tabOrders = aFilter === 'all' ? dayOrders : dayOrders.filter(function(o){ return o.status === aFilter; });
@@ -1048,39 +1052,38 @@ function renderAdminView() {
   });
 
   const monthLabel = (selD.getMonth()+1)+'월';
-  const weekTotal = weekDays.reduce(function(s,d){ return s+(orderCountMap[d.date]||0); },0);
+  const weekTotal = weekDays.reduce(function(s,d){ return s+(orderCountMap[d.date]||0); }, 0);
 
   let h = '';
 
-  // ── 상단: 상품 탭 (떡케이크/화과자) ──
-  h += '<div style="display:flex;gap:0;margin:16px 16px 0;background:#fff;border-radius:14px;overflow:hidden;padding:3px;box-shadow:0 1px 0 rgba(50,40,35,0.06);">';
-  h += '<button onclick="adminTab=\'cake\';aFilter=\'all\';adminSelDate=null;renderAdminView()" class="seg-btn '+(isCake?'btn-active-cake':'btn-inactive-w')+'">🎂 떡케이크<\/button>';
-  h += '<button onclick="adminTab=\'hwa\';aFilter=\'all\';adminSelDate=null;renderAdminView()" class="seg-btn '+(!isCake?'btn-active-hwa':'btn-inactive-w')+'">🌸 화과자<\/button>';
+  // ── 상품 탭 (플로앙 스타일: 연한 배경 세그먼트) ──
+  h += '<div style="display:flex;gap:0;margin:14px 16px 0;background:rgba(50,40,35,0.06);border-radius:14px;padding:3px;">';
+  h += '<button onclick="adminTab=\'cake\';aFilter=\'all\';adminSelDate=null;renderAdminView()" style="flex:1;padding:9px 0;border:none;border-radius:11px;font-size:14px;font-weight:'+(isCake?'600':'500')+';font-family:inherit;cursor:pointer;background:'+(isCake?'#8b4a4a':'transparent')+';color:'+(isCake?'#fff':'#8a837c')+';transition:all 0.18s;">🎂 떡케이크<\/button>';
+  h += '<button onclick="adminTab=\'hwa\';aFilter=\'all\';adminSelDate=null;renderAdminView()" style="flex:1;padding:9px 0;border:none;border-radius:11px;font-size:14px;font-weight:'+(!isCake?'600':'500')+';font-family:inherit;cursor:pointer;background:'+(!isCake?'#4a6b8b':'transparent')+';color:'+(!isCake?'#fff':'#8a837c')+';transition:all 0.18s;">🌸 화과자<\/button>';
   h += '<\/div>';
 
-  // ── 주간 캘린더 ──
-  h += '<div style="background:rgba(247,243,240,0.96);position:sticky;top:52px;z-index:40;border-bottom:0.5px solid rgba(50,40,35,0.1);margin-top:12px;">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px;">';
+  // ── 주간 캘린더 (sticky) ──
+  h += '<div style="background:rgba(247,243,240,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:52px;z-index:40;border-bottom:0.5px solid rgba(50,40,35,0.08);margin-top:12px;">';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;">';
   h += '<div style="font-size:15px;font-weight:700;letter-spacing:-0.3px;">'+monthLabel+'<\/div>';
   h += '<div style="font-size:12px;color:#b8a99e;">이번주 '+weekTotal+'건<\/div>';
   h += '<\/div>';
 
-  // 화살표 + 날짜 한 줄
-  h += '<div style="display:flex;align-items:center;padding:0 4px 10px;gap:2px;">';
+  h += '<div style="display:flex;align-items:center;padding:0 4px 12px;gap:2px;">';
   h += '<button onclick="event.stopPropagation();adminWeekOffset--;renderAdminView()" style="width:36px;height:56px;border:none;background:transparent;color:#c4bdb7;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;">‹<\/button>';
   h += '<div style="flex:1;display:flex;gap:2px;">';
   weekDays.forEach(function(d) {
     const isSel = d.date === adminSelDate;
     const isToday = d.date === today;
     const cnt = orderCountMap[d.date] || 0;
-    const bg = isSel ? accentColor : 'transparent';
-    const textColor = isSel ? '#fff' : (isToday ? accentColor : '#1c1814');
-    const labelColor = isSel ? 'rgba(255,255,255,0.65)' : '#b8a99e';
+    const bg = isSel ? accent : 'transparent';
+    const textC = isSel ? '#fff' : (isToday ? accent : '#1c1814');
+    const labelC = isSel ? 'rgba(255,255,255,0.65)' : '#b8a99e';
     h += '<div onclick="adminSelDate=\''+d.date+'\';aFilter=\'all\';renderAdminView()" style="flex:1;text-align:center;padding:7px 2px;border-radius:12px;cursor:pointer;background:'+bg+';transition:all 0.15s;">';
-    h += '<div style="font-size:10px;color:'+labelColor+';margin-bottom:3px;font-weight:500;pointer-events:none;">'+d.label+'<\/div>';
-    h += '<div style="font-size:17px;font-weight:700;color:'+textColor+';pointer-events:none;">'+d.day.getDate()+'<\/div>';
+    h += '<div style="font-size:10px;color:'+labelC+';margin-bottom:3px;font-weight:500;pointer-events:none;">'+d.label+'<\/div>';
+    h += '<div style="font-size:17px;font-weight:700;color:'+textC+';pointer-events:none;">'+d.day.getDate()+'<\/div>';
     h += cnt > 0
-      ? '<div style="width:5px;height:5px;border-radius:50%;background:'+(isSel?'rgba(255,255,255,0.6)':accentColor)+';margin:3px auto 0;pointer-events:none;"><\/div>'
+      ? '<div style="width:5px;height:5px;border-radius:50%;background:'+(isSel?'rgba(255,255,255,0.6)':accent)+';margin:3px auto 0;pointer-events:none;"><\/div>'
       : '<div style="width:5px;height:5px;margin:3px auto 0;pointer-events:none;"><\/div>';
     h += '<\/div>';
   });
@@ -1095,7 +1098,7 @@ function renderAdminView() {
   h += '<div style="display:flex;border-top:0.5px solid rgba(50,40,35,0.08);">';
   [{k:'all',l:'전체',cnt:dayOrders.length},{k:'pending',l:'확인중',cnt:pendingCnt},{k:'confirmed',l:'예약확정',cnt:confirmedCnt},{k:'done',l:'픽업완료',cnt:doneCnt}].forEach(function(t) {
     const isOn = aFilter === t.k;
-    h += '<div onclick="aFilter=\''+t.k+'\';renderAdminView()" style="flex:1;text-align:center;padding:10px 0;font-size:12px;font-weight:'+(isOn?'700':'500')+';color:'+(isOn?accentColor:'#b8a99e')+';border-bottom:2px solid '+(isOn?accentColor:'transparent')+';cursor:pointer;transition:all 0.15s;">';
+    h += '<div onclick="aFilter=\''+t.k+'\';renderAdminView()" style="flex:1;text-align:center;padding:10px 0;font-size:12px;font-weight:'+(isOn?'700':'500')+';color:'+(isOn?accent:'#b8a99e')+';border-bottom:2px solid '+(isOn?accent:'transparent')+';cursor:pointer;transition:all 0.15s;">';
     h += t.l+(t.cnt>0?' '+t.cnt:'');
     h += '<\/div>';
   });
@@ -1106,27 +1109,33 @@ function renderAdminView() {
   const dayNames = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
   const selLabel = (selObj.getMonth()+1)+'월 '+selObj.getDate()+'일 '+dayNames[selObj.getDay()];
   h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px;">';
-  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">'+selLabel+'<\/div>';
+  h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.4px;">'+selLabel+'<\/div>';
   h += '<div style="display:flex;align-items:center;gap:8px;">';
-  if (adminSelDate === today) h += '<div style="background:'+accentColor+';color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">오늘<\/div>';
-  if (tabOrders.length > 0) h += '<div style="background:rgba(50,40,35,0.07);color:'+accentColor+';font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">'+tabOrders.length+'건<\/div>';
+  if (adminSelDate === today) h += '<div style="background:'+accent+';color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">오늘<\/div>';
+  if (tabOrders.length > 0)   h += '<div style="background:rgba(50,40,35,0.07);color:'+accent+';font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">'+tabOrders.length+'건<\/div>';
   h += '<\/div><\/div>';
 
   // ── 주문 목록 ──
   if (!tabOrders.length) {
     h += '<div style="text-align:center;padding:72px 20px;">';
     h += '<div style="font-size:44px;margin-bottom:16px;">'+(isCake?'🎂':'🌸')+'<\/div>';
-    h += '<div style="font-size:15px;color:#c4bdb7;font-weight:500;">'+selLabel+'<br>주문이 없어요<\/div><\/div>';
+    h += '<div style="font-size:16px;font-weight:600;color:#1c1814;letter-spacing:-0.3px;margin-bottom:6px;">'+selLabel+'<\/div>';
+    h += '<div style="font-size:14px;color:#c4bdb7;">주문이 없어요<\/div>';
+    h += '<\/div>';
   } else {
     const sorted = tabOrders.slice().sort(function(a,b){ return (a.pickup_time||'').localeCompare(b.pickup_time||''); });
     sorted.forEach(function(o) {
-      const sc = {pending:{bg:'rgba(255,149,0,0.1)',c:'#b06800',l:'확인중'},confirmed:{bg:'rgba(52,199,89,0.1)',c:'#1a7a33',l:'예약확정'},done:{bg:'rgba(50,40,35,0.07)',c:'#8a837c',l:'픽업완료'},cancel:{bg:'rgba(255,59,48,0.08)',c:'#ff3b30',l:'취소'}}[o.status]||{bg:'rgba(255,149,0,0.1)',c:'#b06800',l:'확인중'};
-      const cardClass = isCake ? 'order-card-cake' : 'order-card-hwa';
-      const priceClass = isCake ? 'order-price-cake' : 'order-price-hwa';
-      h += '<div class="'+cardClass+'" onclick="openOrder(\''+o.id+'\')">'; 
+      const sc = {
+        pending:   {bg:'rgba(255,149,0,0.1)',  c:'#b06800', l:'확인중'},
+        confirmed: {bg:'rgba(52,199,89,0.1)',   c:'#1a7a33', l:'예약확정'},
+        done:      {bg:'rgba(50,40,35,0.07)',   c:'#8a837c', l:'픽업완료'},
+        cancel:    {bg:'rgba(255,59,48,0.08)',  c:'#ff3b30', l:'취소'}
+      }[o.status] || {bg:'rgba(255,149,0,0.1)',c:'#b06800',l:'확인중'};
+
+      h += '<div style="background:#fff;border-radius:16px;margin:0 16px 10px;overflow:hidden;cursor:pointer;border-left:3px solid '+accent+';box-shadow:0 1px 0 rgba(50,40,35,0.05),0 2px 12px rgba(50,40,35,0.05);transition:all 0.2s;" onclick="openOrder(\''+o.id+'\')">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px 8px;">';
       h += '<div style="display:flex;align-items:center;gap:8px;">';
-      h += '<div style="font-size:16px;font-weight:700;">'+o.name+'<\/div>';
+      h += '<div style="font-size:16px;font-weight:700;letter-spacing:-0.3px;">'+o.name+'<\/div>';
       if (o.pickup_time) h += '<div style="font-size:13px;color:#b8a99e;font-weight:500;">'+o.pickup_time+'<\/div>';
       h += '<\/div>';
       h += '<div style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:'+sc.bg+';color:'+sc.c+';">'+sc.l+'<\/div>';
@@ -1136,13 +1145,14 @@ function renderAdminView() {
       h += '<\/div>';
       h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:0.5px solid rgba(50,40,35,0.07);">';
       h += '<div style="font-size:13px;color:#b8a99e;">'+o.phone+'<\/div>';
-      h += '<div class="'+priceClass+'">'+(o.total_price||0).toLocaleString()+'원<\/div>';
+      h += '<div style="font-size:16px;font-weight:700;color:'+accent+';letter-spacing:-0.3px;">'+(o.total_price||0).toLocaleString()+'원<\/div>';
       h += '<\/div><\/div>';
     });
   }
   h += '<div style="height:40px;"><\/div>';
   W(h);
 }
+
 
 async function openOrder(id) {
   let o = null;
