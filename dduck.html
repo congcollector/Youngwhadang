@@ -274,7 +274,7 @@ body { background:#ede8e1; }
 </div>
 
 <div class="wrap" id="wrap"><div class="loading">불러오는 중...</div></div>
-<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1457,8 +1457,9 @@ function showBlockCalendar() {
   const startDow = firstDay.getDay();
 
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
-  h += '<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
+  h += '<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);display:flex;align-items:center;justify-content:space-between;">';
   h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">픽업 예약 막아놓기<\/div>';
+  h += '<div onclick="closeSheet()" style="width:30px;height:30px;border-radius:50%;background:rgba(50,40,35,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#8a837c;flex-shrink:0;">✕<\/div>';
   h += '<\/div>';
 
   // ── 정기 마감 요일 ──
