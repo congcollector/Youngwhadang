@@ -1452,160 +1452,136 @@ function showBlockCalendar() {
   const DOW_NAMES = ['일','월','화','수','목','금','토'];
   const MONTH_NAMES = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-  // 이달 첫날/마지막날
   const firstDay = new Date(y, m, 1);
   const lastDay  = new Date(y, m+1, 0);
-  const startDow = firstDay.getDay(); // 0=일
+  const startDow = firstDay.getDay();
 
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
   h += '<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
   h += '<div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;">픽업 예약 막아놓기<\/div>';
-  h += '<div style="font-size:13px;color:#8a837c;margin-top:3px;">날짜를 눌러 해당 날 픽업 마감 시간을 설정하세요<\/div>';
   h += '<\/div>';
 
-  // ── 정기 차단 요일 ──
+  // ── 정기 마감 요일 ──
   h += '<div style="padding:14px 16px 0;">';
   h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">정기 마감 요일<\/div>';
-  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
   DOW_NAMES.forEach(function(n, i) {
     const isBlocked = blockRules.some(function(r){ return r.dow === i && !r.after; });
-    h += '<button onclick="toggleRegularDow('+i+')" style="padding:7px 12px;border-radius:22px;font-size:13px;font-weight:500;font-family:inherit;border:1.5px solid '+(isBlocked?'#8b4a4a':'rgba(50,40,35,0.12)')+';background:'+(isBlocked?'#8b4a4a':'transparent')+';color:'+(isBlocked?'#fff':'#1c1814')+';cursor:pointer;transition:all 0.15s;">'+n+'<\/button>';
+    h += '<div onclick="toggleRegularDow('+i+')" style="padding:8px 13px;border-radius:22px;font-size:13px;font-weight:500;font-family:inherit;border:1.5px solid '+(isBlocked?'#8b4a4a':'rgba(50,40,35,0.12)')+';background:'+(isBlocked?'#8b4a4a':'transparent')+';color:'+(isBlocked?'#fff':'#1c1814')+';cursor:pointer;transition:all 0.15s;">'+n+'<\/div>';
   });
-  h += '<\/div>';
-  // 정기 시간 이후 차단 요일
-  blockRules.forEach(function(r, ri) {
-    if (!r.after) return;
-    h += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;background:#f7f3f0;border-radius:10px;padding:8px 12px;">';
-    h += '<span style="font-size:13px;color:#8a837c;">매주 '+DOW_NAMES[r.dow]+'요일</span>';
-    h += '<input type="time" value="'+r.after+'" onchange="updateRuleAfter('+ri+',this.value)" style="border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:4px 8px;font-size:13px;font-family:inherit;background:#fff;"> 이후 마감';
-    h += '<button onclick="removeBlockRule('+ri+')" style="margin-left:auto;background:rgba(255,59,48,0.08);border:none;border-radius:6px;padding:4px 8px;color:#ff3b30;font-size:11px;cursor:pointer;">삭제<\/button>';
-    h += '<\/div>';
-  });
-  h += '<button onclick="addTimeBlockRule()" style="margin-top:8px;width:100%;padding:9px;border-radius:10px;background:rgba(139,74,74,0.07);border:none;color:#8b4a4a;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;">+ 특정 요일 시간 이후 마감 추가<\/button>';
-  h += '<\/div>';
+  h += '<\/div><\/div>';
 
-  // ── 월 캘린더 ──
+  // ── 추가 마감 날짜 캘린더 ──
   h += '<div style="padding:14px 16px 0;">';
-  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">특정 날짜 마감<\/div>';
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">추가 마감 날짜<\/div>';
 
   // 월 이동
   h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
-  h += '<button onclick="blockCalMove(-1)" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(50,40,35,0.07);color:#1c1814;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹<\/button>';
+  h += '<div onclick="blockCalMove(-1)" style="width:32px;height:32px;border-radius:50%;background:rgba(50,40,35,0.07);color:#1c1814;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹<\/div>';
   h += '<div style="font-size:16px;font-weight:700;">'+y+'년 '+MONTH_NAMES[m]+'<\/div>';
-  h += '<button onclick="blockCalMove(1)" style="width:32px;height:32px;border-radius:50%;border:none;background:rgba(50,40,35,0.07);color:#1c1814;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">›<\/button>';
+  h += '<div onclick="blockCalMove(1)" style="width:32px;height:32px;border-radius:50%;background:rgba(50,40,35,0.07);color:#1c1814;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">›<\/div>';
   h += '<\/div>';
 
   // 요일 헤더
   h += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">';
   DOW_NAMES.forEach(function(n){
-    h += '<div style="text-align:center;font-size:11px;color:#b8a99e;font-weight:600;padding:4px 0;">'+n+'<\/div>';
+    h += '<div style="text-align:center;font-size:11px;color:#b8a99e;font-weight:600;padding:4px 0;pointer-events:none;">'+n+'<\/div>';
   });
   h += '<\/div>';
 
   // 날짜 그리드
   h += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
+  for (let i = 0; i < startDow; i++) h += '<div><\/div>';
 
-  // 빈칸
-  for (let i = 0; i < startDow; i++) {
-    h += '<div><\/div>';
-  }
-
+  const today = new Date(); today.setHours(0,0,0,0);
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const dateStr = y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
     const d = new Date(y, m, day);
     const dow = d.getDay();
-    const isRegularBlocked = blockRules.some(function(r){ return r.dow === dow && !r.after; });
-    const dateBlock = blockDates[dateStr];
-    const hasBlock = dateBlock !== undefined;
-    const today = new Date(); today.setHours(0,0,0,0);
     const isPast = d < today;
+    const isRegular = blockRules.some(function(r){ return r.dow===dow && !r.after; });
+    const dateBlock = blockDates[dateStr];
+    const hasBlock  = dateBlock !== undefined;
 
-    let bg = 'transparent', textColor = '#1c1814', border = '1.5px solid transparent';
-    let label = '';
-
-    if (isRegularBlocked) {
-      bg = 'rgba(50,40,35,0.06)'; textColor = '#c4bdb7'; border = '1.5px solid transparent';
-    } else if (hasBlock) {
-      if (dateBlock === null || dateBlock === '') {
-        bg = '#8b4a4a'; textColor = '#fff';
-      } else {
-        bg = 'rgba(139,74,74,0.12)'; textColor = '#8b4a4a'; border = '1.5px solid #8b4a4a';
-        label = dateBlock;
-      }
+    let bg = 'transparent', textColor = '#1c1814', border = '1.5px solid transparent', subLabel = '';
+    if (isPast)       { textColor = '#d4cdc8'; }
+    if (isRegular)    { bg = 'rgba(50,40,35,0.06)'; textColor = '#c4bdb7'; }
+    if (hasBlock) {
+      const t = dateBlock === null || dateBlock === '' || dateBlock === '00:00' ? '하루종일' : dateBlock+'~';
+      bg = 'rgba(139,74,74,0.12)'; textColor = '#8b4a4a'; border = '1.5px solid #8b4a4a'; subLabel = t;
     }
-    if (isPast) { textColor = '#d4cdc8'; }
 
-    h += '<div onclick="'+(isPast||isRegularBlocked?'':'pickBlockDate(\''+dateStr+'\',\''+dateStr+'\')') +'" style="text-align:center;padding:6px 2px;border-radius:10px;cursor:'+(isPast||isRegularBlocked?'default':'pointer')+';background:'+bg+';border:'+border+';transition:all 0.15s;">';
+    const clickable = !isPast && !isRegular;
+    h += '<div data-date="'+dateStr+'" onclick="'+(clickable?'handlePickBlock(this)':'')+'" style="text-align:center;padding:6px 2px;border-radius:10px;cursor:'+(clickable?'pointer':'default')+';background:'+bg+';border:'+border+';transition:all 0.15s;">';
     h += '<div style="font-size:14px;font-weight:600;color:'+textColor+';pointer-events:none;">'+day+'<\/div>';
-    if (label) h += '<div style="font-size:9px;color:'+textColor+';pointer-events:none;margin-top:1px;">'+label+'<\/div>';
+    if (subLabel) h += '<div style="font-size:9px;color:'+textColor+';pointer-events:none;margin-top:1px;line-height:1.2;">'+subLabel+'<\/div>';
     h += '<\/div>';
   }
   h += '<\/div>';
 
   // 범례
-  h += '<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">';
-  h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:#8b4a4a;"><\/div>하루종일 마감<\/div>';
-  h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(139,74,74,0.12);border:1px solid #8b4a4a;"><\/div>시간 이후 마감<\/div>';
-  h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(50,40,35,0.06);"><\/div>정기 마감<\/div>';
+  h += '<div style="display:flex;gap:14px;margin-top:12px;">';
+  h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(50,40,35,0.06);border:1px solid rgba(50,40,35,0.1);"><\/div>정기 마감<\/div>';
+  h += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#8a837c;"><div style="width:12px;height:12px;border-radius:3px;background:rgba(139,74,74,0.12);border:1px solid #8b4a4a;"><\/div>추가 마감<\/div>';
   h += '<\/div>';
   h += '<\/div>';
+  h += '<div style="height:20px;"><\/div>';
 
-  h += '<div style="height:16px;"><\/div>';
   showSheet(h);
 }
 
-// 날짜 탭 → 마감 설정 팝업
+
+function handlePickBlock(el) { pickBlockDate(el.getAttribute('data-date')); }
 function pickBlockDate(dateStr) {
   window._curBlockDate = dateStr;
   const blockDates = CFG.block_dates || {};
   const current = blockDates[dateStr];
   const d = new Date(dateStr+'T00:00:00');
   const label = (d.getMonth()+1)+'월 '+d.getDate()+'일';
-  const isDayBlock = current === null || current === '';
-  const isTimeBlock = current !== undefined && current !== null && current !== '';
-  const hasAny = current !== undefined;
+  const isTimeBlock = current !== undefined;
+  const curTime = (current === null || current === '') ? '00:00' : (current || '13:00');
 
-  const sheet = document.querySelector('.sheet');
-  if (!sheet) return;
+  // 오버레이 위에 새 팝업 (바텀시트 대신 중앙 팝업)
+  let old = document.getElementById('block_date_modal');
+  if (old) old.remove();
 
-  let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
-  h += '<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
-  h += '<div style="font-size:17px;font-weight:700;">'+label+' 픽업 마감 설정<\/div>';
-  h += '<div style="font-size:13px;color:#8a837c;margin-top:3px;">마감 방식을 선택하세요<\/div>';
-  h += '<\/div>';
-  h += '<div style="padding:16px 16px 0;">';
+  const modal = document.createElement('div');
+  modal.id = 'block_date_modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);';
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
 
-  // 하루종일 마감
-  const dayBg = isDayBlock ? 'rgba(139,74,74,0.07)' : 'transparent';
-  const dayBorder = isDayBlock ? '#8b4a4a' : 'rgba(50,40,35,0.1)';
-  const dayColor = isDayBlock ? '#8b4a4a' : '#1c1814';
-  const dayWeight = isDayBlock ? '600' : '500';
-  h += '<div onclick="setBlockDate(window._curBlockDate,null)" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid '+dayBorder+';background:'+dayBg+';color:'+dayColor+';font-size:14px;font-weight:'+dayWeight+';font-family:inherit;cursor:pointer;text-align:left;margin-bottom:10px;box-sizing:border-box;">';
-  h += '🚫 하루 종일 마감<br><span style="font-size:12px;color:#b8a99e;font-weight:400;">이 날 픽업 예약 전체 불가<\/span>';
+  let h = '<div style="background:#f7f3f0;border-radius:20px;width:100%;max-width:360px;overflow:hidden;">';
+
+  // 헤더
+  h += '<div style="padding:18px 20px 14px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
+  h += '<div style="font-size:17px;font-weight:700;">'+label+' 추가 마감 설정<\/div>';
+  h += '<div style="font-size:13px;color:#8a837c;margin-top:3px;">00:00으로 설정하면 하루 종일 마감으로 적용돼요<\/div>';
   h += '<\/div>';
 
-  // 시간 이후 마감
-  const timeBg = isTimeBlock ? 'rgba(139,74,74,0.07)' : '#f7f3f0';
-  const timeBorder = isTimeBlock ? '#8b4a4a' : 'rgba(50,40,35,0.1)';
-  const timeWeight = isTimeBlock ? '600' : '500';
-  const timeColor = isTimeBlock ? '#8b4a4a' : '#1c1814';
-  h += '<div style="background:'+timeBg+';border:1.5px solid '+timeBorder+';border-radius:14px;padding:14px;margin-bottom:10px;">';
-  h += '<div style="font-size:14px;font-weight:'+timeWeight+';color:'+timeColor+';margin-bottom:10px;">⏰ 특정 시간 이후 마감<\/div>';
-  h += '<div style="display:flex;align-items:center;gap:8px;">';
-  h += '<input type="time" id="blockTimeInput" value="'+(isTimeBlock?current:'13:00')+'" style="border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:7px 10px;font-size:14px;font-family:inherit;background:#fff;flex:1;">';
-  h += '<div onclick="applyTimeBlock()" style="padding:9px 16px;border-radius:10px;background:#8b4a4a;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">적용<\/div>';
-  h += '<\/div><\/div>';
+  // 시간 설정
+  h += '<div style="padding:20px;">';
+  h += '<div style="font-size:13px;font-weight:600;color:#1c1814;margin-bottom:10px;">마감 시작 시간<\/div>';
+  h += '<input type="time" id="blockTimeInput" value="'+curTime+'" style="width:100%;border:1.5px solid rgba(50,40,35,0.12);border-radius:12px;padding:12px 14px;font-size:16px;font-family:inherit;background:#fff;outline:none;margin-bottom:16px;">';
 
-  // 마감 해제
-  if (hasAny) {
-    h += '<div onclick="removeBlockDate(window._curBlockDate)" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,59,48,0.07);color:#ff3b30;font-size:14px;font-weight:500;cursor:pointer;text-align:center;box-sizing:border-box;">마감 해제<\/div>';
+  // 해제 버튼 (기존 설정 있을 때만)
+  if (isTimeBlock) {
+    h += '<div onclick="removeBlockDate(window._curBlockDate)" style="width:100%;padding:12px;border-radius:12px;background:rgba(255,59,48,0.07);color:#ff3b30;font-size:14px;font-weight:500;cursor:pointer;text-align:center;margin-bottom:10px;">마감 해제<\/div>';
   }
 
-  // 뒤로가기
-  h += '<div onclick="showBlockCalendar()" style="width:100%;padding:12px;border-radius:14px;background:rgba(50,40,35,0.06);color:#8a837c;font-size:14px;cursor:pointer;text-align:center;margin-top:10px;box-sizing:border-box;">← 캘린더로 돌아가기<\/div>';
-  h += '<\/div><div style="height:20px;"><\/div>';
+  // 저장 버튼
+  h += '<div onclick="saveBlockDateFromModal()" style="width:100%;padding:14px;border-radius:14px;background:#8b4a4a;color:#fff;font-size:15px;font-weight:600;cursor:pointer;text-align:center;">저장<\/div>';
+  h += '<\/div><\/div>';
 
-  sheet.innerHTML = h;
+  modal.innerHTML = h;
+  document.body.appendChild(modal);
+}
+
+function saveBlockDateFromModal() {
+  const inp = document.getElementById('blockTimeInput');
+  if (!inp || !window._curBlockDate) return;
+  setBlockDate(window._curBlockDate, inp.value);
+  const modal = document.getElementById('block_date_modal');
+  if (modal) modal.remove();
 }
 
 
@@ -1613,11 +1589,15 @@ function setBlockDate(dateStr, afterTime) {
   if (!CFG.block_dates) CFG.block_dates = {};
   CFG.block_dates[dateStr] = afterTime;
   saveBlockSettings();
+  toast('저장됐어요 ✅');
   showBlockCalendar();
 }
 function removeBlockDate(dateStr) {
   if (CFG.block_dates) delete CFG.block_dates[dateStr];
+  const modal = document.getElementById('block_date_modal');
+  if (modal) modal.remove();
   saveBlockSettings();
+  toast('마감 해제됐어요');
   showBlockCalendar();
 }
 function toggleRegularDow(dow) {
