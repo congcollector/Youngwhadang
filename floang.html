@@ -449,15 +449,20 @@ animation:sheetFade 0.22s ease;
 // ── 데모 모드 (DB 없이 메모리 저장) ──
 let _demoOrders = [
   {id:'demo1', type:'cake', name:'김민지', phone:'010-1234-5678',
-   pickup_date:'2026-04-10', pickup_time:'14:00', cake_size:'2호', cake_price:85000,
-   design:'돔스타일 / 기본설기 / 핑크 파스텔 컬러', lettering:'생일 축하해 사랑해♥', payment:'계좌이체',
-   choco_deco:false, delivery:false, delivery_addr:'', total_price:85000,
-   status:'confirmed', memo:'', photos:'[]', sizes:'{}', created_at:Date.now()-3600000},
+   pickup_date:'2026-03-25', pickup_time:'14:00', cake_size:'2호 x1',
+   design:'스타일:crescent / 맛:basic / 핑크 파스텔 계열로 부탁드려요 🌸', lettering:'', payment:'계좌이체',
+   choco_deco:false, delivery:false, delivery_addr:'', total_price:88000,
+   status:'confirmed', memo:'생일 케이크 · 당일 정시 픽업 예정', photos:'[]', sizes:'{"s2":1}', created_at:Date.now()-3600000},
   {id:'demo2', type:'cake', name:'이준호', phone:'010-9876-5432',
-   pickup_date:'2026-04-11', pickup_time:'11:00', cake_size:'1호', cake_price:65000,
-   design:'크레센트 / 흑임자설기 / 보라 계열', lettering:'', payment:'계좌이체',
+   pickup_date:'2026-03-25', pickup_time:'16:30', cake_size:'1호 x1',
+   design:'스타일:dome / 맛:blacksesame / 심플하게 꽃 가득 채워주세요', lettering:'', payment:'계좌이체',
    choco_deco:false, delivery:false, delivery_addr:'', total_price:65000,
-   status:'pending', memo:'', photos:'[]', sizes:'{}', created_at:Date.now()-7200000},
+   status:'pending', memo:'', photos:'[]', sizes:'{"s1":1}', created_at:Date.now()-7200000},
+  {id:'demo3', type:'cake', name:'박서연', phone:'010-5555-7777',
+   pickup_date:'2026-03-26', pickup_time:'11:00', cake_size:'3호 x1',
+   design:'스타일:wreath / 맛:greentea / 연보라·민트 계열 부탁드려요', lettering:'', payment:'계좌이체',
+   choco_deco:false, delivery:false, delivery_addr:'', total_price:115000,
+   status:'pending', memo:'결혼기념일 케이크', photos:'[]', sizes:'{"s3":1}', created_at:Date.now()-10800000},
   {id:'demo3', type:'hwa', name:'박서연', phone:'010-5555-6666',
    pickup_date:'2026-04-12', pickup_time:'15:00', cake_size:'15구', cake_price:64000,
    method:'pickup', packing:'["p_bojagi"]', packing_text:'사랑하는 엄마께',
@@ -1081,13 +1086,10 @@ async function submitHwa() {
 // ══════════════════════
 async function renderAdmin() {
   W('<div class="loading">불러오는 중...</div>');
-  let allOrders = [];
   try {
-    const r = await api('/cake_orders?order=created_at.desc');
-    if (r.ok) allOrders = await r.json();
-  } catch(e) {}
-  if (!Array.isArray(allOrders)) allOrders = [];
-  adminOrders = allOrders.filter(function(o){ return o.type==='cake'; });
+    adminOrders = await getOrders('cake');
+    if (!Array.isArray(adminOrders)) adminOrders = [];
+  } catch(e) { adminOrders = []; }
   renderAdminView();
 }
 
@@ -1158,12 +1160,12 @@ function renderAdminView() {
     const labelColor = isSel ? 'rgba(255,255,255,0.65)' : '#b8a99e';
 
     h += '<div onclick="adminSelDate=\''+d.date+'\';adminTab=\'all\';renderAdminView()" style="flex:1;text-align:center;padding:7px 2px;border-radius:12px;cursor:pointer;background:'+bg+';transition:all 0.15s;">';
-    h += '<div style="font-size:10px;color:'+labelColor+';margin-bottom:3px;font-weight:500;">'+d.label+'<\/div>';
-    h += '<div style="font-size:17px;font-weight:700;color:'+textColor+';">'+d.day.getDate()+'<\/div>';
+    h += '<div style="font-size:10px;color:'+labelColor+';margin-bottom:3px;font-weight:500;pointer-events:none;">'+d.label+'<\/div>';
+    h += '<div style="font-size:17px;font-weight:700;color:'+textColor+';pointer-events:none;">'+d.day.getDate()+'<\/div>';
     if (cnt > 0) {
-      h += '<div style="width:5px;height:5px;border-radius:50%;background:'+(isSel?'rgba(255,255,255,0.6)':'#7a4f3a')+';margin:3px auto 0;"><\/div>';
+      h += '<div style="width:5px;height:5px;border-radius:50%;background:'+(isSel?'rgba(255,255,255,0.6)':'#7a4f3a')+';margin:3px auto 0;pointer-events:none;"><\/div>';
     } else {
-      h += '<div style="width:5px;height:5px;margin:3px auto 0;"><\/div>';
+      h += '<div style="width:5px;height:5px;margin:3px auto 0;pointer-events:none;"><\/div>';
     }
     h += '<\/div>';
   });
