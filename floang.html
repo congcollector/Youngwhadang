@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>플로앙 · 앙금플라워 떡케이크 주문</title>
 <style>
 :root {
@@ -37,6 +37,10 @@ backdrop-filter:blur(24px) saturate(1.8);
 border-bottom:0.5px solid rgba(50,40,35,0.1);
 padding:54px 20px 0;
 position:sticky; top:0; z-index:50;
+width:100%;
+}
+.hdr-inner {
+max-width:480px; margin:0 auto;
 }
 .hdr-top { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:12px; }
 .hdr-eye { font-size:11px; font-weight:500; color:#b8a99e; letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
@@ -357,13 +361,71 @@ backdrop-filter:blur(8px);
 .cfg-tabs { display:flex; border-bottom:0.5px solid rgba(50,40,35,0.08); margin-bottom:16px; }
 .cfg-tab { flex:1; padding:12px 0; text-align:center; font-size:14px; font-weight:500; color:#b8a99e; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.15s; }
 .cfg-tab-cake.on { color:#7a4f3a; border-bottom-color:#7a4f3a; }
+
+/* ── 반응형 ── */
+
+/* 태블릿 세로 (768px+) */
+@media (min-width: 768px) {
+.wrap { max-width:600px; padding:32px 0 120px; }
+.hdr { padding:56px 28px 0; }
+.hdr-inner { max-width:600px; }
+.hdr-ttl { font-size:28px; }
+.card { margin:0 20px; }
+.sz-scroll { padding:4px 20px 6px; }
+.sz { width:140px; }
+.sec-hdr { padding:0 24px; }
+.btn-cake { width:calc(100% - 40px); margin:0 20px; padding:18px; font-size:18px; }
+.notice { margin:0 20px; }
+.pay-wrap { padding:16px 20px; }
+.opt-wrap { padding:16px 20px; }
+.flt { padding:0 20px; }
+.order-card-cake { margin:0 20px 10px; }
+}
+
+/* 태블릿 가로 / 작은 데스크탑 (1024px+) */
+@media (min-width: 1024px) {
+body { background:#ede8e3; }
+.wrap { max-width:680px; padding:40px 0 120px; }
+.hdr { padding:48px 32px 0; }
+.hdr-inner { max-width:680px; }
+.hdr-ttl { font-size:28px; }
+.card { margin:0 24px; border-radius:18px; }
+.sz { width:148px; padding:16px 14px; }
+.sz-scroll { padding:4px 24px 6px; gap:12px; }
+.sec-hdr { padding:0 28px; font-size:12px; }
+.btn-cake { width:calc(100% - 48px); margin:0 24px; border-radius:16px; }
+.notice { margin:0 24px; border-radius:18px; }
+.row { min-height:54px; }
+.overlay { align-items:center; justify-content:center; }
+.sheet {
+border-radius:22px;
+max-width:600px;
+width:100%;
+max-height:88vh;
+margin:0 auto;
+animation:sheetFade 0.22s ease;
+}
+@keyframes sheetFade { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+.flt { padding:0 24px; }
+.order-card-cake { margin:0 24px 10px; border-radius:18px; }
+.stats { padding:0 24px; }
+.adm-tabs { padding:0 24px; }
+}
+
+/* 데스크탑 (1280px+) */
+@media (min-width: 1280px) {
+.wrap { max-width:720px; }
+.hdr-inner { max-width:720px; }
+.sheet { max-width:640px; }
+.sz { width:156px; }
+}
 </style>
 
 </head>
 <body>
 
 <div class="hdr">
-  <div class="hdr-top">
+  <div class="hdr-inner"><div class="hdr-top">
     <div>
       <div class="hdr-eye" id="hdrEye">Floang · 방배동 앙금플라워</div>
       <div class="hdr-ttl" id="hdrTtl">🌸 케이크 주문</div>
@@ -377,7 +439,7 @@ backdrop-filter:blur(8px);
     <div class="hdr-tab cake on" onclick="switchTab('cake')">떡케이크</div>
 
   </div>
-</div>
+</div></div>
 
 <div class="wrap" id="wrap"><div class="loading">불러오는 중...</div></div>
 <div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
