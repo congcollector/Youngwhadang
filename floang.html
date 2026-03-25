@@ -758,9 +758,16 @@ function renderCake() {
         h += '<div class="sw'+(isOn?' on-cake':'')+'" onclick="event.stopPropagation();fd.choco=!fd.choco;renderCake()"><div class="sw-k"><\/div><\/div><\/div>';
       } else {
         const oid = opt.id;
-        h += '<div class="tog" onclick="if(!fd.extraOpts)fd.extraOpts={};fd.extraOpts[\''+oid+'\']= !fd.extraOpts[\''+oid+'\'];renderCake()">';
-        h += '<div class="tog-bd"><div class="tog-l">'+opt.name+'<\/div><div class="tog-s">+'+opt.price.toLocaleString()+'원 · '+(opt.desc||'')+'<\/div><\/div>';
-        h += '<div class="sw'+(isOn?' on-cake':'')+'" onclick="event.stopPropagation();if(!fd.extraOpts)fd.extraOpts={};fd.extraOpts[\''+oid+'\']= !fd.extraOpts[\''+oid+'\'];renderCake()"><div class="sw-k"><\/div><\/div><\/div>';
+        h += '<div class="tog">';
+        h += '<div class="tog-bd" onclick="if(!fd.extraOpts)fd.extraOpts={};fd.extraOpts[\''+oid+'\']= !fd.extraOpts[\''+oid+'\'];renderCake()">';
+        h += '<div class="tog-l">'+opt.name+'<\/div>';
+        h += '<div style="display:flex;align-items:center;gap:6px;margin-top:2px;">';
+        if (opt.price > 0) h += '<div class="tog-s">+'+opt.price.toLocaleString()+'원<\/div>';
+        if (opt.desc) h += '<div class="tog-s">'+opt.desc+'<\/div>';
+        if (opt.photo) h += '<div onclick="event.stopPropagation();showOptPhotoModal(\''+oid+'\')" style="font-size:11px;color:#7a4f3a;background:rgba(122,79,58,0.08);padding:2px 8px;border-radius:8px;font-weight:500;cursor:pointer;">상세 보기<\/div>';
+        h += '<\/div><\/div>';
+        h += '<div class="sw'+(isOn?' on-cake':'')+'" onclick="if(!fd.extraOpts)fd.extraOpts={};fd.extraOpts[\''+oid+'\']= !fd.extraOpts[\''+oid+'\'];renderCake()"><div class="sw-k"><\/div><\/div>';
+        h += '<\/div>';
       }
     });
     h += '<\/div><\/div>';
@@ -1610,7 +1617,18 @@ function showSettings() {
     h += '<input id="cfg_opt_price_'+oi+'" type="number" style="width:80px;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;" value="'+opt.price+'" placeholder="가격">';
     h += '<button onclick="removeCfgOpt('+oi+')" style="background:rgba(255,59,48,0.08);border:none;border-radius:6px;padding:5px 8px;color:#ff3b30;font-size:12px;cursor:pointer;">✕<\/button>';
     h += '<\/div>';
-    h += '<input id="cfg_opt_desc_'+oi+'" style="width:100%;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;" value="'+(opt.desc||'')+'" placeholder="설명 (선택)">';
+    h += '<input id="cfg_opt_desc_'+oi+'" style="width:100%;border:1px solid rgba(50,40,35,0.1);border-radius:6px;padding:4px 8px;font-size:12px;font-family:inherit;margin-bottom:6px;" value="'+(opt.desc||'')+'" placeholder="설명 (선택)">';
+    // 옵션 이미지
+    h += '<div style="display:flex;align-items:center;gap:8px;">';
+    if (opt.photo) {
+      h += '<div style="position:relative;"><img src="'+opt.photo+'" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">';
+      h += '<button onclick="removeCfgOptPhoto('+oi+')" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:#ff3b30;border:none;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕<\/button><\/div>';
+    } else {
+      h += '<label style="width:60px;height:60px;border-radius:8px;border:1.5px dashed rgba(50,40,35,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#c4bdb7;">';
+      h += '<input type="file" accept="image/*" style="display:none;" onchange="addCfgOptPhoto('+oi+',this)">+<\/label>';
+    }
+    h += '<span style="font-size:11px;color:#b8a99e;">팝업 이미지 (선택)<\/span>';
+    h += '<\/div>';
     h += '<\/div>';
   });
   h += '<\/div>';
@@ -1739,6 +1757,53 @@ function removeCfgSzPhoto(i, j) {
 }
 
 // 옵션 추가/삭제
+function showOptPhotoModal(optId) {
+  const opt = (CFG.extra_options||[]).find(function(o){ return o.id===optId; });
+  if (!opt || !opt.photo) return;
+  let modal = document.getElementById('opt_photo_modal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'opt_photo_modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+  modal.onclick = function(e){ if(e.target===modal) modal.remove(); };
+  let inner = '<div style="background:#f5f2ef;border-radius:22px 22px 0 0;padding:0 0 40px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:sheetUp 0.3s cubic-bezier(0.32,0.72,0,1);">';
+  inner += '<div style="padding:12px 0 6px;text-align:center;"><div style="display:inline-block;width:36px;height:4px;border-radius:2px;background:rgba(50,40,35,0.15);"><\/div><\/div>';
+  inner += '<div style="padding:4px 20px 16px;border-bottom:0.5px solid rgba(50,40,35,0.08);"><div style="font-size:17px;font-weight:600;">'+opt.name+'<\/div>';
+  if (opt.price > 0) inner += '<div style="font-size:13px;color:#8a837c;margin-top:2px;">+'+opt.price.toLocaleString()+'원<\/div>';
+  inner += '<\/div>';
+  inner += '<div style="padding:16px 16px 0;"><img src="'+opt.photo+'" style="width:100%;border-radius:14px;object-fit:cover;max-height:260px;"><\/div>';
+  if (opt.desc) inner += '<div style="padding:14px 20px;font-size:14px;color:#8a837c;line-height:1.8;">'+opt.desc+'<\/div>';
+  inner += '<div style="padding:0 16px;"><button onclick="document.getElementById(\'opt_photo_modal\').remove()" style="width:100%;padding:14px;border-radius:14px;border:none;background:rgba(50,40,35,0.07);color:#8a837c;font-size:15px;font-family:inherit;cursor:pointer;">닫기<\/button><\/div>';
+  inner += '<\/div>';
+  modal.innerHTML = inner;
+  document.body.appendChild(modal);
+}
+
+function addCfgOptPhoto(oi, input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const max = 1200;
+      if (w > max) { h = h*max/w; w = max; }
+      if (h > max) { w = w*max/h; h = max; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      CFG.extra_options[oi].photo = canvas.toDataURL('image/jpeg', 0.92);
+      showSettings();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeCfgOptPhoto(oi) {
+  CFG.extra_options[oi].photo = '';
+  showSettings();
+}
+
 function addCfgOpt() {
   if (!CFG.extra_options) CFG.extra_options = [];
   CFG.extra_options.push({id:'opt_'+Date.now(), name:'새 옵션', price:0, desc:'', active:true});
@@ -1784,7 +1849,8 @@ async function saveSettingsFromForm() {
       name: document.getElementById('cfg_opt_name_'+oi) ? document.getElementById('cfg_opt_name_'+oi).value : opt.name,
       price: parseInt(document.getElementById('cfg_opt_price_'+oi) ? document.getElementById('cfg_opt_price_'+oi).value : opt.price)||0,
       desc: document.getElementById('cfg_opt_desc_'+oi) ? document.getElementById('cfg_opt_desc_'+oi).value : (opt.desc||''),
-      active: true
+      active: true,
+      photo: (CFG.extra_options[oi] && CFG.extra_options[oi].photo) || ''
     };
   });
 
