@@ -198,6 +198,10 @@ position:sticky; top:0; z-index:50;
 .succ-s  { font-size:15px; color:#8a837c; line-height:1.7; margin-bottom:28px; }
 
 /* ── 토스트 ── */
+.time-chip { flex-shrink:0; padding:8px 14px; border-radius:22px; font-size:13px; font-weight:500; cursor:pointer; border:1.5px solid rgba(50,40,35,0.12); background:transparent; color:#1c1814; white-space:nowrap; transition:all 0.15s; }
+.time-chip:active { transform:scale(0.96); }
+.tc-on { border-color:#8b4a4a !important; background:rgba(139,74,74,0.08) !important; color:#8b4a4a !important; font-weight:600 !important; }
+.block-warn { padding:10px 14px; border-radius:10px; font-size:13px; line-height:1.5; background:rgba(255,59,48,0.07); color:#ff3b30; }
 .toast { position:fixed; bottom:34px; left:50%; transform:translateX(-50%); background:rgba(28,24,20,0.9); color:#fff; padding:12px 22px; border-radius:22px; font-size:14px; font-weight:500; z-index:400; opacity:0; transition:opacity 0.2s; pointer-events:none; white-space:nowrap; backdrop-filter:blur(8px); }
 .toast.show { opacity:1; }
 
@@ -345,6 +349,8 @@ const DEFAULT_CFG = {
   ],
   choco_price:3000, delivery_price:5000,
   block_rules:[],
+  open_time:'10:00',
+  close_time:'20:30',
   block_dates:{},
   extra_options:[
     {id:'choco', name:'🍫 초콜릿 장식', price:3000, desc:'화이트초콜릿 장식', active:true},
@@ -522,98 +528,21 @@ function renderCake() {
   h += '<button class="opt-chip'+(fd.method==='delivery'?' on-cake':'')+'" onclick="fd.method=\'delivery\';renderCake()">🚗 배달<\/button>';
   h += '<\/div>';
   if (fd.method==='pickup') {
-    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value;renderCake()"><\/div>';
-    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><select class="inp" style="text-align:right;color:#1c1814;" onchange="fd.time=this.value;renderCake()">';
-    h += '<option value="" disabled '+((fd.date)?'':'selected')+' style="color:#c4bdb7;">시간 선택<\/option>';
-    h += '<option value="10:00" '+((fd.date==='10:00')?'selected':'')+'>10:00<\/option>';
-    h += '<option value="10:10" '+((fd.date==='10:10')?'selected':'')+'>10:10<\/option>';
-    h += '<option value="10:20" '+((fd.date==='10:20')?'selected':'')+'>10:20<\/option>';
-    h += '<option value="10:30" '+((fd.date==='10:30')?'selected':'')+'>10:30<\/option>';
-    h += '<option value="10:40" '+((fd.date==='10:40')?'selected':'')+'>10:40<\/option>';
-    h += '<option value="10:50" '+((fd.date==='10:50')?'selected':'')+'>10:50<\/option>';
-    h += '<option value="11:00" '+((fd.date==='11:00')?'selected':'')+'>11:00<\/option>';
-    h += '<option value="11:10" '+((fd.date==='11:10')?'selected':'')+'>11:10<\/option>';
-    h += '<option value="11:20" '+((fd.date==='11:20')?'selected':'')+'>11:20<\/option>';
-    h += '<option value="11:30" '+((fd.date==='11:30')?'selected':'')+'>11:30<\/option>';
-    h += '<option value="11:40" '+((fd.date==='11:40')?'selected':'')+'>11:40<\/option>';
-    h += '<option value="11:50" '+((fd.date==='11:50')?'selected':'')+'>11:50<\/option>';
-    h += '<option value="12:00" '+((fd.date==='12:00')?'selected':'')+'>12:00<\/option>';
-    h += '<option value="12:10" '+((fd.date==='12:10')?'selected':'')+'>12:10<\/option>';
-    h += '<option value="12:20" '+((fd.date==='12:20')?'selected':'')+'>12:20<\/option>';
-    h += '<option value="12:30" '+((fd.date==='12:30')?'selected':'')+'>12:30<\/option>';
-    h += '<option value="12:40" '+((fd.date==='12:40')?'selected':'')+'>12:40<\/option>';
-    h += '<option value="12:50" '+((fd.date==='12:50')?'selected':'')+'>12:50<\/option>';
-    h += '<option value="13:00" '+((fd.date==='13:00')?'selected':'')+'>13:00<\/option>';
-    h += '<option value="13:10" '+((fd.date==='13:10')?'selected':'')+'>13:10<\/option>';
-    h += '<option value="13:20" '+((fd.date==='13:20')?'selected':'')+'>13:20<\/option>';
-    h += '<option value="13:30" '+((fd.date==='13:30')?'selected':'')+'>13:30<\/option>';
-    h += '<option value="13:40" '+((fd.date==='13:40')?'selected':'')+'>13:40<\/option>';
-    h += '<option value="13:50" '+((fd.date==='13:50')?'selected':'')+'>13:50<\/option>';
-    h += '<option value="14:00" '+((fd.date==='14:00')?'selected':'')+'>14:00<\/option>';
-    h += '<option value="14:10" '+((fd.date==='14:10')?'selected':'')+'>14:10<\/option>';
-    h += '<option value="14:20" '+((fd.date==='14:20')?'selected':'')+'>14:20<\/option>';
-    h += '<option value="14:30" '+((fd.date==='14:30')?'selected':'')+'>14:30<\/option>';
-    h += '<option value="14:40" '+((fd.date==='14:40')?'selected':'')+'>14:40<\/option>';
-    h += '<option value="14:50" '+((fd.date==='14:50')?'selected':'')+'>14:50<\/option>';
-    h += '<option value="15:00" '+((fd.date==='15:00')?'selected':'')+'>15:00<\/option>';
-    h += '<option value="15:10" '+((fd.date==='15:10')?'selected':'')+'>15:10<\/option>';
-    h += '<option value="15:20" '+((fd.date==='15:20')?'selected':'')+'>15:20<\/option>';
-    h += '<option value="15:30" '+((fd.date==='15:30')?'selected':'')+'>15:30<\/option>';
-    h += '<option value="15:40" '+((fd.date==='15:40')?'selected':'')+'>15:40<\/option>';
-    h += '<option value="15:50" '+((fd.date==='15:50')?'selected':'')+'>15:50<\/option>';
-    h += '<option value="16:00" '+((fd.date==='16:00')?'selected':'')+'>16:00<\/option>';
-    h += '<option value="16:10" '+((fd.date==='16:10')?'selected':'')+'>16:10<\/option>';
-    h += '<option value="16:20" '+((fd.date==='16:20')?'selected':'')+'>16:20<\/option>';
-    h += '<option value="16:30" '+((fd.date==='16:30')?'selected':'')+'>16:30<\/option>';
-    h += '<option value="16:40" '+((fd.date==='16:40')?'selected':'')+'>16:40<\/option>';
-    h += '<option value="16:50" '+((fd.date==='16:50')?'selected':'')+'>16:50<\/option>';
-    h += '<option value="17:00" '+((fd.date==='17:00')?'selected':'')+'>17:00<\/option>';
-    h += '<option value="17:10" '+((fd.date==='17:10')?'selected':'')+'>17:10<\/option>';
-    h += '<option value="17:20" '+((fd.date==='17:20')?'selected':'')+'>17:20<\/option>';
-    h += '<option value="17:30" '+((fd.date==='17:30')?'selected':'')+'>17:30<\/option>';
-    h += '<option value="17:40" '+((fd.date==='17:40')?'selected':'')+'>17:40<\/option>';
-    h += '<option value="17:50" '+((fd.date==='17:50')?'selected':'')+'>17:50<\/option>';
-    h += '<option value="18:00" '+((fd.date==='18:00')?'selected':'')+'>18:00<\/option>';
-    h += '<option value="18:10" '+((fd.date==='18:10')?'selected':'')+'>18:10<\/option>';
-    h += '<option value="18:20" '+((fd.date==='18:20')?'selected':'')+'>18:20<\/option>';
-    h += '<option value="18:30" '+((fd.date==='18:30')?'selected':'')+'>18:30<\/option>';
-    h += '<option value="18:40" '+((fd.date==='18:40')?'selected':'')+'>18:40<\/option>';
-    h += '<option value="18:50" '+((fd.date==='18:50')?'selected':'')+'>18:50<\/option>';
-    h += '<option value="19:00" '+((fd.date==='19:00')?'selected':'')+'>19:00<\/option>';
-    h += '<option value="19:10" '+((fd.date==='19:10')?'selected':'')+'>19:10<\/option>';
-    h += '<option value="19:20" '+((fd.date==='19:20')?'selected':'')+'>19:20<\/option>';
-    h += '<option value="19:30" '+((fd.date==='19:30')?'selected':'')+'>19:30<\/option>';
-    h += '<option value="19:40" '+((fd.date==='19:40')?'selected':'')+'>19:40<\/option>';
-    h += '<option value="19:50" '+((fd.date==='19:50')?'selected':'')+'>19:50<\/option>';
-    h += '<option value="20:00" '+((fd.date==='20:00')?'selected':'')+'>20:00<\/option>';
-    h += '<option value="20:10" '+((fd.date==='20:10')?'selected':'')+'>20:10<\/option>';
-    h += '<option value="20:20" '+((fd.date==='20:20')?'selected':'')+'>20:20<\/option>';
-    h += '<option value="20:30" '+((fd.date==='20:30')?'selected':'')+'>20:30<\/option>';
-    h += '<option value="20:40" '+((fd.date==='20:40')?'selected':'')+'>20:40<\/option>';
-    h += '<option value="20:50" '+((fd.date==='20:50')?'selected':'')+'>20:50<\/option>';
-    h += '<\/select><\/div>';
-    const _bs_fd_time = (fd.date && fd.time) ? getBlockStatus(fd.date, fd.time) : (fd.date ? getBlockStatus(fd.date, null) : null);
-    if (_bs_fd_time) {
-      const _c = _bs_fd_time.type==='warn' ? '#b06800' : '#ff3b30';
-      const _bg = _bs_fd_time.type==='warn' ? 'rgba(255,149,0,0.07)' : 'rgba(255,59,48,0.07)';
-      h += '<div style="margin:4px 16px 0;padding:10px 14px;background:'+_bg+';border-radius:10px;font-size:13px;color:'+_c+';line-height:1.5;">⚠️ '+_bs_fd_time.msg+'<\/div>';
-    }
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value;renderCake()"></div>';
+    h += buildTimeChips('fd.time', fd.time, fd.date, '#8b4a4a');
     h += '<div style="border-top:0.5px solid var(--sep);cursor:pointer;" onclick="fd._addrOpen=!fd._addrOpen;renderCake()">';
     h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">';
-    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내<\/div>';
-    h += '<div style="font-size:12px;color:var(--text3);">'+(fd._addrOpen?'▲':'▼')+'<\/div>';
-    h += '<\/div>';
+    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내</div>';
+    h += '<div style="font-size:12px;color:var(--text3);">'+( fd._addrOpen?'▲':'▼')+'</div>';
+    h += '</div>';
     if (fd._addrOpen) {
-      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'<br>📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'</div>';
     }
-    h += '<\/div>';
-  } else {
-    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value"><\/div>';
-    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><input class="inp" type="time" value="'+fd.time+'" oninput="fd.time=this.value"><\/div>';
-    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value">';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원<\/div>';
-    h += '<\/div>';
+  } else if (fd.method==='delivery') {
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value;renderCake()"></div>';
+    h += buildTimeChips('fd.time', fd.time, fd.date, '#8b4a4a');
+    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value"></div>';
+    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;padding:0 16px 8px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원</div>';
   }
   h += '<\/div><\/div>';
 
@@ -709,6 +638,91 @@ function renderCakeSuccess() {
 }
 
 // ── 예약 차단 체크 ──
+function setTime(el, varPath, updateFn) {
+  const t = el.getAttribute('data-t');
+  if (varPath === 'fd.time') fd.time = t;
+  else if (varPath === 'hf.pickup_time') hf.pickup_time = t;
+  // 칩 스타일 즉시 업데이트
+  const scroll = el.closest('.sz-scroll');
+  if (scroll) {
+    scroll.querySelectorAll('.time-chip').forEach(function(c){ c.classList.remove('tc-on'); });
+    el.classList.add('tc-on');
+  }
+  // 경고 업데이트
+  if (updateFn === 'updateBlockWarning') updateBlockWarning();
+  else if (updateFn === 'updateBlockWarningHwa') updateBlockWarningHwa();
+}
+
+function updateBlockWarning() {
+  // select value 유지하면서 경고만 업데이트
+  const sel = document.getElementById('cakeTimeSelect');
+  if (sel) sel.value = fd.time;
+  const warnDiv = document.getElementById('cakeBlockWarn');
+  if (!warnDiv) return;
+  const bs = fd.date ? getBlockStatus(fd.date, fd.time) : null;
+  if (bs) {
+    const c = bs.type==='warn' ? '#b06800' : '#ff3b30';
+    const bg = bs.type==='warn' ? 'rgba(255,149,0,0.07)' : 'rgba(255,59,48,0.07)';
+    warnDiv.style.display = 'block';
+    warnDiv.style.background = bg;
+    warnDiv.style.color = c;
+    warnDiv.textContent = '⚠️ ' + bs.msg;
+  } else {
+    warnDiv.style.display = 'none';
+  }
+}
+function updateBlockWarningHwa() {
+  const bs = hf.pickup_date ? getBlockStatus(hf.pickup_date, hf.pickup_time) : null;
+  const warnDiv = document.getElementById('hwaBlockWarn');
+  if (!warnDiv) return;
+  if (bs) {
+    const c = bs.type==='warn' ? '#b06800' : '#ff3b30';
+    const bg = bs.type==='warn' ? 'rgba(255,149,0,0.07)' : 'rgba(255,59,48,0.07)';
+    warnDiv.style.display = 'block';
+    warnDiv.style.background = bg;
+    warnDiv.style.color = c;
+    warnDiv.textContent = '⚠️ ' + bs.msg;
+  } else {
+    warnDiv.style.display = 'none';
+  }
+}
+
+function buildTimeChips(varName, curVal, dateVal, accent) {
+  var slots = [];
+  var openT = (CFG.open_time || '10:00');
+  var closeT = (CFG.close_time || '20:30');
+  for (var h = 10; h <= 20; h++) {
+    for (var m = 0; m < 60; m += 30) {
+      var t = (h < 10 ? '0' : '') + h + ':' + (m === 0 ? '00' : m);
+      if (t >= openT && t <= closeT) slots.push(t);
+    }
+  }
+  var html = '<div class="sec-hdr" style="padding:12px 20px 6px;font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;">시간</div>';
+  html += '<div style="display:flex;gap:7px;overflow-x:auto;padding:4px 16px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">';
+  slots.forEach(function(t) {
+    var isOn = curVal === t;
+    html += '<div data-var="' + varName + '" data-t="' + t + '" onclick="pickTime(this)" style="flex-shrink:0;padding:8px 14px;border-radius:22px;font-size:14px;font-weight:' + (isOn ? '600' : '500') + ';cursor:pointer;border:1.5px solid ' + (isOn ? accent : 'rgba(50,40,35,0.12)') + ';background:' + (isOn ? 'rgba(139,74,74,0.08)' : 'transparent') + ';color:' + (isOn ? accent : '#1c1814') + ';white-space:nowrap;transition:all 0.15s;">' + t + '</div>';
+  });
+  html += '</div>';
+  // 블록 경고
+  if (dateVal) {
+    var bs = getBlockStatus(dateVal, curVal || null);
+    if (bs) {
+      var warnC = bs.type === 'warn' ? '#b06800' : '#ff3b30';
+      var warnBg = bs.type === 'warn' ? 'rgba(255,149,0,0.07)' : 'rgba(255,59,48,0.07)';
+      html += '<div style="margin:0 16px 4px;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5;background:' + warnBg + ';color:' + warnC + ';">⚠️ ' + bs.msg + '</div>';
+    }
+  }
+  return html;
+}
+
+function pickTime(el) {
+  var varName = el.getAttribute('data-var');
+  var t = el.getAttribute('data-t');
+  if (varName === 'fd.time') { fd.time = t; renderCake(); }
+  else if (varName === 'hf.pickup_time') { hf.pickup_time = t; renderHwa(); }
+}
+
 function getBlockStatus(dateStr, timeStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr + 'T00:00:00');
@@ -724,7 +738,7 @@ function getBlockStatus(dateStr, timeStr) {
     if (timeStr && timeStr >= afterTime) {
       return { type:'time', msg:'해당 시간대는 픽업 예약이 마감되었습니다.' };
     }
-    if (!timeStr) return { type:'warn', after: afterTime, msg:afterTime+' 이후 픽업은 예약이 마감돼요 · 시간을 확인해주세요' };
+    if (!timeStr) return { type:'warn', after: afterTime, msg:afterTime+' 이후 픽업은 예약이 마감됐어요. · 시간을 확인해주세요' };
   }
 
   // 2. 정기 요일 차단 체크
@@ -736,7 +750,7 @@ function getBlockStatus(dateStr, timeStr) {
     if (timeStr && timeStr >= r.after) {
       return { type:'time', msg:'해당 시간대는 픽업 예약이 마감되었습니다.' };
     }
-    if (!timeStr) return { type:'warn', after: r.after, msg:r.after+' 이후 픽업은 예약이 마감돼요 · 시간을 확인해주세요' };
+    if (!timeStr) return { type:'warn', after: r.after, msg:r.after+' 이후 픽업은 예약이 마감됐어요. · 시간을 확인해주세요' };
   }
   return null;
 }
@@ -846,179 +860,26 @@ function renderHwa() {
     h += '<div style="padding:8px 16px;border-top:0.5px solid var(--sep);"><button onclick="showShipPackingModal()" style="padding:6px 12px;border-radius:20px;background:rgba(120,120,128,0.1);border:none;color:var(--text2);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;">📦 택배 포장 보기 ›<\/button><\/div>';
   }
   if (hf.method === 'pickup') {
-    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value;renderHwa()"><\/div>';
-    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><select class="inp" style="text-align:right;color:#1c1814;" onchange="hf.pickup_time=this.value;renderHwa()">';
-    h += '<option value="" disabled '+((hf.pickup_date)?'':'selected')+' style="color:#c4bdb7;">시간 선택<\/option>';
-    h += '<option value="10:00" '+((hf.pickup_date==='10:00')?'selected':'')+'>10:00<\/option>';
-    h += '<option value="10:10" '+((hf.pickup_date==='10:10')?'selected':'')+'>10:10<\/option>';
-    h += '<option value="10:20" '+((hf.pickup_date==='10:20')?'selected':'')+'>10:20<\/option>';
-    h += '<option value="10:30" '+((hf.pickup_date==='10:30')?'selected':'')+'>10:30<\/option>';
-    h += '<option value="10:40" '+((hf.pickup_date==='10:40')?'selected':'')+'>10:40<\/option>';
-    h += '<option value="10:50" '+((hf.pickup_date==='10:50')?'selected':'')+'>10:50<\/option>';
-    h += '<option value="11:00" '+((hf.pickup_date==='11:00')?'selected':'')+'>11:00<\/option>';
-    h += '<option value="11:10" '+((hf.pickup_date==='11:10')?'selected':'')+'>11:10<\/option>';
-    h += '<option value="11:20" '+((hf.pickup_date==='11:20')?'selected':'')+'>11:20<\/option>';
-    h += '<option value="11:30" '+((hf.pickup_date==='11:30')?'selected':'')+'>11:30<\/option>';
-    h += '<option value="11:40" '+((hf.pickup_date==='11:40')?'selected':'')+'>11:40<\/option>';
-    h += '<option value="11:50" '+((hf.pickup_date==='11:50')?'selected':'')+'>11:50<\/option>';
-    h += '<option value="12:00" '+((hf.pickup_date==='12:00')?'selected':'')+'>12:00<\/option>';
-    h += '<option value="12:10" '+((hf.pickup_date==='12:10')?'selected':'')+'>12:10<\/option>';
-    h += '<option value="12:20" '+((hf.pickup_date==='12:20')?'selected':'')+'>12:20<\/option>';
-    h += '<option value="12:30" '+((hf.pickup_date==='12:30')?'selected':'')+'>12:30<\/option>';
-    h += '<option value="12:40" '+((hf.pickup_date==='12:40')?'selected':'')+'>12:40<\/option>';
-    h += '<option value="12:50" '+((hf.pickup_date==='12:50')?'selected':'')+'>12:50<\/option>';
-    h += '<option value="13:00" '+((hf.pickup_date==='13:00')?'selected':'')+'>13:00<\/option>';
-    h += '<option value="13:10" '+((hf.pickup_date==='13:10')?'selected':'')+'>13:10<\/option>';
-    h += '<option value="13:20" '+((hf.pickup_date==='13:20')?'selected':'')+'>13:20<\/option>';
-    h += '<option value="13:30" '+((hf.pickup_date==='13:30')?'selected':'')+'>13:30<\/option>';
-    h += '<option value="13:40" '+((hf.pickup_date==='13:40')?'selected':'')+'>13:40<\/option>';
-    h += '<option value="13:50" '+((hf.pickup_date==='13:50')?'selected':'')+'>13:50<\/option>';
-    h += '<option value="14:00" '+((hf.pickup_date==='14:00')?'selected':'')+'>14:00<\/option>';
-    h += '<option value="14:10" '+((hf.pickup_date==='14:10')?'selected':'')+'>14:10<\/option>';
-    h += '<option value="14:20" '+((hf.pickup_date==='14:20')?'selected':'')+'>14:20<\/option>';
-    h += '<option value="14:30" '+((hf.pickup_date==='14:30')?'selected':'')+'>14:30<\/option>';
-    h += '<option value="14:40" '+((hf.pickup_date==='14:40')?'selected':'')+'>14:40<\/option>';
-    h += '<option value="14:50" '+((hf.pickup_date==='14:50')?'selected':'')+'>14:50<\/option>';
-    h += '<option value="15:00" '+((hf.pickup_date==='15:00')?'selected':'')+'>15:00<\/option>';
-    h += '<option value="15:10" '+((hf.pickup_date==='15:10')?'selected':'')+'>15:10<\/option>';
-    h += '<option value="15:20" '+((hf.pickup_date==='15:20')?'selected':'')+'>15:20<\/option>';
-    h += '<option value="15:30" '+((hf.pickup_date==='15:30')?'selected':'')+'>15:30<\/option>';
-    h += '<option value="15:40" '+((hf.pickup_date==='15:40')?'selected':'')+'>15:40<\/option>';
-    h += '<option value="15:50" '+((hf.pickup_date==='15:50')?'selected':'')+'>15:50<\/option>';
-    h += '<option value="16:00" '+((hf.pickup_date==='16:00')?'selected':'')+'>16:00<\/option>';
-    h += '<option value="16:10" '+((hf.pickup_date==='16:10')?'selected':'')+'>16:10<\/option>';
-    h += '<option value="16:20" '+((hf.pickup_date==='16:20')?'selected':'')+'>16:20<\/option>';
-    h += '<option value="16:30" '+((hf.pickup_date==='16:30')?'selected':'')+'>16:30<\/option>';
-    h += '<option value="16:40" '+((hf.pickup_date==='16:40')?'selected':'')+'>16:40<\/option>';
-    h += '<option value="16:50" '+((hf.pickup_date==='16:50')?'selected':'')+'>16:50<\/option>';
-    h += '<option value="17:00" '+((hf.pickup_date==='17:00')?'selected':'')+'>17:00<\/option>';
-    h += '<option value="17:10" '+((hf.pickup_date==='17:10')?'selected':'')+'>17:10<\/option>';
-    h += '<option value="17:20" '+((hf.pickup_date==='17:20')?'selected':'')+'>17:20<\/option>';
-    h += '<option value="17:30" '+((hf.pickup_date==='17:30')?'selected':'')+'>17:30<\/option>';
-    h += '<option value="17:40" '+((hf.pickup_date==='17:40')?'selected':'')+'>17:40<\/option>';
-    h += '<option value="17:50" '+((hf.pickup_date==='17:50')?'selected':'')+'>17:50<\/option>';
-    h += '<option value="18:00" '+((hf.pickup_date==='18:00')?'selected':'')+'>18:00<\/option>';
-    h += '<option value="18:10" '+((hf.pickup_date==='18:10')?'selected':'')+'>18:10<\/option>';
-    h += '<option value="18:20" '+((hf.pickup_date==='18:20')?'selected':'')+'>18:20<\/option>';
-    h += '<option value="18:30" '+((hf.pickup_date==='18:30')?'selected':'')+'>18:30<\/option>';
-    h += '<option value="18:40" '+((hf.pickup_date==='18:40')?'selected':'')+'>18:40<\/option>';
-    h += '<option value="18:50" '+((hf.pickup_date==='18:50')?'selected':'')+'>18:50<\/option>';
-    h += '<option value="19:00" '+((hf.pickup_date==='19:00')?'selected':'')+'>19:00<\/option>';
-    h += '<option value="19:10" '+((hf.pickup_date==='19:10')?'selected':'')+'>19:10<\/option>';
-    h += '<option value="19:20" '+((hf.pickup_date==='19:20')?'selected':'')+'>19:20<\/option>';
-    h += '<option value="19:30" '+((hf.pickup_date==='19:30')?'selected':'')+'>19:30<\/option>';
-    h += '<option value="19:40" '+((hf.pickup_date==='19:40')?'selected':'')+'>19:40<\/option>';
-    h += '<option value="19:50" '+((hf.pickup_date==='19:50')?'selected':'')+'>19:50<\/option>';
-    h += '<option value="20:00" '+((hf.pickup_date==='20:00')?'selected':'')+'>20:00<\/option>';
-    h += '<option value="20:10" '+((hf.pickup_date==='20:10')?'selected':'')+'>20:10<\/option>';
-    h += '<option value="20:20" '+((hf.pickup_date==='20:20')?'selected':'')+'>20:20<\/option>';
-    h += '<option value="20:30" '+((hf.pickup_date==='20:30')?'selected':'')+'>20:30<\/option>';
-    h += '<option value="20:40" '+((hf.pickup_date==='20:40')?'selected':'')+'>20:40<\/option>';
-    h += '<option value="20:50" '+((hf.pickup_date==='20:50')?'selected':'')+'>20:50<\/option>';
-    h += '<\/select><\/div>';
-    const _bs_hf_pickup_time = (hf.pickup_date && hf.pickup_time) ? getBlockStatus(hf.pickup_date, hf.pickup_time) : (hf.pickup_date ? getBlockStatus(hf.pickup_date, null) : null);
-    if (_bs_hf_pickup_time) {
-      const _c = _bs_hf_pickup_time.type==='warn' ? '#b06800' : '#ff3b30';
-      const _bg = _bs_hf_pickup_time.type==='warn' ? 'rgba(255,149,0,0.07)' : 'rgba(255,59,48,0.07)';
-      h += '<div style="margin:4px 16px 0;padding:10px 14px;background:'+_bg+';border-radius:10px;font-size:13px;color:'+_c+';line-height:1.5;">⚠️ '+_bs_hf_pickup_time.msg+'<\/div>';
-    }
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value;renderHwa()"></div>';
+    h += buildTimeChips('hf.pickup_time', hf.pickup_time, hf.pickup_date, '#8b4a4a');
     h += '<div style="border-top:0.5px solid var(--sep);cursor:pointer;" onclick="hf._addrOpen=!hf._addrOpen;renderHwa()">';
     h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">';
-    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내<\/div>';
-    h += '<div style="font-size:12px;color:var(--text3);">'+(hf._addrOpen?'▲':'▼')+'<\/div>';
-    h += '<\/div>';
+    h += '<div style="font-size:12px;color:var(--text2);">📍 오시는 길 · 주차 안내</div>';
+    h += '<div style="font-size:12px;color:var(--text3);">'+( hf._addrOpen?'▲':'▼')+'</div>';
+    h += '</div>';
     if (hf._addrOpen) {
-      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">📍 충남 부여군 부여읍 사비로 100번길 10 1층<br>금성극장 옆 청년공간 제일 안쪽<br>🅿️ 부여중앙시장 공영주차장 (30분 무료)<\/div>';
+      h += '<div style="padding:0 16px 12px;font-size:12px;color:var(--text2);line-height:1.8;">'+CFG.pickup_notice+'</div>';
     }
-    h += '<\/div>';
   } else if (hf.method === 'delivery') {
-    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span><\/div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value;renderHwa()"><\/div>';
-    h += '<div class="row"><div class="row-lbl">시간 <span class="req">*</span><\/div><select class="inp" style="text-align:right;color:#1c1814;" onchange="hf.pickup_time=this.value;renderHwa()">';
-    h += '<option value="" disabled '+((hf.pickup_date)?'':'selected')+' style="color:#c4bdb7;">시간 선택<\/option>';
-    h += '<option value="10:00" '+((hf.pickup_date==='10:00')?'selected':'')+'>10:00<\/option>';
-    h += '<option value="10:10" '+((hf.pickup_date==='10:10')?'selected':'')+'>10:10<\/option>';
-    h += '<option value="10:20" '+((hf.pickup_date==='10:20')?'selected':'')+'>10:20<\/option>';
-    h += '<option value="10:30" '+((hf.pickup_date==='10:30')?'selected':'')+'>10:30<\/option>';
-    h += '<option value="10:40" '+((hf.pickup_date==='10:40')?'selected':'')+'>10:40<\/option>';
-    h += '<option value="10:50" '+((hf.pickup_date==='10:50')?'selected':'')+'>10:50<\/option>';
-    h += '<option value="11:00" '+((hf.pickup_date==='11:00')?'selected':'')+'>11:00<\/option>';
-    h += '<option value="11:10" '+((hf.pickup_date==='11:10')?'selected':'')+'>11:10<\/option>';
-    h += '<option value="11:20" '+((hf.pickup_date==='11:20')?'selected':'')+'>11:20<\/option>';
-    h += '<option value="11:30" '+((hf.pickup_date==='11:30')?'selected':'')+'>11:30<\/option>';
-    h += '<option value="11:40" '+((hf.pickup_date==='11:40')?'selected':'')+'>11:40<\/option>';
-    h += '<option value="11:50" '+((hf.pickup_date==='11:50')?'selected':'')+'>11:50<\/option>';
-    h += '<option value="12:00" '+((hf.pickup_date==='12:00')?'selected':'')+'>12:00<\/option>';
-    h += '<option value="12:10" '+((hf.pickup_date==='12:10')?'selected':'')+'>12:10<\/option>';
-    h += '<option value="12:20" '+((hf.pickup_date==='12:20')?'selected':'')+'>12:20<\/option>';
-    h += '<option value="12:30" '+((hf.pickup_date==='12:30')?'selected':'')+'>12:30<\/option>';
-    h += '<option value="12:40" '+((hf.pickup_date==='12:40')?'selected':'')+'>12:40<\/option>';
-    h += '<option value="12:50" '+((hf.pickup_date==='12:50')?'selected':'')+'>12:50<\/option>';
-    h += '<option value="13:00" '+((hf.pickup_date==='13:00')?'selected':'')+'>13:00<\/option>';
-    h += '<option value="13:10" '+((hf.pickup_date==='13:10')?'selected':'')+'>13:10<\/option>';
-    h += '<option value="13:20" '+((hf.pickup_date==='13:20')?'selected':'')+'>13:20<\/option>';
-    h += '<option value="13:30" '+((hf.pickup_date==='13:30')?'selected':'')+'>13:30<\/option>';
-    h += '<option value="13:40" '+((hf.pickup_date==='13:40')?'selected':'')+'>13:40<\/option>';
-    h += '<option value="13:50" '+((hf.pickup_date==='13:50')?'selected':'')+'>13:50<\/option>';
-    h += '<option value="14:00" '+((hf.pickup_date==='14:00')?'selected':'')+'>14:00<\/option>';
-    h += '<option value="14:10" '+((hf.pickup_date==='14:10')?'selected':'')+'>14:10<\/option>';
-    h += '<option value="14:20" '+((hf.pickup_date==='14:20')?'selected':'')+'>14:20<\/option>';
-    h += '<option value="14:30" '+((hf.pickup_date==='14:30')?'selected':'')+'>14:30<\/option>';
-    h += '<option value="14:40" '+((hf.pickup_date==='14:40')?'selected':'')+'>14:40<\/option>';
-    h += '<option value="14:50" '+((hf.pickup_date==='14:50')?'selected':'')+'>14:50<\/option>';
-    h += '<option value="15:00" '+((hf.pickup_date==='15:00')?'selected':'')+'>15:00<\/option>';
-    h += '<option value="15:10" '+((hf.pickup_date==='15:10')?'selected':'')+'>15:10<\/option>';
-    h += '<option value="15:20" '+((hf.pickup_date==='15:20')?'selected':'')+'>15:20<\/option>';
-    h += '<option value="15:30" '+((hf.pickup_date==='15:30')?'selected':'')+'>15:30<\/option>';
-    h += '<option value="15:40" '+((hf.pickup_date==='15:40')?'selected':'')+'>15:40<\/option>';
-    h += '<option value="15:50" '+((hf.pickup_date==='15:50')?'selected':'')+'>15:50<\/option>';
-    h += '<option value="16:00" '+((hf.pickup_date==='16:00')?'selected':'')+'>16:00<\/option>';
-    h += '<option value="16:10" '+((hf.pickup_date==='16:10')?'selected':'')+'>16:10<\/option>';
-    h += '<option value="16:20" '+((hf.pickup_date==='16:20')?'selected':'')+'>16:20<\/option>';
-    h += '<option value="16:30" '+((hf.pickup_date==='16:30')?'selected':'')+'>16:30<\/option>';
-    h += '<option value="16:40" '+((hf.pickup_date==='16:40')?'selected':'')+'>16:40<\/option>';
-    h += '<option value="16:50" '+((hf.pickup_date==='16:50')?'selected':'')+'>16:50<\/option>';
-    h += '<option value="17:00" '+((hf.pickup_date==='17:00')?'selected':'')+'>17:00<\/option>';
-    h += '<option value="17:10" '+((hf.pickup_date==='17:10')?'selected':'')+'>17:10<\/option>';
-    h += '<option value="17:20" '+((hf.pickup_date==='17:20')?'selected':'')+'>17:20<\/option>';
-    h += '<option value="17:30" '+((hf.pickup_date==='17:30')?'selected':'')+'>17:30<\/option>';
-    h += '<option value="17:40" '+((hf.pickup_date==='17:40')?'selected':'')+'>17:40<\/option>';
-    h += '<option value="17:50" '+((hf.pickup_date==='17:50')?'selected':'')+'>17:50<\/option>';
-    h += '<option value="18:00" '+((hf.pickup_date==='18:00')?'selected':'')+'>18:00<\/option>';
-    h += '<option value="18:10" '+((hf.pickup_date==='18:10')?'selected':'')+'>18:10<\/option>';
-    h += '<option value="18:20" '+((hf.pickup_date==='18:20')?'selected':'')+'>18:20<\/option>';
-    h += '<option value="18:30" '+((hf.pickup_date==='18:30')?'selected':'')+'>18:30<\/option>';
-    h += '<option value="18:40" '+((hf.pickup_date==='18:40')?'selected':'')+'>18:40<\/option>';
-    h += '<option value="18:50" '+((hf.pickup_date==='18:50')?'selected':'')+'>18:50<\/option>';
-    h += '<option value="19:00" '+((hf.pickup_date==='19:00')?'selected':'')+'>19:00<\/option>';
-    h += '<option value="19:10" '+((hf.pickup_date==='19:10')?'selected':'')+'>19:10<\/option>';
-    h += '<option value="19:20" '+((hf.pickup_date==='19:20')?'selected':'')+'>19:20<\/option>';
-    h += '<option value="19:30" '+((hf.pickup_date==='19:30')?'selected':'')+'>19:30<\/option>';
-    h += '<option value="19:40" '+((hf.pickup_date==='19:40')?'selected':'')+'>19:40<\/option>';
-    h += '<option value="19:50" '+((hf.pickup_date==='19:50')?'selected':'')+'>19:50<\/option>';
-    h += '<option value="20:00" '+((hf.pickup_date==='20:00')?'selected':'')+'>20:00<\/option>';
-    h += '<option value="20:10" '+((hf.pickup_date==='20:10')?'selected':'')+'>20:10<\/option>';
-    h += '<option value="20:20" '+((hf.pickup_date==='20:20')?'selected':'')+'>20:20<\/option>';
-    h += '<option value="20:30" '+((hf.pickup_date==='20:30')?'selected':'')+'>20:30<\/option>';
-    h += '<option value="20:40" '+((hf.pickup_date==='20:40')?'selected':'')+'>20:40<\/option>';
-    h += '<option value="20:50" '+((hf.pickup_date==='20:50')?'selected':'')+'>20:50<\/option>';
-    h += '<\/select><\/div>';
-    const _bs_hf_pickup_time = (hf.pickup_date && hf.pickup_time) ? getBlockStatus(hf.pickup_date, hf.pickup_time) : (hf.pickup_date ? getBlockStatus(hf.pickup_date, null) : null);
-    if (_bs_hf_pickup_time) {
-      const _c = _bs_hf_pickup_time.type==='warn' ? '#b06800' : '#ff3b30';
-      const _bg = _bs_hf_pickup_time.type==='warn' ? 'rgba(255,149,0,0.07)' : 'rgba(255,59,48,0.07)';
-      h += '<div style="margin:4px 16px 0;padding:10px 14px;background:'+_bg+';border-radius:10px;font-size:13px;color:'+_c+';line-height:1.5;">⚠️ '+_bs_hf_pickup_time.msg+'<\/div>';
-    }
-    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" placeholder="배달 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value">';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">부여 전 지역 +5,000원<\/div>';
-    h += '<\/div>';
+    h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value;renderHwa()"></div>';
+    h += buildTimeChips('hf.pickup_time', hf.pickup_time, hf.pickup_date, '#8b4a4a');
+    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" placeholder="배달 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value"></div>';
+    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;padding:0 16px 8px;">부여 전 지역 +'+CFG.delivery_price.toLocaleString()+'원</div>';
   } else {
-    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);">';
-    h += '<input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;margin-bottom:8px;" placeholder="배송 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value">';
-    h += '<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">발송 날짜<\/div>';
-    h += '<input type="date" style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;" value="'+hf.ship_date+'" oninput="hf.ship_date=this.value">';
-    h += '<div style="font-size:11px;color:var(--text2);margin-top:6px;">📦 우체국 택배 · 1-2일 후 도착 · 택배비 '+CFG.hwa_delivery_price.toLocaleString()+'원 (5만원 이상 무료)<\/div>';
-    h += '<\/div>';
+    h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;margin-bottom:8px;" placeholder="배송 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value"></div>';
+    h += '<div style="font-size:12px;color:var(--text2);padding:0 16px 6px;">발송 날짜</div>';
+    h += '<div style="padding:0 16px 8px;"><input type="date" style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" value="'+hf.ship_date+'" oninput="hf.ship_date=this.value"></div>';
+    h += '<div style="font-size:11px;color:var(--text2);padding:0 16px 8px;">📦 우체국 택배 · 1-2일 후 도착 · 택배비 '+CFG.hwa_delivery_price.toLocaleString()+'원 (5만원 이상 무료)</div>';
   }
   h += '<\/div><\/div>';
   h += '<div class="sec"><div class="sec-hdr">포장 옵션</div><div class="card">';
@@ -1685,6 +1546,20 @@ function showBlockCalendar() {
   h += '<div onclick="closeSheet()" style="width:30px;height:30px;border-radius:50%;background:rgba(50,40,35,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#8a837c;flex-shrink:0;">✕<\/div>';
   h += '<\/div>';
 
+  // ── 운영 시간 ──
+  h += '<div style="padding:14px 16px 0;">';
+  h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">픽업 운영 시간<\/div>';
+  h += '<div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 0 rgba(50,40,35,0.06);margin-bottom:4px;">';
+  h += '<span style="font-size:13px;color:#8a837c;flex-shrink:0;">시작<\/span>';
+  h += '<select id="openTimeSelect" onchange="saveOpenClose()" style="flex:1;border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:6px 10px;font-size:14px;font-family:inherit;background:#f7f3f0;text-align:center;">';
+  (function(){ var ts=[]; for(var h=6;h<=23;h++) for(var m=0;m<60;m+=30){ var t=(h<10?'0':'')+h+':'+(m===0?'00':m); ts.push(t); } return ts; })().forEach(function(t){ h += '<option value="'+t+'"'+((CFG.open_time||'10:00')===t?' selected':'')+'>'+t+'<\/option>'; });
+  h += '<\/select>';
+  h += '<span style="font-size:13px;color:#c4bdb7;">~<\/span>';
+  h += '<select id="closeTimeSelect" onchange="saveOpenClose()" style="flex:1;border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:6px 10px;font-size:14px;font-family:inherit;background:#f7f3f0;text-align:center;">';
+  (function(){ var ts=[]; for(var h=6;h<=23;h++) for(var m=0;m<60;m+=30){ var t=(h<10?'0':'')+h+':'+(m===0?'00':m); ts.push(t); } return ts; })().forEach(function(t){ h += '<option value="'+t+'"'+((CFG.close_time||'20:30')===t?' selected':'')+'>'+t+'<\/option>'; });
+  h += '<\/select>';
+  h += '<\/div><\/div>';
+
   // ── 정기 마감 요일 ──
   h += '<div style="padding:14px 16px 0;">';
   h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;">정기 마감 요일<\/div>';
@@ -1854,6 +1729,14 @@ function blockCalMove(dir) {
   if (window._blockCalMonth.m > 11) { window._blockCalMonth.m = 0;  window._blockCalMonth.y++; }
   showBlockCalendar();
 }
+function saveOpenClose() {
+  var openSel = document.getElementById('openTimeSelect');
+  var closeSel = document.getElementById('closeTimeSelect');
+  if (openSel) CFG.open_time = openSel.value;
+  if (closeSel) CFG.close_time = closeSel.value;
+  saveBlockSettings();
+}
+
 async function saveBlockSettings() {
   const newCFG = Object.assign({}, CFG);
   try { await saveSettings(newCFG); CFG = newCFG; toast('저장됐어요'); } catch(e) { toast('저장 실패'); }
@@ -2059,7 +1942,9 @@ async function saveSettingsFromForm() {
     newCFG.lets = CFG.lets.map(function(_,i){ return document.getElementById('cfg_let_'+i).value; });
     // 예약 차단 규칙
     const blockEls = document.querySelectorAll('[id^="cfg_block_dow_"]');
-    newCFG.block_rules = Array.from(blockEls).map(function(el) {
+    newCFG.open_time = CFG.open_time || '10:00';
+  newCFG.close_time = CFG.close_time || '20:30';
+  newCFG.block_rules = Array.from(blockEls).map(function(el) {
       const ri = el.id.replace('cfg_block_dow_','');
       const typeEl  = document.getElementById('cfg_block_type_'+ri);
       const afterEl = document.getElementById('cfg_block_after_'+ri);
