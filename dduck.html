@@ -1030,9 +1030,9 @@ function renderAdminView() {
 
   // ── 주문 목록 ──
   if (!tabOrders.length) {
-    h += '<div style="text-align:center;padding:60px 20px;">';
-    h += '<div style="font-size:36px;margin-bottom:12px;">'+(isCake?'🎂':'🌸')+'<\/div>';
-    h += '<div style="font-size:15px;color:#b8a99e;">'+selLabel+'<br>주문이 없어요<\/div><\/div>';
+    h += '<div style="text-align:center;padding:72px 20px;">';
+    h += '<div style="font-size:44px;margin-bottom:16px;">'+(isCake?'🎂':'🌸')+'<\/div>';
+    h += '<div style="font-size:15px;color:#c4bdb7;font-weight:500;">'+selLabel+'<br>주문이 없어요<\/div><\/div>';
   } else {
     const sorted = tabOrders.slice().sort(function(a,b){ return (a.pickup_time||'').localeCompare(b.pickup_time||''); });
     sorted.forEach(function(o) {
@@ -1638,7 +1638,10 @@ async function saveBlockSettings() {
 
 function showSettings() {
   let h = '<div class="sh-hw"><div class="sh-h"><\/div><\/div>';
-  h += '<div class="sh-tw"><div class="sh-t">⚙️ 주문서 설정<\/div><\/div>';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 20px 16px;border-bottom:0.5px solid rgba(50,40,35,0.08);">';
+  h += '<div style="font-size:17px;font-weight:600;">⚙️ 주문서 설정<\/div>';
+  h += '<div onclick="closeSheet()" style="width:30px;height:30px;border-radius:50%;background:rgba(50,40,35,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#8a837c;">✕<\/div>';
+  h += '<\/div>';
   // 설정 탭
   h += '<div class="cfg-tabs">';
   h += '<div class="cfg-tab cfg-tab-cake'+(cfgTab==='cake'?' on':'')+'" onclick="cfgTab=\'cake\';showSettings()">🎂 떡케이크<\/div>';
@@ -1796,29 +1799,10 @@ function showSettings() {
     h += '<\/div>';
   }
   h += '<\/div>';
-  // ── 예약 차단 규칙 ──
-  if (cfgTab === 'cake') {
-    h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;text-transform:uppercase;letter-spacing:0.8px;margin:18px 0 8px;">예약 차단 규칙 <span style="font-size:10px;font-weight:400;text-transform:none;">매주 반복</span><\/div>';
-    h += '<div id="cfg_block_list" style="margin-bottom:8px;">';
-    const DOW_NAMES = ['일','월','화','수','목','금','토'];
-    (CFG.block_rules||[]).forEach(function(rule, ri) {
-      h += '<div style="background:#f7f3f0;border-radius:12px;margin-bottom:8px;padding:12px 14px;box-shadow:0 1px 0 rgba(50,40,35,0.06);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
-      h += '<select id="cfg_block_dow_'+ri+'" style="border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:#fff;">';
-      DOW_NAMES.forEach(function(n,i){ h += '<option value="'+i+'"'+(rule.dow===i?' selected':'')+'>매주 '+n+'요일<\/option>'; });
-      h += '<\/select>';
-      h += '<select id="cfg_block_type_'+ri+'" onchange="toggleBlockAfter('+ri+')" style="border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:#fff;">';
-      h += '<option value="after"'+((rule.after)?' selected':'')+'>이후 마감<\/option>';
-      h += '<option value="day"'+((!rule.after)?' selected':'')+'>하루 종일 마감<\/option>';
-      h += '<\/select>';
-      h += '<input id="cfg_block_after_'+ri+'" type="time" value="'+(rule.after||'13:00')+'" style="border:1px solid rgba(50,40,35,0.1);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;display:'+(rule.after?'block':'none')+';width:88px;background:#fff;">';
-      h += '<button onclick="removeCfgBlock('+ri+')" style="background:rgba(255,59,48,0.08);border:none;border-radius:8px;padding:6px 10px;color:#ff3b30;font-size:12px;cursor:pointer;flex-shrink:0;">✕ 삭제<\/button>';
-      h += '<\/div>';
-    });
-    h += '<\/div>';
-    h += '<button onclick="addCfgBlock()" style="width:100%;padding:10px;border-radius:10px;background:rgba(139,74,74,0.07);border:none;color:#8b4a4a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:12px;">+ 차단 규칙 추가<\/button>';
-  }
-
-  h += '<div class="sh-act"><button class="sh-cls" onclick="closeSheet()">닫기<\/button><button class="sh-sav-'+(cfgTab==='cake'?'cake':'hwa')+'" onclick="saveSettingsFromForm()">저장<\/button><\/div>';
+  h += '<div style="display:flex;justify-content:center;gap:10px;padding:16px 20px;">';
+  h += '<button class="sh-cls" onclick="closeSheet()" style="flex:1;max-width:140px;">닫기<\/button>';
+  h += '<button class="sh-sav-cake" onclick="saveSettingsFromForm()" style="flex:1;max-width:140px;">저장<\/button>';
+  h += '<\/div>';
   showSheet(h);
 }
 
