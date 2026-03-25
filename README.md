@@ -412,6 +412,153 @@ if (!fd.taste) { toast('맛을 선택해주세요'); return; }
 
 -----
 
+-----
+
+## 13. 예약 차단 기능 (픽업·배달 막아놓기)
+
+### 개요
+
+어드민에서 📅 버튼 → “픽업·배달 예약 막아놓기” 팝업
+손님 주문서 시간 칩에 자동 반영 (차단된 날짜/시간 선택 시 빨간 경고)
+
+### CFG 구조
+
+```javascript
+// DEFAULT_CFG에 추가
+block_rules: [],   // 정기 차단: [{dow:0, after:null}] (매주 일요일 하루종일)
+                   //            [{dow:6, after:'13:00'}] (매주 토요일 13:00 이후)
+block_dates: {},   // 특정 날짜: {'2026-03-27': null} (하루종일)
+                   //            {'2026-03-27': '13:00'} (13:00 이후)
+open_time: '10:00',   // 운영 시작 시간
+close_time: '20:30',  // 운영 종료 시간
+```
+
+### 핵심 함수 3개
+
+#### 1. getBlockStatus(dateStr, timeStr)
+
+날짜+시간을 받아 차단 여부 반환
+
+```javascript
+function getBlockStatus(dateStr, timeStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  const dow = d.getDay();
+
+  // 특정 날짜 차단 체크
+  const blockDates = CFG.block_dates || {};
+  if (blockDates[dateStr] !== undefined) {
+    const afterTime = blockDates[dateStr];
+    if (afterTime === null || afterTime === '') {
+      return { type:'day', msg:'해당 날짜는 픽업 예약이 마감되었습니다.' };
+    }
+    if (timeStr && timeStr >= afterTime) {
+      return { type:'time', msg:'해당 시간대는 픽업 예약이 마감되었습니다.' };
+    }
+    if (!timeStr) return { type:'warn', after: afterTime, msg: afterTime+' 이후 픽업은 예약이 마감됐어요.' };
+  }
+
+  // 정기 요일 차단 체크
+  const rules = CFG.block_rules || [];
+  for (let i = 0; i < rules.length; i++) {
+    const r = rules[i];
+    if (r.dow !== dow) continue;
+    if (!r.after) return { type:'day', msg:'해당 날짜는 픽업 예약이 마감되었습니다.' };
+    if (timeStr && timeStr >= r.after) {
+      return { type:'time', msg:'해당 시간대는 픽업 예약이 마감되었습니다.' };
+    }
+    if (!timeStr) return { type:'warn', after: r.after, msg: r.after+' 이후 픽업은 예약이 마감됐어요.' };
+  }
+  return null;
+}
+```
+
+#### 2. buildTimeChips(varName, curVal, dateVal, accent)
+
+운영시간 범위 안에서 30분 단위 시간 칩 HTML 생성
+
+```javascript
+function buildTimeChips(varName, curVal, dateVal, accent) {
+  var slots = [];
+  var openT  = (CFG.open_time  || '10:00');
+  var closeT = (CFG.close_time || '20:30');
+  for (var h = 10; h <= 20; h++) {
+    for (var m = 0; m < 60; m += 30) {
+      var t = (h<10?'0':'')+h+':'+(m===0?'00':m);
+      if (t >= openT && t <= closeT) slots.push(t);
+    }
+  }
+  var html = '<div class="sec-hdr" style="...">시간</div>';
+  html += '<div style="display:flex;gap:7px;overflow-x:auto;...">';
+  slots.forEach(function(t) {
+    var isOn = curVal === t;
+    // data-var, data-t 속성으로 onclick 따옴표 충돌 방지
+    html += '<div data-var="'+varName+'" data-t="'+t+'" onclick="pickTime(this)" style="...'+( isOn?accent:'...')+...>'+t+'</div>';
+  });
+  html += '</div>';
+  // 차단 경고 (dateVal 있을 때만)
+  if (dateVal) {
+    var bs = getBlockStatus(dateVal, curVal || null);
+    if (bs) html += '<div style="...경고색...">⚠️ '+bs.msg+'</div>';
+  }
+  return html;
+}
+```
+
+#### 3. pickTime(el)
+
+시간 칩 클릭 핸들러 - data-* 속성으로 따옴표 충돌 없이 처리
+
+```javascript
+function pickTime(el) {
+  var varName = el.getAttribute('data-var');
+  var t = el.getAttribute('data-t');
+  if (varName === 'fd.time') { fd.time = t; renderCake(); }
+  else if (varName === 'hf.pickup_time') { hf.pickup_time = t; renderHwa(); }
+}
+```
+
+### 어드민 📅 팝업 구조
+
+- **픽업·배달 운영 시간**: 시작~종료 select (30분 단위, 06:00~23:30)
+- **정기 마감 요일**: 요일 칩 탭으로 토글 (매주 반복)
+- **추가 마감 날짜**: 월별 캘린더 → 날짜 탭 → 중앙 팝업에서 시간 설정
+  - 00:00 설정 = 하루 종일 마감
+  - 특정 시간 = 그 시간 이후 마감
+- **범례**: 정기 마감(회색) / 추가 마감(갈색 테두리)
+- 팝업 외 영역 클릭 or ✕ 버튼으로 닫기
+
+### 손님 주문서 반영
+
+- 날짜 input `oninput`에 `renderCake()` 연결
+- 시간 칩 클릭 시 `pickTime(this)` → `renderCake()` 호출
+- `buildTimeChips()` 내부에서 자동으로 경고 div 렌더링
+- `submitCake()` / `submitHwa()` 제출 시에도 한 번 더 검증
+
+### 핵심 주의사항
+
+```javascript
+// ❌ onclick 안에 따옴표 직접 사용 → JS 파싱 오류
+h += '<div onclick="pickTime('fd.time','14:00')">';
+
+// ✅ data-* 속성 사용 → 따옴표 충돌 없음
+h += '<div data-var="fd.time" data-t="14:00" onclick="pickTime(this)">';
+```
+
+### HTML 헤더 버튼 추가
+
+```html
+<!-- 어드민 모드에서만 표시 -->
+<button id="calendarBtn" style="display:none;" onclick="showBlockCalendar()">📅</button>
+<button id="settingsBtn" style="display:none;" onclick="showSettings()">⚙️</button>
+```
+
+```javascript
+// 어드민 진입 시
+document.getElementById('calendarBtn').style.display = 'block';
+document.getElementById('settingsBtn').style.display = 'block';
+```
+
 ## 12. 향후 추가할 기능 (피드백 기반)
 
 실제 사용 가게 생기면 추가할 기능들:
