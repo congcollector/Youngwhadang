@@ -178,7 +178,6 @@ body { background:#ede8e0; }
   <div style="text-align:center;padding:80px 20px;color:#c8bdb4;font-size:15px;">불러오는 중...</div>
 </div>
 
-<input id="hiddenPhotoInput" type="file" accept="image/*" style="display:none;" onchange="addPhoto(event)">
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
   <div class="sheet" id="sheet"></div>
 </div>
@@ -270,7 +269,7 @@ async function saveCFG(newCFG) {
 }
 
 // ── 전역 상태 ──
-let fd = { name:'', phone:'', menu_id:'', size:'', flavor:'', lettering:'', candles:0, add_flower:false, add_choco:false, design_memo:'', pickup_date:'', pickup_time:'', payment:'', photos:[], done:false };
+let fd = { name:'', phone:'', menu_id:'', size:'', flavor:'', lettering:'', candles:0, add_flower:false, add_choco:false, design_memo:'', pickup_date:'', pickup_time:'', payment:'', done:false };
 let adminOrders = [];
 let adminSelDate = null;
 let adminWeekOffset = 0;
@@ -460,24 +459,7 @@ h += ‘<div class="sec"><div class="sec-hdr">디자인 요청</div><div class="
 h += ‘<div class="lettering-wrap">’;
 h += ‘<textarea class="lettering-input" rows="2" placeholder="원하는 디자인 설명 또는 메시지" oninput="fd.design_memo=this.value">’+fd.design_memo+’</textarea>’;
 h += ‘</div>’;
-// 사진 첨부 (최대 2장) - file input은 HTML에 고정, 여기선 미리보기만
-const photos = fd.photos || [];
-h += ‘<div style="padding:0 16px 14px;">’;
-h += ‘<div style="font-size:12px;color:#c8bdb4;margin-bottom:8px;">참고 사진 첨부 (최대 2장)</div>’;
-h += ‘<div style="display:flex;gap:8px;align-items:center;">’;
-photos.forEach(function(p, i) {
-h += ‘<div style="position:relative;flex-shrink:0;">’;
-h += ‘<img src="'+p+'" style="width:72px;height:72px;border-radius:10px;object-fit:cover;display:block;">’;
-h += ‘<button onclick="removePhoto('+i+')" style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;background:#ff3b30;border:none;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button>’;
-h += ‘</div>’;
-});
-if (photos.length < 2) {
-h += ‘<div onclick="document.getElementById(\'hiddenPhotoInput\').click()" style="width:72px;height:72px;border-radius:10px;border:1.5px dashed rgba(44,31,20,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#faf7f4;gap:4px;flex-shrink:0;">’;
-h += ‘<div style="font-size:22px;pointer-events:none;">📷</div>’;
-h += ‘<div style="font-size:10px;color:#c8bdb4;pointer-events:none;">추가</div>’;
-h += ‘</div>’;
-}
-h += ‘</div></div>’;
+
 h += ‘</div></div>’;
 
 // ── 픽업 일시 (날짜+시간 같은 카드) ──
@@ -529,30 +511,6 @@ W(h);
 function selectMenu(id) { fd.menu_id = id; fd.size = ‘’; fd.flavor = ‘’; renderOrder(); }
 function selectSize(sz)  { fd.size = sz; renderOrder(); }
 function selectFlavor(fl){ fd.flavor = fl; renderOrder(); }
-
-function addPhoto(event) {
-const file = event.target.files[0];
-if (!file) return;
-if (!fd.photos) fd.photos = [];
-if (fd.photos.length >= 2) return;
-const reader = new FileReader();
-reader.onload = function(e) {
-fd.photos.push(e.target.result);
-// renderOrder 대신 사진 영역만 업데이트
-const wrap = document.getElementById(‘photoWrap’);
-if (wrap) updatePhotoUI();
-else renderOrder();
-};
-reader.readAsDataURL(file);
-}
-function updatePhotoUI() {
-// 사진 영역만 부분 업데이트 (전체 재렌더 방지)
-renderOrder();
-}
-function removePhoto(i) {
-fd.photos.splice(i, 1);
-renderOrder();
-}
 
 // ── 제출 ──
 async function submitOrder() {
