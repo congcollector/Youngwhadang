@@ -178,6 +178,7 @@ body { background:#ede8e0; }
   <div style="text-align:center;padding:80px 20px;color:#c8bdb4;font-size:15px;">불러오는 중...</div>
 </div>
 
+<input id="hiddenPhotoInput" type="file" accept="image/*" style="display:none;" onchange="addPhoto(event)">
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
   <div class="sheet" id="sheet"></div>
 </div>
@@ -194,7 +195,16 @@ const IS_ADMIN = location.hash === '#admin-anne';
 async function api(path, method='GET', body=null) {
   const opts = { method, headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'} };
   if (body) opts.body = JSON.stringify(body);
-  return fetch(SUPA+path, opts);
+  const controller = new AbortController();
+  const timer = setTimeout(function(){ controller.abort(); }, 8000);
+  try {
+    const r = await fetch(SUPA+path, Object.assign({signal: controller.signal}, opts));
+    clearTimeout(timer);
+    return r;
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
 }
 async function getOrders() {
   const r = await api('/anne_orders?order=pickup_date.asc,pickup_time.asc');
@@ -450,23 +460,22 @@ h += ‘<div class="sec"><div class="sec-hdr">디자인 요청</div><div class="
 h += ‘<div class="lettering-wrap">’;
 h += ‘<textarea class="lettering-input" rows="2" placeholder="원하는 디자인 설명 또는 메시지" oninput="fd.design_memo=this.value">’+fd.design_memo+’</textarea>’;
 h += ‘</div>’;
-// 사진 첨부 (최대 2장)
+// 사진 첨부 (최대 2장) - file input은 HTML에 고정, 여기선 미리보기만
 const photos = fd.photos || [];
 h += ‘<div style="padding:0 16px 14px;">’;
 h += ‘<div style="font-size:12px;color:#c8bdb4;margin-bottom:8px;">참고 사진 첨부 (최대 2장)</div>’;
-h += ‘<div style="display:flex;gap:8px;">’;
+h += ‘<div style="display:flex;gap:8px;align-items:center;">’;
 photos.forEach(function(p, i) {
-h += ‘<div style="position:relative;">’;
-h += ‘<img src="'+p+'" style="width:72px;height:72px;border-radius:10px;object-fit:cover;">’;
-h += ‘<button onclick="removePhoto('+i+')" style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:#ff3b30;border:none;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>’;
+h += ‘<div style="position:relative;flex-shrink:0;">’;
+h += ‘<img src="'+p+'" style="width:72px;height:72px;border-radius:10px;object-fit:cover;display:block;">’;
+h += ‘<button onclick="removePhoto('+i+')" style="position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;background:#ff3b30;border:none;color:#fff;font-size:11px;cursor:pointer;line-height:1;">✕</button>’;
 h += ‘</div>’;
 });
 if (photos.length < 2) {
-h += ‘<label style="width:72px;height:72px;border-radius:10px;border:1.5px dashed rgba(44,31,20,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#faf7f4;gap:4px;">’;
-h += ‘<div style="font-size:20px;">📷</div>’;
-h += ‘<div style="font-size:10px;color:#c8bdb4;">사진 추가</div>’;
-h += ‘<input type="file" accept="image/*" style="display:none;" onchange="addPhoto(this)">’;
-h += ‘</label>’;
+h += ‘<div onclick="document.getElementById(\'hiddenPhotoInput\').click()" style="width:72px;height:72px;border-radius:10px;border:1.5px dashed rgba(44,31,20,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#faf7f4;gap:4px;flex-shrink:0;">’;
+h += ‘<div style="font-size:22px;pointer-events:none;">📷</div>’;
+h += ‘<div style="font-size:10px;color:#c8bdb4;pointer-events:none;">추가</div>’;
+h += ‘</div>’;
 }
 h += ‘</div></div>’;
 h += ‘</div></div>’;
@@ -521,16 +530,24 @@ function selectMenu(id) { fd.menu_id = id; fd.size = ‘’; fd.flavor = ‘’;
 function selectSize(sz)  { fd.size = sz; renderOrder(); }
 function selectFlavor(fl){ fd.flavor = fl; renderOrder(); }
 
-function addPhoto(input) {
-if (!input.files || !input.files[0]) return;
-const file = input.files[0];
+function addPhoto(event) {
+const file = event.target.files[0];
+if (!file) return;
+if (!fd.photos) fd.photos = [];
+if (fd.photos.length >= 2) return;
 const reader = new FileReader();
 reader.onload = function(e) {
-if (!fd.photos) fd.photos = [];
 fd.photos.push(e.target.result);
-renderOrder();
+// renderOrder 대신 사진 영역만 업데이트
+const wrap = document.getElementById(‘photoWrap’);
+if (wrap) updatePhotoUI();
+else renderOrder();
 };
 reader.readAsDataURL(file);
+}
+function updatePhotoUI() {
+// 사진 영역만 부분 업데이트 (전체 재렌더 방지)
+renderOrder();
 }
 function removePhoto(i) {
 fd.photos.splice(i, 1);
@@ -597,7 +614,11 @@ W(’<div class="succ">’
 async function renderAdmin() {
 W(’<div style="text-align:center;padding:80px 20px;color:#c8bdb4;">불러오는 중…</div>’);
 try {
-adminOrders = await getOrders() || [];
+const result = await Promise.race([
+getOrders(),
+new Promise(function(resolve){ setTimeout(function(){ resolve([]); }, 8000); })
+]);
+adminOrders = result || [];
 } catch(e) { adminOrders = []; }
 renderAdminView();
 }
@@ -864,7 +885,7 @@ rendered = true;
 if (IS_ADMIN) renderAdmin();
 else renderOrder();
 }
-setTimeout(doRender, 5000); // 최대 5초 대기
+setTimeout(doRender, 3000); // 최대 3초 대기
 loadCFG().then(doRender).catch(doRender);
 </script>
 
