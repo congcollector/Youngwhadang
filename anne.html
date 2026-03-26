@@ -237,12 +237,17 @@ let CFG = {...DEFAULT_CFG};
 
 async function loadCFG() {
   try {
-    const r = await fetch(SUPA+'/cake_photos2?shop=eq.anne&select=cfg', {headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});
+    const r = await Promise.race([
+      fetch(SUPA+'/cake_photos2?shop=eq.anne&select=cfg', {headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}}),
+      new Promise(function(_, reject){ setTimeout(function(){ reject('timeout'); }, 4000); })
+    ]);
     if (r.ok) {
       const arr = await r.json();
       if (arr.length && arr[0].cfg) CFG = Object.assign({}, DEFAULT_CFG, arr[0].cfg);
     }
-  } catch(e) {}
+  } catch(e) {
+    // CFG 없으면 DEFAULT_CFG 그대로 사용
+  }
 }
 async function saveCFG(newCFG) {
   const r = await fetch(SUPA+'/cake_photos2?shop=eq.anne', {headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});
@@ -851,13 +856,16 @@ if (IS_ADMIN) {
 document.getElementById(‘settingsBtn’).style.display = ‘block’;
 }
 
-loadCFG().then(function() {
+// 무조건 5초 안에 렌더링
+var rendered = false;
+function doRender() {
+if (rendered) return;
+rendered = true;
 if (IS_ADMIN) renderAdmin();
 else renderOrder();
-}).catch(function() {
-if (IS_ADMIN) renderAdmin();
-else renderOrder();
-});
+}
+setTimeout(doRender, 5000); // 최대 5초 대기
+loadCFG().then(doRender).catch(doRender);
 </script>
 
 </body>
