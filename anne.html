@@ -305,19 +305,23 @@ function calcPrice() {
   const menu = CFG.menus.find(function(m){ return m.id === fd.menu_id; });
   if (!menu) return 0;
 
+  let base = 0;
   // 이벤트 345 적용
   if (CFG.event_345_on) {
     const ep = {미니:30000,'1호':40000,'2호':50000};
-    if (ep[fd.size]) return ep[fd.size];
-  }
-
-  if (!menu.flavors.length) {
-    // 맛 없음 (생과일, 딸기)
-    return menu.prices[fd.size] || 0;
+    base = ep[fd.size] || 0;
+  } else if (!menu.flavors.length) {
+    base = menu.prices[fd.size] || 0;
   } else {
     if (!fd.flavor || !fd.size) return 0;
-    return (menu.prices[fd.flavor] && menu.prices[fd.flavor][fd.size]) || 0;
+    base = (menu.prices[fd.flavor] && menu.prices[fd.flavor][fd.size]) || 0;
   }
+
+  // 계좌이체 선택 시 10% 할인
+  if (base > 0 && fd.payment === '계좌이체') {
+    return Math.floor(base * 0.9 / 100) * 100; // 100원 단위 절사
+  }
+  return base;
 }
 
 // ── 레터링 글자수 제한 ──
@@ -475,7 +479,7 @@ h += ‘</div></div>’;
 // ── 결제 방법 ──
 h += ‘<div class="sec"><div class="sec-hdr">결제 방법 <span class="req">*</span></div><div class="card">’;
 // 사전예약: 계좌이체 (사전할인가) / 픽업 시: 카드·지역화폐 (정가)
-h += ‘<div style="padding:12px 16px 8px;font-size:12px;color:#9a8878;line-height:1.7;">사전 계좌이체 → 10% 할인가 · 픽업 시 결제 → 정가</div>’;
+h += ‘<div style="padding:12px 16px 8px;font-size:13px;color:#9a8878;line-height:1.8;">사전 계좌이체 → 10% 할인가<br>픽업 시 결제 → 정가</div>’;
 h += ‘<div class="pay-wrap">’;
 [{k:‘계좌이체’, l:‘💳 계좌이체 (사전할인)’},
 {k:‘카드’, l:‘💳 카드 (정가)’},
@@ -498,6 +502,7 @@ h += ‘</div></div>’;
 h += ‘<div class="sec"><div class="sec-hdr">주문 요약</div><div class="card">’;
 h += ‘<div class="price-row"><span class="pk">케이크</span><span class="pv">’+(menu ? menu.name+(fd.size?’ · ‘+fd.size:’’)+(fd.flavor?’ · ‘+fd.flavor:’’) : ‘미선택’)+’</span></div>’;
 if (CFG.event_345_on && price > 0) h += ‘<div class="price-row"><span class="pk">이벤트</span><span class="pv" style="color:#b06800;">345 이벤트 적용</span></div>’;
+if (fd.payment === ‘계좌이체’ && price > 0) h += ‘<div class="price-row"><span class="pk">할인</span><span class="pv" style="color:#1a7a33;">사전예약 10% 할인 적용</span></div>’;
 h += ‘<div class="price-row"><span class="pkb">총 금액</span><span class="pvb">’+(price>0?price.toLocaleString()+‘원’:‘케이크를 먼저 선택해주세요’)+’</span></div>’;
 h += ‘</div></div>’;
 
