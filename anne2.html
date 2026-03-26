@@ -426,6 +426,7 @@ else renderOrder();
 }
 loadSettings().then(function(){ render(); }).catch(function(){ render(); });
 </script>
+<script>window.onerror=function(m,s,l,c,e){document.getElementById('wrap').innerHTML='<div style="padding:20px;color:red;font-size:12px;">'+m+'<br>'+s+':'+l+'</div>';return true;};</script>
 
 </body>
 </html>
