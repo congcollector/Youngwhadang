@@ -3,6 +3,9 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>동탄 빨간머리앤 · 케이크 주문</title>
 <style>
@@ -243,25 +246,6 @@ const DEFAULT_CFG = {
 };
 
 let CFG = {...DEFAULT_CFG};
-
-async function loadCFG() {
-  try {
-    const r = await Promise.race([
-      fetch(SUPA+'/cake_photos2?shop=eq.anne&select=cfg', {headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}}),
-      new Promise(function(_, reject){ setTimeout(function(){ reject('timeout'); }, 4000); })
-    ]);
-    if (r.ok) {
-      const arr = await r.json();
-      if (arr.length && arr[0].cfg) CFG = Object.assign({}, DEFAULT_CFG, arr[0].cfg);
-    }
-  } catch(e) {
-    // CFG 없으면 DEFAULT_CFG 그대로 사용
-  }
-}
-function saveCFG(newCFG) {
-  CFG = Object.assign({}, DEFAULT_CFG, newCFG);
-  return Promise.resolve();
-}
 
 // ── 전역 상태 ──
 let fd = { name:'', phone:'', menu_id:'', size:'', flavor:'', lettering:'', candles:0, add_flower:false, add_choco:false, design_memo:'', pickup_date:'', pickup_time:'', payment:'', done:false };
@@ -822,7 +806,7 @@ const eventNotice = document.getElementById(‘eventNotice’);
 if (openSel) CFG.open_time = openSel.value;
 if (closeSel) CFG.close_time = closeSel.value;
 if (eventNotice) CFG.event_notice = eventNotice.value;
-await saveCFG(CFG);
+// saveCFG 비활성화
 toast(‘저장됐어요 ✅’);
 closeSheet();
 }
