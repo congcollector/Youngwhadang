@@ -103,11 +103,11 @@ html,body{background:#faf7f4;font-family:-apple-system,'Apple SD Gothic Neo',san
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPA = 'https://pithlzhuqezeesprcbze.supabase.co/rest/v1';
-const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
-const IS_ADMIN = location.hash === '#admin-anne';
+var SUPA = 'https://pithlzhuqezeesprcbze.supabase.co/rest/v1';
+var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpdGhsemh1cWV6ZWVzcHJjYnplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1NjgsImV4cCI6MjA4OTU4MzU2OH0.GFBnUKHQ_B_GQEQIy9nBWr38gnok_b__fAyTX7v7tNQ';
+var IS_ADMIN = location.hash === '#admin-anne';
 
-const MENUS = [
+var MENUS = [
   {id:'fruit',   e:'🍊', name:'미니생과일',        desc:'신선한 제철 과일 토핑',     flavors:[], sizes:['미니'],       prices:{미니:33000}},
   {id:'straw',   e:'🍓', name:'미니딸기',          desc:'딸기 듬뿍 미니케이크',      flavors:[], sizes:['미니'],       prices:{미니:35000}},
   {id:'dome',    e:'🌸', name:'생화돔케이크',       desc:'생화로 꾸민 돔형 케이크',   flavors:['우유','딸기'], sizes:['미니','1호','2호'], prices:{우유:{미니:32000,'1호':43000,'2호':55000},딸기:{미니:36000,'1호':52000,'2호':65000}}},
@@ -115,12 +115,12 @@ const MENUS = [
   {id:'hydra',   e:'💙', name:'수국케이크',         desc:'수국 꽃장식 · 1호까지 가능',flavors:['우유','딸기'], sizes:['미니','1호'],  prices:{우유:{미니:33000,'1호':45000},딸기:{미니:38000,'1호':60000}}},
 ];
 
-const LETTER_LIMIT = {미니:12,'1호':12,'2호':15,'3호':20};
-const OPEN = '09:00', CLOSE = '23:00';
+var LETTER_LIMIT = {미니:12,'1호':12,'2호':15,'3호':20};
+var OPEN = '09:00', CLOSE = '23:00';
 
-let fd = {name:'',phone:'',mid:'',size:'',flavor:'',lettering:'',candles:0,flower:false,choco:false,memo:'',date:'',time:'',pay:'',done:false};
-let adminOrders=[], adminSelDate=null, adminWeekOffset=0, aFilter='all', curId=null;
-let eventOn = false;
+var fd = {name:'',phone:'',mid:'',size:'',flavor:'',lettering:'',candles:0,flower:false,choco:false,memo:'',date:'',time:'',pay:'',done:false};
+var adminOrders=[], adminSelDate=null, adminWeekOffset=0, aFilter='all', curId=null;
+var eventOn = false;
 
 function W(h){ document.getElementById('wrap').innerHTML = h; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },2400); }
@@ -128,20 +128,20 @@ function showSheet(h){ document.getElementById('sheet').innerHTML=h; document.ge
 function closeSheet(){ document.getElementById('overlay').className='overlay'; }
 
 async function apiCall(path, method, body){
-  const h = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
-  const opts = {method:method||'GET', headers:h};
+  var h = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+  var opts = {method:method||'GET', headers:h};
   if(body) opts.body = JSON.stringify(body);
-  const r = await fetch(SUPA+path, opts);
+  var r = await fetch(SUPA+path, opts);
   return r;
 }
 
 function calcPrice(){
   if(!fd.mid) return 0;
-  const m = MENUS.find(function(x){return x.id===fd.mid;});
+  var m = MENUS.find(function(x){return x.id===fd.mid;});
   if(!m) return 0;
-  let base = 0;
+  var base = 0;
   if(eventOn){
-    const ep={미니:30000,'1호':40000,'2호':50000};
+    var ep={미니:30000,'1호':40000,'2호':50000};
     base = ep[fd.size]||0;
   } else if(!m.flavors.length){
     base = m.prices[fd.size]||0;
@@ -160,12 +160,12 @@ function getLimit(){
 }
 
 function buildTimeChips(cur){
-  const slots=[];
+  var slots=[];
   for(let h=9;h<=23;h++) for(let m=0;m<60;m+=30){
-    const t=(h<10?'0':'')+h+':'+(m===0?'00':m);
+    var t=(h<10?'0':'')+h+':'+(m===0?'00':m);
     if(t>=OPEN&&t<=CLOSE) slots.push(t);
   }
-  let html='<div class="time-wrap">';
+  var html='<div class="time-wrap">';
   slots.forEach(function(t){
     html+='<div class="time-chip'+(cur===t?' on':'')+'" onclick="fd.time=\''+t+'\';renderOrder()">'+t+'</div>';
   });
@@ -174,8 +174,10 @@ function buildTimeChips(cur){
 
 function renderOrder(){
   if(fd.done){ renderSuccess(); return; }
-  const price = calcPrice();
-  let h='';
+  // 에러 디버깅용 - wrap에 바로 표시
+  try {
+  var price = calcPrice();
+  var h='';
 
   h+='<div class="sec"><div class="sec-hdr">안내</div>';
   h+='<div class="notice"><strong>📌 100% 주문제작 · 입금 후 제작 시작</strong><br>사전 계좌이체 → 10% 할인가<br>픽업 시 결제 → 정가<br>아침 9시 ~ 저녁 11시 픽업 가능';
@@ -189,7 +191,7 @@ function renderOrder(){
 
   h+='<div class="sec"><div class="sec-hdr">케이크 선택 <span class="req">*</span></div>';
   MENUS.forEach(function(m){
-    const isOn = fd.mid===m.id;
+    var isOn = fd.mid===m.id;
     h+='<div class="cake-card'+(isOn?' on':'')+'" onclick="fd.mid=\''+m.id+'\';fd.size=\'\';fd.flavor=\'\';renderOrder()">';
     h+='<div class="cake-name">'+m.e+' '+m.name+'</div>';
     h+='<div class="cake-desc">'+m.desc+'</div>';
@@ -226,7 +228,7 @@ function renderOrder(){
 
   h+='<div class="sec"><div class="sec-hdr">레터링</div><div class="card">';
   h+='<div style="padding:14px 16px;">';
-  const lim=getLimit(), ll=fd.lettering.length;
+  var lim=getLimit(), ll=fd.lettering.length;
   h+='<textarea class="ta" rows="2" placeholder="케이크에 쓸 문구 (선택)" maxlength="'+lim+'" oninput="fd.lettering=this.value.substring(0,'+lim+');this.value=fd.lettering;">'+fd.lettering+'</textarea>';
 
 h+=’<div class="cnt'+(ll>=lim?' warn':'')+'">’+ll+’/’+lim+‘자</div></div>’;
@@ -252,7 +254,7 @@ h+=’<div class="sec"><div class="sec-hdr">결제 방법 <span class="req">*</s
 h+=’<div style="padding:10px 16px 4px;font-size:13px;color:#9a8878;line-height:1.8;">사전 계좌이체 → 10% 할인가<br>픽업 시 결제 → 정가</div>’;
 h+=’<div class="pay-wrap">’;
 [‘계좌이체’,‘카드’,‘지역화폐’].forEach(function(p){
-const label = p===‘계좌이체’?‘💳 계좌이체 (사전할인)’:p===‘카드’?‘💳 카드 (정가)’:‘🏷️ 지역화폐 (정가)’;
+var label = p===‘계좌이체’?‘💳 계좌이체 (사전할인)’:p===‘카드’?‘💳 카드 (정가)’:‘🏷️ 지역화폐 (정가)’;
 h+=’<button class="pay-chip'+(fd.pay===p?' on':'')+'" onclick="fd.pay=\''+p+'\';renderOrder()">’+label+’</button>’;
 });
 h+=’</div>’;
@@ -267,7 +269,7 @@ h+=’</div>’;
 h+=’</div></div>’;
 
 h+=’<div class="sec"><div class="sec-hdr">주문 요약</div><div class="card">’;
-const m2=MENUS.find(function(x){return x.id===fd.mid;});
+var m2=MENUS.find(function(x){return x.id===fd.mid;});
 h+=’<div class="price-row"><span class="pk">케이크</span><span class="pv">’+(m2?m2.name+(fd.size?’ · ‘+fd.size:’’)+(fd.flavor?’ · ‘+fd.flavor:’’):‘미선택’)+’</span></div>’;
 if(fd.pay===‘계좌이체’&&price>0) h+=’<div class="price-row"><span class="pk">할인</span><span class="pv" style="color:#1a7a33;">사전예약 10% 할인</span></div>’;
 h+=’<div class="price-row"><span class="pkb">총 금액</span><span class="pvb">’+(price>0?price.toLocaleString()+‘원’:‘케이크를 먼저 선택해주세요’)+’</span></div>’;
@@ -275,6 +277,9 @@ h+=’</div></div>’;
 
 h+=’<button class="btn-main" onclick="submitOrder()">주문서 제출하기</button>’;
 W(h);
+} catch(e) {
+document.getElementById(‘wrap’).innerHTML = ’<div style="padding:40px 20px;color:#ff3b30;font-size:14px;font-weight:600;">오류: ’ + e.message + ‘<br>’ + e.stack + ‘</div>’;
+}
 }
 
 function renderSuccess(){
@@ -289,16 +294,16 @@ if(!fd.name.trim()){toast(‘이름을 입력해주세요’);return;}
 if(!fd.phone.trim()){toast(‘연락처를 입력해주세요’);return;}
 if(!fd.mid){toast(‘케이크를 선택해주세요’);return;}
 if(!fd.size){toast(‘사이즈를 선택해주세요’);return;}
-const m=MENUS.find(function(x){return x.id===fd.mid;});
+var m=MENUS.find(function(x){return x.id===fd.mid;});
 if(m&&m.flavors.length&&!fd.flavor){toast(‘맛을 선택해주세요’);return;}
 if(!fd.date){toast(‘픽업 날짜를 선택해주세요’);return;}
 if(!fd.time){toast(‘픽업 시간을 선택해주세요’);return;}
 if(!fd.pay){toast(‘결제 방법을 선택해주세요’);return;}
-const price=calcPrice();
-const btn=document.querySelector(’.btn-main’);
+var price=calcPrice();
+var btn=document.querySelector(’.btn-main’);
 if(btn){btn.disabled=true;btn.textContent=‘제출 중…’;}
 try{
-const r=await apiCall(’/anne_orders’,‘POST’,{
+var r=await apiCall(’/anne_orders’,‘POST’,{
 name:fd.name.trim(),phone:fd.phone.trim(),
 cake_type:fd.mid,cake_flavor:fd.flavor||null,cake_size:fd.size,
 lettering:fd.lettering||null,candles:fd.candles||0,
@@ -317,7 +322,7 @@ if(btn){btn.disabled=false;btn.textContent=‘주문서 제출하기’;}
 async function renderAdmin(){
 W(’<div class="loading">불러오는 중…</div>’);
 try{
-const r=await Promise.race([
+var r=await Promise.race([
 apiCall(’/anne_orders?order=pickup_date.asc,pickup_time.asc’),
 new Promise(function(res){setTimeout(function(){res({ok:true,json:async function(){return [];}});},6000);})
 ]);
@@ -327,29 +332,29 @@ renderAdminView();
 }
 
 function renderAdminView(){
-const acc=’#b07050’;
+var acc=’#b07050’;
 if(!adminSelDate){const t=new Date();adminSelDate=t.getFullYear()+’-’+String(t.getMonth()+1).padStart(2,‘0’)+’-’+String(t.getDate()).padStart(2,‘0’);}
-const selD=new Date(adminSelDate+‘T00:00:00’);
-const dow=selD.getDay();
-const weekStart=new Date(selD);
+var selD=new Date(adminSelDate+‘T00:00:00’);
+var dow=selD.getDay();
+var weekStart=new Date(selD);
 weekStart.setDate(selD.getDate()+(dow===0?-6:1-dow)+adminWeekOffset*7);
-const weekDays=[];
+var weekDays=[];
 for(let i=0;i<7;i++){const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);const ds=d.getFullYear()+’-’+String(d.getMonth()+1).padStart(2,‘0’)+’-’+String(d.getDate()).padStart(2,‘0’);weekDays.push({date:ds,day:d,label:[‘일’,‘월’,‘화’,‘수’,‘목’,‘금’,‘토’][d.getDay()]});}
-const today=(function(){const t=new Date();return t.getFullYear()+’-’+String(t.getMonth()+1).padStart(2,‘0’)+’-’+String(t.getDate()).padStart(2,‘0’);})();
-const dayOrders=adminOrders.filter(function(o){return o.pickup_date===adminSelDate;});
-const tabOrders=aFilter===‘all’?dayOrders:dayOrders.filter(function(o){return o.status===aFilter;});
-const cntMap={};adminOrders.forEach(function(o){cntMap[o.pickup_date]=(cntMap[o.pickup_date]||0)+1;});
-const weekTotal=weekDays.reduce(function(s,d){return s+(cntMap[d.date]||0);},0);
-const monthLabel=(selD.getMonth()+1)+‘월’;
-let h=’’;
+var today=(function(){const t=new Date();return t.getFullYear()+’-’+String(t.getMonth()+1).padStart(2,‘0’)+’-’+String(t.getDate()).padStart(2,‘0’);})();
+var dayOrders=adminOrders.filter(function(o){return o.pickup_date===adminSelDate;});
+var tabOrders=aFilter===‘all’?dayOrders:dayOrders.filter(function(o){return o.status===aFilter;});
+var cntMap={};adminOrders.forEach(function(o){cntMap[o.pickup_date]=(cntMap[o.pickup_date]||0)+1;});
+var weekTotal=weekDays.reduce(function(s,d){return s+(cntMap[d.date]||0);},0);
+var monthLabel=(selD.getMonth()+1)+‘월’;
+var h=’’;
 h+=’<div style="background:rgba(250,247,244,0.97);backdrop-filter:blur(12px);position:sticky;top:52px;z-index:40;border-bottom:0.5px solid rgba(44,31,20,0.08);margin-top:12px;">’;
 h+=’<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;"><div style="font-size:15px;font-weight:700;">’+monthLabel+’</div><div style="font-size:12px;color:#c8bdb4;">이번주 ‘+weekTotal+‘건</div></div>’;
 h+=’<div style="display:flex;align-items:center;padding:0 4px 12px;gap:2px;">’;
 h+=’<button onclick="event.stopPropagation();adminWeekOffset--;renderAdminView()" style="width:36px;height:56px;border:none;background:transparent;color:#c8bdb4;font-size:20px;cursor:pointer;">‹</button>’;
 h+=’<div style="flex:1;display:flex;gap:2px;">’;
 weekDays.forEach(function(d){
-const isSel=d.date===adminSelDate,isT=d.date===today,cnt=cntMap[d.date]||0;
-const bg=isSel?acc:‘transparent’,tc=isSel?’#fff’:(isT?acc:’#2c1f14’),lc=isSel?‘rgba(255,255,255,0.65)’:’#c8bdb4’;
+var isSel=d.date===adminSelDate,isT=d.date===today,cnt=cntMap[d.date]||0;
+var bg=isSel?acc:‘transparent’,tc=isSel?’#fff’:(isT?acc:’#2c1f14’),lc=isSel?‘rgba(255,255,255,0.65)’:’#c8bdb4’;
 h+=’<div onclick="adminSelDate=\''+d.date+'\';aFilter=\'all\';renderAdminView()" style="flex:1;text-align:center;padding:7px 2px;border-radius:12px;cursor:pointer;background:'+bg+';transition:all 0.15s;">’;
 h+=’<div style="font-size:10px;color:'+lc+';margin-bottom:3px;font-weight:500;pointer-events:none;">’+d.label+’</div>’;
 h+=’<div style="font-size:17px;font-weight:700;color:'+tc+';pointer-events:none;">’+d.day.getDate()+’</div>’;
@@ -358,18 +363,18 @@ h+=’</div>’;
 });
 h+=’</div>’;
 h+=’<button onclick="event.stopPropagation();adminWeekOffset++;renderAdminView()" style="width:36px;height:56px;border:none;background:transparent;color:#c8bdb4;font-size:20px;cursor:pointer;">›</button></div>’;
-const pc=dayOrders.filter(function(o){return o.status===‘pending’;}).length;
-const cc=dayOrders.filter(function(o){return o.status===‘confirmed’;}).length;
-const dc=dayOrders.filter(function(o){return o.status===‘done’;}).length;
+var pc=dayOrders.filter(function(o){return o.status===‘pending’;}).length;
+var cc=dayOrders.filter(function(o){return o.status===‘confirmed’;}).length;
+var dc=dayOrders.filter(function(o){return o.status===‘done’;}).length;
 h+=’<div style="display:flex;border-top:0.5px solid rgba(44,31,20,0.08);">’;
 [{k:‘all’,l:‘전체’,cnt:dayOrders.length},{k:‘pending’,l:‘확인중’,cnt:pc},{k:‘confirmed’,l:‘예약확정’,cnt:cc},{k:‘done’,l:‘픽업완료’,cnt:dc}].forEach(function(t){
-const isOn=aFilter===t.k;
+var isOn=aFilter===t.k;
 h+=’<div onclick="aFilter=\''+t.k+'\';renderAdminView()" style="flex:1;text-align:center;padding:10px 0;font-size:12px;font-weight:'+(isOn?'700':'500')+';color:'+(isOn?acc:'#c8bdb4')+';border-bottom:2px solid '+(isOn?acc:'transparent')+';cursor:pointer;">’+t.l+(t.cnt>0?’ ‘+t.cnt:’’)+’</div>’;
 });
 h+=’</div></div>’;
-const selObj=new Date(adminSelDate+‘T00:00:00’);
-const dayNames=[‘일요일’,‘월요일’,‘화요일’,‘수요일’,‘목요일’,‘금요일’,‘토요일’];
-const selLabel=(selObj.getMonth()+1)+‘월 ‘+selObj.getDate()+‘일 ‘+dayNames[selObj.getDay()];
+var selObj=new Date(adminSelDate+‘T00:00:00’);
+var dayNames=[‘일요일’,‘월요일’,‘화요일’,‘수요일’,‘목요일’,‘금요일’,‘토요일’];
+var selLabel=(selObj.getMonth()+1)+‘월 ‘+selObj.getDate()+‘일 ‘+dayNames[selObj.getDay()];
 h+=’<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 16px 10px;">’;
 h+=’<div style="font-size:17px;font-weight:700;letter-spacing:-0.4px;">’+selLabel+’</div>’;
 h+=’<div style="display:flex;gap:8px;">’;
@@ -380,8 +385,8 @@ if(!tabOrders.length){
 h+=’<div style="text-align:center;padding:72px 20px;"><div style="font-size:44px;margin-bottom:16px;">🎂</div><div style="font-size:16px;font-weight:600;margin-bottom:6px;">’+selLabel+’</div><div style="font-size:14px;color:#c8bdb4;">주문이 없어요</div></div>’;
 } else {
 tabOrders.slice().sort(function(a,b){return (a.pickup_time||’’).localeCompare(b.pickup_time||’’);}).forEach(function(o){
-const sc={pending:{bg:‘rgba(255,149,0,0.1)’,c:’#b06800’,l:‘확인중’},confirmed:{bg:‘rgba(52,199,89,0.1)’,c:’#1a7a33’,l:‘예약확정’},done:{bg:‘rgba(44,31,20,0.07)’,c:’#8a837c’,l:‘픽업완료’},cancel:{bg:‘rgba(255,59,48,0.08)’,c:’#ff3b30’,l:‘취소’}}[o.status]||{bg:‘rgba(255,149,0,0.1)’,c:’#b06800’,l:‘확인중’};
-const mn=MENUS.find(function(x){return x.id===o.cake_type;});
+var sc={pending:{bg:‘rgba(255,149,0,0.1)’,c:’#b06800’,l:‘확인중’},confirmed:{bg:‘rgba(52,199,89,0.1)’,c:’#1a7a33’,l:‘예약확정’},done:{bg:‘rgba(44,31,20,0.07)’,c:’#8a837c’,l:‘픽업완료’},cancel:{bg:‘rgba(255,59,48,0.08)’,c:’#ff3b30’,l:‘취소’}}[o.status]||{bg:‘rgba(255,149,0,0.1)’,c:’#b06800’,l:‘확인중’};
+var mn=MENUS.find(function(x){return x.id===o.cake_type;});
 h+=’<div class="order-card" onclick="openOrder(\''+o.id+'\')">’;
 h+=’<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px 8px;">’;
 h+=’<div style="display:flex;align-items:center;gap:8px;"><div style="font-size:16px;font-weight:700;">’+o.name+’</div>’+(o.pickup_time?’<div style="font-size:13px;color:#c8bdb4;">’+o.pickup_time+’</div>’:’’)+’</div>’;
@@ -396,13 +401,13 @@ W(h);
 }
 
 async function openOrder(id){
-const o=adminOrders.find(function(x){return x.id===id;});
+var o=adminOrders.find(function(x){return x.id===id;});
 if(!o) return;
 curId=id;
-const acc=’#b07050’;
-const mn=MENUS.find(function(x){return x.id===o.cake_type;});
-const statusList=[{k:‘pending’,l:‘확인중’,bg:‘rgba(255,149,0,0.1)’,c:’#b06800’},{k:‘confirmed’,l:‘예약확정’,bg:‘rgba(52,199,89,0.1)’,c:’#1a7a33’},{k:‘done’,l:‘픽업완료’,bg:‘rgba(0,122,255,0.1)’,c:’#0060c7’},{k:‘cancel’,l:‘취소’,bg:‘rgba(255,59,48,0.08)’,c:’#ff3b30’}];
-let h=’<div class="sh-hw"><div class="sh-h"></div></div>’;
+var acc=’#b07050’;
+var mn=MENUS.find(function(x){return x.id===o.cake_type;});
+var statusList=[{k:‘pending’,l:‘확인중’,bg:‘rgba(255,149,0,0.1)’,c:’#b06800’},{k:‘confirmed’,l:‘예약확정’,bg:‘rgba(52,199,89,0.1)’,c:’#1a7a33’},{k:‘done’,l:‘픽업완료’,bg:‘rgba(0,122,255,0.1)’,c:’#0060c7’},{k:‘cancel’,l:‘취소’,bg:‘rgba(255,59,48,0.08)’,c:’#ff3b30’}];
+var h=’<div class="sh-hw"><div class="sh-h"></div></div>’;
 h+=’<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(44,31,20,0.08);display:flex;align-items:flex-start;justify-content:space-between;">’;
 h+=’<div><div style="font-size:20px;font-weight:700;">’+o.name+’</div><div style="font-size:13px;color:#9a8878;margin-top:2px;">’+o.phone+’</div></div>’;
 h+=’<div style="font-size:22px;font-weight:700;color:'+acc+';">’+(o.total_price||0).toLocaleString()+‘원</div></div>’;
@@ -410,17 +415,17 @@ h+=’<div style="padding:14px 16px 12px;border-bottom:0.5px solid rgba(44,31,20
 h+=’<div style="font-size:11px;font-weight:600;color:#c8bdb4;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">상태</div>’;
 h+=’<div style="display:flex;gap:7px;flex-wrap:wrap;">’;
 statusList.forEach(function(s){
-const isOn=o.status===s.k;
+var isOn=o.status===s.k;
 h+=’<button onclick="chgStatus(\''+id+'\',\''+s.k+'\')" style="padding:8px 16px;border-radius:22px;border:1.5px solid '+(isOn?s.c:'rgba(44,31,20,0.1)')+';background:'+(isOn?s.bg:'transparent')+';color:'+(isOn?s.c:'#9a8878')+';font-size:13px;font-weight:'+(isOn?'700':'500')+';font-family:inherit;cursor:pointer;">’+s.l+’</button>’;
 });
 h+=’</div></div>’;
 h+=’<div style="padding:14px 16px 0;">’;
 h+=’<div style="font-size:11px;font-weight:600;color:#c8bdb4;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">주문 정보</div>’;
 h+=’<div style="background:#faf7f4;border-radius:14px;overflow:hidden;">’;
-const rows=[[‘픽업’,o.pickup_date+’ ‘+o.pickup_time],[‘케이크’,(mn?mn.name:o.cake_type)+’ · ‘+o.cake_size+(o.cake_flavor?’ · ‘+o.cake_flavor:’’)]];
+var rows=[[‘픽업’,o.pickup_date+’ ‘+o.pickup_time],[‘케이크’,(mn?mn.name:o.cake_type)+’ · ‘+o.cake_size+(o.cake_flavor?’ · ‘+o.cake_flavor:’’)]];
 if(o.lettering) rows.push([‘레터링’,o.lettering]);
 if(o.candles) rows.push([‘초’,o.candles+‘개’]);
-const opts=[o.add_flower?‘💐 생화’:null,o.add_choco?‘🍫 초코시트’:null].filter(Boolean);
+var opts=[o.add_flower?‘💐 생화’:null,o.add_choco?‘🍫 초코시트’:null].filter(Boolean);
 if(opts.length) rows.push([‘옵션’,opts.join(’ · ‘)]);
 if(o.design_memo) rows.push([‘디자인’,o.design_memo]);
 rows.push([‘결제’,o.payment]);
@@ -439,7 +444,7 @@ showSheet(h);
 
 async function chgStatus(id,s){
 await apiCall(’/anne_orders?id=eq.’+id,‘PATCH’,{status:s});
-const o=adminOrders.find(function(x){return x.id===id;});
+var o=adminOrders.find(function(x){return x.id===id;});
 if(o) o.status=s;
 toast(‘상태 변경됐어요’);
 openOrder(id);
@@ -447,9 +452,9 @@ renderAdminView();
 }
 
 async function saveOrder(id){
-const memo=document.getElementById(‘memoTa’);
+var memo=document.getElementById(‘memoTa’);
 await apiCall(’/anne_orders?id=eq.’+id,‘PATCH’,{memo:memo?memo.value:’’});
-const o=adminOrders.find(function(x){return x.id===id;});
+var o=adminOrders.find(function(x){return x.id===id;});
 if(o&&memo) o.memo=memo.value;
 toast(‘저장됐어요’);
 closeSheet();
@@ -457,7 +462,7 @@ renderAdminView();
 }
 
 function showSettings(){
-let h=’<div class="sh-hw"><div class="sh-h"></div></div>’;
+var h=’<div class="sh-hw"><div class="sh-h"></div></div>’;
 h+=’<div style="padding:8px 20px 14px;border-bottom:0.5px solid rgba(44,31,20,0.08);display:flex;align-items:center;justify-content:space-between;">’;
 h+=’<div style="font-size:17px;font-weight:600;">⚙️ 설정</div>’;
 h+=’<div onclick="closeSheet()" style="width:30px;height:30px;border-radius:50%;background:rgba(44,31,20,0.07);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#9a8878;">✕</div></div>’;
@@ -476,7 +481,7 @@ showSheet(h);
 }
 
 // ── 초기화 ──
-const pill=document.getElementById(‘modePill’);
+var pill=document.getElementById(‘modePill’);
 pill.textContent=IS_ADMIN?‘사장님 🔑’:‘주문하기’;
 pill.className=’pill ’+(IS_ADMIN?‘pill-a’:‘pill-g’);
 if(IS_ADMIN) document.getElementById(‘settingsBtn’).style.display=‘block’;
