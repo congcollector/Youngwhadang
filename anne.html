@@ -258,14 +258,9 @@ async function loadCFG() {
     // CFG 없으면 DEFAULT_CFG 그대로 사용
   }
 }
-async function saveCFG(newCFG) {
-  const r = await fetch(SUPA+'/cake_photos2?shop=eq.anne', {headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});
-  const arr = r.ok ? await r.json() : [];
-  if (arr.length) {
-    await fetch(SUPA+'/cake_photos2?shop=eq.anne', {method:'PATCH', headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'}, body:JSON.stringify({cfg:newCFG})});
-  } else {
-    await fetch(SUPA+'/cake_photos2', {method:'POST', headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'}, body:JSON.stringify({shop:'anne',cfg:newCFG})});
-  }
+function saveCFG(newCFG) {
+  CFG = Object.assign({}, DEFAULT_CFG, newCFG);
+  return Promise.resolve();
 }
 
 // ── 전역 상태 ──
@@ -348,6 +343,7 @@ function getLetterLimit() {
 
 // ── 주문서 렌더 ──
 function renderOrder() {
+  try {
   if (fd.done) { renderSuccess(); return; }
 
   const menu = CFG.menus.find(function(m){ return m.id === fd.menu_id; });
@@ -506,6 +502,10 @@ h += ‘</div></div>’;
 h += ‘<button class="btn-main" onclick="submitOrder()">주문서 제출하기</button>’;
 
 W(h);
+} catch(err) {
+console.error(‘renderOrder error:’, err.message);
+W(’<div style="padding:40px 20px;text-align:center;color:#ff3b30;font-size:13px;">오류: ‘+err.message+’</div>’);
+}
 }
 
 function selectMenu(id) { fd.menu_id = id; fd.size = ‘’; fd.flavor = ‘’; renderOrder(); }
@@ -836,15 +836,9 @@ document.getElementById(‘settingsBtn’).style.display = ‘block’;
 }
 
 // 무조건 5초 안에 렌더링
-var rendered = false;
-function doRender() {
-if (rendered) return;
-rendered = true;
+// CFG는 DEFAULT_CFG 사용, 즉시 렌더링
 if (IS_ADMIN) renderAdmin();
 else renderOrder();
-}
-setTimeout(doRender, 3000); // 최대 3초 대기
-loadCFG().then(doRender).catch(doRender);
 </script>
 
 </body>
