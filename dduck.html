@@ -772,16 +772,16 @@ async function submitCake() {
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
-      type:'cake',
+      id:'c_'+Date.now(),
       name:fd.name, phone:fd.phone,
       pickup_date:fd.date, pickup_time:fd.time,
       cake_size:sizeNames.join(', '), cake_price:cakeSub,
-      sizes:JSON.stringify(fd.sizes),
       design:fd.design||'', lettering:fd.lettering||'',
       payment:fd.pay, choco_deco:fd.choco,
       delivery:fd.method==='delivery', delivery_addr:fd.method==='delivery'?fd.addr||'':'',
       total_price:total, status:'pending', memo:'',
-      photos:JSON.stringify(fd.photos||[])
+      photos:JSON.stringify(fd.photos||[]),
+      created_at:Date.now()
     });
     fd.done = true; renderCake();
   } catch(e) { toast('전송 실패, 다시 시도해주세요'); renderCake(); }
@@ -979,18 +979,17 @@ async function submitHwa() {
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
-      id:'h_'+Date.now(), type:'hwa',
+      id:'h_'+Date.now(),
       name:hf.name, phone:hf.phone,
       cake_size:sizeNames.join(', '), cake_price:cakeSub,
-      sizes:JSON.stringify(fd.sizes),
-      method:hf.method,
       pickup_date:hf.method==='pickup'?hf.pickup_date:hf.ship_date,
       pickup_time:hf.pickup_time||'',
-      delivery_addr:hf.method==='ship'?hf.ship_addr:'',
-      packing:JSON.stringify(hf.packing),
-      packing_text:hf.packing_text||'',
+      delivery:hf.method!=='pickup',
+      delivery_addr:hf.method==='ship'?hf.ship_addr:(hf.method==='delivery'?hf.addr||'':''),
+      design:hf.packing_text||'',
       payment:hf.pay,
-      total_price:total, status:'pending', memo:''
+      total_price:total, status:'pending', memo:'',
+      created_at:Date.now()
     });
     hf.done = true; renderHwa();
   } catch(e) { toast('전송 실패, 다시 시도해주세요'); renderHwa(); }
