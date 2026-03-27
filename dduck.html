@@ -631,7 +631,7 @@ function renderCakeSuccess() {
   let h = '<div class="succ">';
   h += '<div class="succ-ic">🌸<\/div>';
   h += '<div class="succ-t">주문서가 전달됐어요<\/div>';
-  h += '<div class="succ-s">확인 후 <strong>'+CFG.shop_phone+'<\/strong>으로 연락드릴게요 💛<\/div>';
+  h += '<div class="succ-s"><strong>'+fd.phone+'<\/strong>으로 확인 연락 드릴게요 💛<\/div>';
   h += '<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong class="cake-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
   h += '<button class="btn-cake" onclick="resetCake()">새 주문서 작성<\/button><\/div>';
   W(h);
@@ -951,7 +951,7 @@ function renderHwaSuccess() {
   let h = '<div class="succ">';
   h += '<div class="succ-ic">🌸<\/div>';
   h += '<div class="succ-t">주문서가 전달됐어요<\/div>';
-  h += '<div class="succ-s">확인 후 <strong>'+CFG.shop_phone+'<\/strong>으로 연락드릴게요 💛<\/div>';
+  h += '<div class="succ-s"><strong>'+fd.phone+'<\/strong>으로 확인 연락 드릴게요 💛<\/div>';
   h += '<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong class="hwa-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
   h += '<button class="btn-hwa" onclick="resetHwa()">새 주문서 작성<\/button><\/div>';
   W(h);
