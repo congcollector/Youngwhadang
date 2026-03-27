@@ -400,6 +400,8 @@ let acc = {s:false,t:false,hs:false};
 
 // 떡케이크 폼
 let fd = {name:'',phone:'',date:'',time:'',sizes:{},design:'',lettering:'',pay:'',choco:false,method:'pickup',delivery:false,addr:'',photos:[],done:false,_addrOpen:false};
+let _cakeSubmitting = false;
+let _hwaSubmitting = false;
 // 화과자 폼
 let hf = {name:'',phone:'',sizes:{},method:'pickup',pickup_date:'',pickup_time:'',ship_addr:'',ship_date:'',packing:[],packing_text:'',bag:false,pay:'',done:false,_addrOpen:false};
 
@@ -542,7 +544,6 @@ function renderCake() {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+fd.date+'" oninput="fd.date=this.value;renderCake()"></div>';
     h += buildTimeChips('fd.time', fd.time, fd.date, '#8b4a4a');
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" placeholder="배달 주소를 입력해주세요" value="'+fd.addr+'" oninput="fd.addr=this.value"></div>';
-    h += '<div style="font-size:13px;color:#ff6b6b;margin-top:6px;padding:0 16px 8px;font-weight:500;">배달 예약이 마감되었습니다.</div>';
   }
   h += '<\/div><\/div>';
 
@@ -756,6 +757,8 @@ function getBlockStatus(dateStr, timeStr) {
 }
 
 async function submitCake() {
+  if (_cakeSubmitting) return;
+  _cakeSubmitting = true;
   if (!fd.name.trim()) { toast('성함을 입력해주세요'); return; }
   if (!fd.phone.trim()) { toast('전화번호를 입력해주세요'); return; }
   if (!fd.date) { toast('픽업 날짜를 선택해주세요'); return; }
@@ -769,6 +772,9 @@ async function submitCake() {
   const sizeNames = [];
   CFG.sizes.forEach(function(s){ const q=fd.sizes[s.id]||0; if(q>0){cakeSub+=s.price*q; sizeNames.push(s.name+' x'+q);} });
   const total = cakeSub + (fd.choco?CFG.choco_price:0) + (fd.method==='delivery'?CFG.delivery_price:0);
+  // 중복 제출 방지
+  const submitBtn = document.querySelector('.btn-cake');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '전송 중...'; }
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
@@ -783,8 +789,8 @@ async function submitCake() {
       photos:JSON.stringify(fd.photos||[]),
       created_at:Date.now()
     });
-    fd.done = true; renderCake();
-  } catch(e) { toast('전송 실패, 다시 시도해주세요'); renderCake(); }
+    fd.done = true; _cakeSubmitting = false; renderCake();
+  } catch(e) { _cakeSubmitting = false; toast('전송 실패, 다시 시도해주세요'); renderCake(); }
 }
 
 // ══════════════════════
@@ -873,7 +879,6 @@ function renderHwa() {
     h += '<div class="row" style="border-top:0.5px solid var(--sep);"><div class="row-lbl">날짜 <span class="req">*</span></div><input class="inp" type="date" value="'+hf.pickup_date+'" oninput="hf.pickup_date=this.value;renderHwa()"></div>';
     h += buildTimeChips('hf.pickup_time', hf.pickup_time, hf.pickup_date, '#8b4a4a');
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;" placeholder="배달 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value"></div>';
-    h += '<div style="font-size:13px;color:#ff6b6b;margin-top:6px;padding:0 16px 8px;font-weight:500;">배달 예약이 마감되었습니다.</div>';
   } else {
     h += '<div style="padding:12px 16px;border-top:0.5px solid var(--sep);"><input style="width:100%;border:1.5px solid var(--sep);border-radius:12px;padding:10px 12px;font-size:14px;font-family:inherit;color:#1c1814;background:#f7f3f0;outline:none;margin-bottom:8px;" placeholder="배송 주소를 입력해주세요" value="'+hf.ship_addr+'" oninput="hf.ship_addr=this.value"></div>';
     h += '<div style="font-size:12px;color:var(--text2);padding:0 16px 6px;">발송 날짜</div>';
@@ -958,6 +963,8 @@ function renderHwaSuccess() {
 }
 
 async function submitHwa() {
+  if (_hwaSubmitting) return;
+  _hwaSubmitting = true;
   if (!hf.name.trim()) { toast('성함을 입력해주세요'); return; }
   if (!hf.phone.trim()) { toast('연락처를 입력해주세요'); return; }
   const hasHwaSel = hf.sizes && Object.keys(hf.sizes).some(function(k){ return hf.sizes[k]>0; });
@@ -976,6 +983,9 @@ async function submitHwa() {
   });
   if (hf.method==='ship') total += CFG.hwa_delivery_price;
   if (hf.method==='delivery') total += CFG.hwa_delivery_price;
+  // 중복 제출 방지
+  const submitBtnH = document.querySelector('.btn-hwa');
+  if (submitBtnH) { submitBtnH.disabled = true; submitBtnH.textContent = '전송 중...'; }
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
@@ -991,8 +1001,8 @@ async function submitHwa() {
       total_price:total, status:'pending', memo:'',
       created_at:Date.now()
     });
-    hf.done = true; renderHwa();
-  } catch(e) { toast('전송 실패, 다시 시도해주세요'); renderHwa(); }
+    hf.done = true; _hwaSubmitting = false; renderHwa();
+  } catch(e) { _hwaSubmitting = false; toast('전송 실패, 다시 시도해주세요'); renderHwa(); }
 }
 
 // ══════════════════════
@@ -1226,7 +1236,9 @@ async function openOrder(id) {
   h += '<div style="display:flex;gap:10px;padding:14px 16px 0;">';
   h += '<button onclick="doSav(\''+id+'\',\''+o.type+'\',\''+accentColor+'\',this)" style="flex:1;padding:14px;border-radius:14px;background:'+accentColor+';border:none;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">저장하기<\/button>';
   h += '<button onclick="closeSheet()" style="padding:14px 18px;border-radius:14px;background:rgba(50,40,35,0.07);border:none;color:#8a837c;font-size:14px;font-family:inherit;cursor:pointer;">닫기<\/button>';
-  h += '<\/div><div style="height:8px;"><\/div>';
+  h += '<\/div>';
+  h += '<button onclick="doDel()" style="width:calc(100% - 32px);margin:8px 16px 0;padding:13px;border-radius:14px;background:transparent;border:1.5px solid rgba(255,59,48,0.3);color:#ff3b30;font-size:14px;font-family:inherit;cursor:pointer;">🗑️ 주문서 삭제</button>';
+  h += '<div style="height:8px;"><\/div>';
 
   showSheet(h);
 }
@@ -1253,7 +1265,7 @@ async function doSav(id) {
   await updateOrder(id||curId, {memo: memo ? memo.value : ''});
   toast('저장됐어요'); closeSheet(); renderAdminView();
 }
-async function doDel() { if (!confirm('삭제할까요?')) return; await delOrder(curId); closeSheet(); toast('삭제됐어요'); renderAdminView(); }
+async function doDel() { if (!confirm('주문서를 삭제할까요? 복구할 수 없어요.')) return; await delOrder(curId); adminOrders = adminOrders.filter(function(o){return o.id!==curId;}); closeSheet(); toast('삭제됐어요'); renderAdminView(); }
 
 
 function resizeImage(file, maxW, maxH, cb) {
