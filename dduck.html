@@ -772,7 +772,7 @@ async function submitCake() {
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
-      id:'c_'+Date.now(), type:'cake',
+      type:'cake',
       name:fd.name, phone:fd.phone,
       pickup_date:fd.date, pickup_time:fd.time,
       cake_size:sizeNames.join(', '), cake_price:cakeSub,
@@ -781,8 +781,7 @@ async function submitCake() {
       payment:fd.pay, choco_deco:fd.choco,
       delivery:fd.method==='delivery', delivery_addr:fd.method==='delivery'?fd.addr||'':'',
       total_price:total, status:'pending', memo:'',
-      photos:JSON.stringify(fd.photos||[]),
-      created_at:Date.now()
+      photos:JSON.stringify(fd.photos||[])
     });
     fd.done = true; renderCake();
   } catch(e) { toast('전송 실패, 다시 시도해주세요'); renderCake(); }
@@ -991,8 +990,7 @@ async function submitHwa() {
       packing:JSON.stringify(hf.packing),
       packing_text:hf.packing_text||'',
       payment:hf.pay,
-      total_price:total, status:'pending', memo:'',
-      created_at:Date.now()
+      total_price:total, status:'pending', memo:''
     });
     hf.done = true; renderHwa();
   } catch(e) { toast('전송 실패, 다시 시도해주세요'); renderHwa(); }
