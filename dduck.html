@@ -291,7 +291,7 @@ async function api(path, method, body) {
   return fetch(SUPA+path, {method:method||'GET', headers:H, body:body?JSON.stringify(body):undefined});
 }
 async function getOrders(type) {
-  const r = await api('/cake_orders?order=created_at.desc&type=eq.'+type);
+  const r = await api('/cake_orders?order=created_at.desc');
   return r.ok ? r.json() : [];
 }
 async function addOrder(o) {
@@ -631,7 +631,7 @@ function renderCakeSuccess() {
   let h = '<div class="succ">';
   h += '<div class="succ-ic">🌸<\/div>';
   h += '<div class="succ-t">주문서가 전달됐어요<\/div>';
-  h += '<div class="succ-s"><strong>'+fd.phone+'<\/strong>으로 확인 연락 드릴게요 💛<\/div>';
+  h += '<div class="succ-s">확인 후 <strong>'+fd.phone+'<\/strong>으로 예약확정 문자 드릴게요 💛<\/div>';
   h += '<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong class="cake-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
   h += '<button class="btn-cake" onclick="resetCake()">새 주문서 작성<\/button><\/div>';
   W(h);
@@ -772,7 +772,7 @@ async function submitCake() {
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
-      id:'c_'+Date.now(),
+      id:'c_'+Date.now(), type:'cake',
       name:fd.name, phone:fd.phone,
       pickup_date:fd.date, pickup_time:fd.time,
       cake_size:sizeNames.join(', '), cake_price:cakeSub,
@@ -951,7 +951,7 @@ function renderHwaSuccess() {
   let h = '<div class="succ">';
   h += '<div class="succ-ic">🌸<\/div>';
   h += '<div class="succ-t">주문서가 전달됐어요<\/div>';
-  h += '<div class="succ-s"><strong>'+fd.phone+'<\/strong>으로 확인 연락 드릴게요 💛<\/div>';
+  h += '<div class="succ-s">확인 후 <strong>'+fd.phone+'<\/strong>으로 예약확정 문자 드릴게요 💛<\/div>';
   h += '<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong class="hwa-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
   h += '<button class="btn-hwa" onclick="resetHwa()">새 주문서 작성<\/button><\/div>';
   W(h);
@@ -979,7 +979,7 @@ async function submitHwa() {
   W('<div class="loading">주문서 전송 중...</div>');
   try {
     await addOrder({
-      id:'h_'+Date.now(),
+      id:'h_'+Date.now(), type:'hwa',
       name:hf.name, phone:hf.phone,
       cake_size:sizeNames.join(', '), cake_price:cakeSub,
       pickup_date:hf.method==='pickup'?hf.pickup_date:hf.ship_date,
