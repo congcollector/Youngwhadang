@@ -758,7 +758,6 @@ function getBlockStatus(dateStr, timeStr) {
 
 async function submitCake() {
   if (_cakeSubmitting) return;
-  _cakeSubmitting = true;
   if (!fd.name.trim()) { toast('성함을 입력해주세요'); return; }
   if (!fd.phone.trim()) { toast('전화번호를 입력해주세요'); return; }
   if (!fd.date) { toast('픽업 날짜를 선택해주세요'); return; }
@@ -768,6 +767,7 @@ async function submitCake() {
   const hasSel = fd.sizes && Object.keys(fd.sizes).some(function(k){ return fd.sizes[k]>0; });
   if (!hasSel) { toast('케이크 사이즈를 선택해주세요'); return; }
   if (!fd.pay) { toast('결제 방법을 선택해주세요'); return; }
+  _cakeSubmitting = true;
   let cakeSub = 0;
   const sizeNames = [];
   CFG.sizes.forEach(function(s){ const q=fd.sizes[s.id]||0; if(q>0){cakeSub+=s.price*q; sizeNames.push(s.name+' x'+q);} });
@@ -964,7 +964,6 @@ function renderHwaSuccess() {
 
 async function submitHwa() {
   if (_hwaSubmitting) return;
-  _hwaSubmitting = true;
   if (!hf.name.trim()) { toast('성함을 입력해주세요'); return; }
   if (!hf.phone.trim()) { toast('연락처를 입력해주세요'); return; }
   const hasHwaSel = hf.sizes && Object.keys(hf.sizes).some(function(k){ return hf.sizes[k]>0; });
@@ -973,6 +972,7 @@ async function submitHwa() {
   if ((hf.method==='pickup'||hf.method==='delivery') && hf.pickup_date) { const _hblock = getBlockStatus(hf.pickup_date, hf.pickup_time); if (_hblock && _hblock.type !== 'warn') { toast(_hblock.msg); return; } }
   if (hf.method==='ship' && !hf.ship_addr.trim()) { toast('배송 주소를 입력해주세요'); return; }
   if (!hf.pay) { toast('결제 방법을 선택해주세요'); return; }
+  _hwaSubmitting = true;
   let hwaSub = 0;
   const hwaSizeNames = [];
   CFG.hwa_sizes.forEach(function(s){ const q=hf.sizes[s.id]||0; if(q>0){hwaSub+=s.price*q; hwaSizeNames.push(s.name+' x'+q);} });
@@ -991,7 +991,7 @@ async function submitHwa() {
     await addOrder({
       id:'h_'+Date.now(), type:'hwa',
       name:hf.name, phone:hf.phone,
-      cake_size:sizeNames.join(', '), cake_price:cakeSub,
+      cake_size:hwaSizeNames.join(', '), cake_price:hwaSub,
       pickup_date:hf.method==='pickup'?hf.pickup_date:hf.ship_date,
       pickup_time:hf.pickup_time||'',
       delivery:hf.method!=='pickup',
@@ -1214,6 +1214,7 @@ async function openOrder(id) {
   h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">'+(isCake?'케이크':'화과자')+'<\/div><div style="font-size:13px;font-weight:500;">'+o.cake_size+'<\/div><\/div>';
   if (o.design) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">디자인<\/div><div style="font-size:13px;line-height:1.6;flex:1;">'+o.design+'<\/div><\/div>';
   if (o.lettering) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">레터링<\/div><div style="font-size:13px;font-weight:500;">'+o.lettering+'<\/div><\/div>';
+  if (o.delivery_addr) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">주소<\/div><div style="font-size:13px;font-weight:500;flex:1;">'+o.delivery_addr+'<\/div><\/div>';
   h += '<div style="display:flex;padding:11px 14px;"><div style="font-size:13px;color:#b8a99e;min-width:60px;">결제<\/div><div style="font-size:13px;font-weight:500;">'+o.payment+'<\/div><\/div>';
   h += '<\/div><\/div>';
 
@@ -1223,7 +1224,9 @@ async function openOrder(id) {
     h += '<div style="padding:14px 16px 0;">';
     h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;">참고 사진<\/div>';
     h += '<div style="display:flex;gap:8px;">';
-    photos.forEach(function(p){ h += '<img src="'+p+'" style="width:80px;height:80px;border-radius:12px;object-fit:cover;">'; });
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+    photos.forEach(function(p){ h += '<img src="'+p+'" onclick="openPhotoFull(\''+encodeURIComponent(p)+'\')" style="width:80px;height:80px;border-radius:12px;object-fit:cover;cursor:zoom-in;">'; });
+    h += '<\/div>';
     h += '<\/div><\/div>';
   }
 
