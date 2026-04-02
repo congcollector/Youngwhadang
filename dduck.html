@@ -1023,9 +1023,7 @@ async function submitHwa() {
 async function renderAdmin() {
   W('<div class="loading">불러오는 중...</div>');
   try {
-    const cake = await getOrders('cake');
-    const hwa  = await getOrders('hwa');
-    adminOrders = (cake||[]).concat(hwa||[]);
+    adminOrders = await getOrders() || [];
     if (!Array.isArray(adminOrders)) adminOrders = [];
   } catch(e) { adminOrders = []; }
   renderAdminView();
