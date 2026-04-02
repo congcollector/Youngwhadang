@@ -296,7 +296,10 @@ async function getOrders(type) {
 }
 async function addOrder(o) {
   const r = await api('/cake_orders','POST',o);
-  if (!r.ok) throw new Error('fail');
+  if (!r.ok) {
+    const errText = await r.text();
+    throw new Error('HTTP ' + r.status + ': ' + errText);
+  }
 }
 async function updateOrder(id,p) { await api('/cake_orders?id=eq.'+id,'PATCH',p); }
 async function delOrder(id) { await api('/cake_orders?id=eq.'+id,'DELETE'); }
@@ -1017,7 +1020,10 @@ async function submitHwa() {
       created_at:Date.now()
     });
     hf.done = true; _hwaSubmitting = false; renderHwa();
-  } catch(e) { _hwaSubmitting = false; toast('전송 실패, 다시 시도해주세요'); renderHwa(); }
+  } catch(e) {
+    _hwaSubmitting = false;
+    W('<div style="padding:20px;color:red;font-size:13px;word-break:break-all;"><b>전송 오류 (개발자 확인용)</b><br>' + String(e) + '<br><br>' + JSON.stringify(e) + '</div>');
+  }
 }
 
 // ══════════════════════
