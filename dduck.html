@@ -1000,16 +1000,25 @@ async function submitHwa() {
   if (submitBtnH) { submitBtnH.disabled = true; submitBtnH.textContent = '전송 중...'; }
   W('<div class="loading">주문서 전송 중...</div>');
   try {
+    // 포장 옵션 취합
+    const packingItems = [];
+    hf.packing.forEach(function(pid) {
+      const pk = CFG.hwa_packing.find(function(x){ return x.id===pid; });
+      if (pk) packingItems.push(pk.name);
+    });
+    if (hf.packing_text) packingItems.push('문구: '+hf.packing_text);
+    const finalPacking = packingItems.length > 0 ? packingItems.join(' / ') : '선택 안 함';
+
     await addOrder({
       id:'h_'+Date.now(), type:'hwa',
       name:hf.name, phone:hf.phone,
       cake_size:hwaSizeNames.join(', '), cake_price:hwaSub,
       pickup_date:hf.method==='ship'?hf.ship_date:hf.pickup_date,
-      pickup_time:hf.pickup_time||'',
+      pickup_time:hf.method==='ship'?'택배발송':hf.pickup_time||'',
       delivery:hf.method!=='pickup',
       delivery_method:hf.method,
       delivery_addr:hf.method==='pickup'?'':hf.ship_addr,
-      design:hf.packing_text||'',
+      design:finalPacking,
       lettering:'',
       choco_deco:false,
       payment:hf.pay,
@@ -1224,23 +1233,29 @@ async function openOrder(id) {
   h += '<div style="padding:14px 16px 0;">';
   h += '<div style="font-size:11px;font-weight:600;color:#b8a99e;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;">주문 정보<\/div>';
   h += '<div style="background:#f7f3f0;border-radius:14px;overflow:hidden;">';
-  // 수령 방법 텍스트
+  // 수령 방법 라벨 계산
+  var dm = o.delivery_method || (o.delivery ? 'delivery' : 'pickup');
   var methodText = '방문 픽업';
+  var dateLabel = '픽업 날짜';
+  var timeLabel = '픽업 시간';
+  var addrLabel = '배달 주소';
   if (!isCake) {
-    var dm = o.delivery_method || (o.delivery ? 'delivery' : 'pickup');
-    if (dm === 'delivery') methodText = '퀵 배달';
-    else if (dm === 'ship') methodText = '택배 배송';
+    if (dm === 'delivery') { methodText = '퀵 배달'; }
+    else if (dm === 'ship') { methodText = '택배 배송'; dateLabel = '발송 예정일'; timeLabel = '배송 구분'; addrLabel = '택배 주소'; }
   } else {
-    if (o.delivery) methodText = '배달';
+    if (o.delivery) { methodText = '배달'; }
   }
-  var addrLabel = (methodText === '택배 배송') ? '배송지' : '배달 주소';
-  var timeLabel = methodText.indexOf('픽업') >= 0 ? '픽업' : '수령 시간';
 
   h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">수령<\/div><div style="font-size:13px;font-weight:500;">'+methodText+'<\/div><\/div>';
-  h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">'+timeLabel+'<\/div><div style="font-size:13px;font-weight:500;">'+o.pickup_date+(o.pickup_time?' '+o.pickup_time:'')+'<\/div><\/div>';
+  h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">'+dateLabel+'<\/div><div style="font-size:13px;font-weight:500;">'+o.pickup_date+'<\/div><\/div>';
+  if (o.pickup_time) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">'+timeLabel+'<\/div><div style="font-size:13px;font-weight:500;">'+o.pickup_time+'<\/div><\/div>';
   h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">'+(isCake?'케이크':'화과자')+'<\/div><div style="font-size:13px;font-weight:500;">'+o.cake_size+'<\/div><\/div>';
-  if (o.design) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">디자인<\/div><div style="font-size:13px;line-height:1.6;flex:1;">'+o.design+'<\/div><\/div>';
-  if (o.lettering) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">레터링<\/div><div style="font-size:13px;font-weight:500;">'+o.lettering+'<\/div><\/div>';
+  if (isCake) {
+    if (o.design) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">디자인<\/div><div style="font-size:13px;line-height:1.6;flex:1;">'+o.design+'<\/div><\/div>';
+    if (o.lettering) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">레터링<\/div><div style="font-size:13px;font-weight:500;">'+o.lettering+'<\/div><\/div>';
+  } else {
+    h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">포장<\/div><div style="font-size:13px;font-weight:500;flex:1;">'+( o.design||'선택 안 함')+'<\/div><\/div>';
+  }
   if (o.delivery_addr) h += '<div style="display:flex;padding:11px 14px;border-bottom:0.5px solid rgba(50,40,35,0.07);"><div style="font-size:13px;color:#b8a99e;min-width:60px;">'+addrLabel+'<\/div><div style="font-size:13px;font-weight:500;flex:1;word-break:break-all;">'+o.delivery_addr+'<\/div><\/div>';
   h += '<div style="display:flex;padding:11px 14px;"><div style="font-size:13px;color:#b8a99e;min-width:60px;">결제<\/div><div style="font-size:13px;font-weight:500;">'+o.payment+'<\/div><\/div>';
   h += '<\/div><\/div>';
