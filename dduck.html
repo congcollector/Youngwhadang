@@ -426,6 +426,18 @@ function showSheet(h) {
 }
 function closeSheet() { document.getElementById('overlay').className = 'overlay'; }
 
+function openPhotoFull(src) {
+  src = decodeURIComponent(src);
+  let modal = document.getElementById('full_photo_modal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'full_photo_modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:999;display:flex;align-items:center;justify-content:center;';
+  modal.onclick = function(e){ if(e.target===modal) modal.remove(); };
+  modal.innerHTML = '<button onclick="document.getElementById(\'full_photo_modal\').remove()" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);color:white;border:none;font-size:18px;cursor:pointer;">✕<\/button><img src="'+src+'" style="max-width:96vw;max-height:90vh;border-radius:12px;object-fit:contain;">';
+  document.body.appendChild(modal);
+}
+
 function switchTab(tab) {
   curTab = tab;
   document.querySelectorAll('.hdr-tab').forEach(function(el){
@@ -956,7 +968,7 @@ function renderHwaSuccess() {
   let h = '<div class="succ">';
   h += '<div class="succ-ic">🌸<\/div>';
   h += '<div class="succ-t">주문서가 전달됐어요<\/div>';
-  h += '<div class="succ-s">확인 후 <strong>'+fd.phone+'<\/strong>으로 예약확정 문자 드릴게요 💛<\/div>';
+  h += '<div class="succ-s">확인 후 <strong>'+hf.phone+'<\/strong>으로 예약확정 문자 드릴게요 💛<\/div>';
   h += '<div class="notice" style="text-align:left;margin:0 0 24px;">💳 입금 계좌<br><strong class="hwa-accent">'+CFG.bank_account+' ('+CFG.bank_holder+')<\/strong><\/div>';
   h += '<button class="btn-hwa" onclick="resetHwa()">새 주문서 작성<\/button><\/div>';
   W(h);
@@ -1971,17 +1983,11 @@ async function saveSettingsFromForm() {
     newCFG.storage_tips = CFG.storage_tips.map(function(_,i){ return document.getElementById('cfg_storage_'+i).value; });
     newCFG.transport_tips = CFG.transport_tips.map(function(_,i){ return document.getElementById('cfg_transport_'+i).value; });
     newCFG.lets = CFG.lets.map(function(_,i){ return document.getElementById('cfg_let_'+i).value; });
-    // 예약 차단 규칙
-    const blockEls = document.querySelectorAll('[id^="cfg_block_dow_"]');
+    // 예약 차단 규칙 (캘린더 설정은 saveBlockSettings()에서 따로 관리 - 덮어쓰지 않음)
     newCFG.open_time = CFG.open_time || '10:00';
-  newCFG.close_time = CFG.close_time || '20:30';
-  newCFG.block_rules = Array.from(blockEls).map(function(el) {
-      const ri = el.id.replace('cfg_block_dow_','');
-      const typeEl  = document.getElementById('cfg_block_type_'+ri);
-      const afterEl = document.getElementById('cfg_block_after_'+ri);
-      const isAfter = typeEl && typeEl.value === 'after';
-      return { dow: parseInt(el.value), after: isAfter && afterEl ? afterEl.value : null };
-    });
+    newCFG.close_time = CFG.close_time || '20:30';
+    newCFG.block_rules = CFG.block_rules;
+    newCFG.block_dates = CFG.block_dates;
   } else {
     newCFG.hwa_sizes = CFG.hwa_sizes.map(function(s,i) {
       return {id:s.id, name:document.getElementById('cfg_hwa_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_price_'+i).value)||s.price, desc:document.getElementById('cfg_hwa_desc_'+i).value};
@@ -1989,9 +1995,6 @@ async function saveSettingsFromForm() {
     newCFG.hwa_photos = CFG.hwa_photos || {};
     newCFG.hwa_packing = CFG.hwa_packing.map(function(p,i) {
       return {id:p.id, name:document.getElementById('cfg_hwa_pk_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_pk_price_'+i).value)||p.price, desc:document.getElementById('cfg_hwa_pk_desc_'+i)?document.getElementById('cfg_hwa_pk_desc_'+i).value:(p.desc||''), popup_desc:document.getElementById('cfg_hwa_pk_popup_'+i)?document.getElementById('cfg_hwa_pk_popup_'+i).value:(p.popup_desc||''), photo:p.photo||''};
-    });
-    newCFG.hwa_sizes = CFG.hwa_sizes.map(function(s,i) {
-      return {id:s.id, name:document.getElementById('cfg_hwa_name_'+i).value, price:parseInt(document.getElementById('cfg_hwa_price_'+i).value)||s.price, desc:document.getElementById('cfg_hwa_desc_'+i).value};
     });
     newCFG.hwa_delivery_price = parseInt(document.getElementById('cfg_hwa_delivery').value)||4000;
     newCFG.hwa_storage = CFG.hwa_storage.map(function(_,i){ return document.getElementById('cfg_hwa_storage_'+i).value; });
