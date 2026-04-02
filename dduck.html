@@ -1009,8 +1009,11 @@ async function submitHwa() {
       delivery:hf.method!=='pickup',
       delivery_addr:hf.method==='ship'?hf.ship_addr:(hf.method==='delivery'?hf.addr||'':''),
       design:hf.packing_text||'',
+      lettering:'',
+      choco_deco:false,
       payment:hf.pay,
       total_price:total, status:'pending', memo:'',
+      photos:'[]',
       created_at:Date.now()
     });
     hf.done = true; _hwaSubmitting = false; renderHwa();
