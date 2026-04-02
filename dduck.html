@@ -296,10 +296,7 @@ async function getOrders(type) {
 }
 async function addOrder(o) {
   const r = await api('/cake_orders','POST',o);
-  if (!r.ok) {
-    const errText = await r.text();
-    throw new Error('HTTP ' + r.status + ': ' + errText);
-  }
+  if (!r.ok) throw new Error('fail');
 }
 async function updateOrder(id,p) { await api('/cake_orders?id=eq.'+id,'PATCH',p); }
 async function delOrder(id) { await api('/cake_orders?id=eq.'+id,'DELETE'); }
@@ -1007,10 +1004,10 @@ async function submitHwa() {
       id:'h_'+Date.now(), type:'hwa',
       name:hf.name, phone:hf.phone,
       cake_size:hwaSizeNames.join(', '), cake_price:hwaSub,
-      pickup_date:hf.method==='pickup'?hf.pickup_date:hf.ship_date,
+      pickup_date:hf.method==='ship'?hf.ship_date:hf.pickup_date,
       pickup_time:hf.pickup_time||'',
       delivery:hf.method!=='pickup',
-      delivery_addr:hf.method==='ship'?hf.ship_addr:(hf.method==='delivery'?hf.addr||'':''),
+      delivery_addr:hf.method==='pickup'?'':hf.ship_addr,
       design:hf.packing_text||'',
       lettering:'',
       choco_deco:false,
@@ -1020,10 +1017,7 @@ async function submitHwa() {
       created_at:Date.now()
     });
     hf.done = true; _hwaSubmitting = false; renderHwa();
-  } catch(e) {
-    _hwaSubmitting = false;
-    W('<div style="padding:20px;color:red;font-size:13px;word-break:break-all;"><b>전송 오류 (개발자 확인용)</b><br>' + String(e) + '<br><br>' + JSON.stringify(e) + '</div>');
-  }
+  } catch(e) { _hwaSubmitting = false; toast('전송 실패, 다시 시도해주세요'); renderHwa(); }
 }
 
 // ══════════════════════
